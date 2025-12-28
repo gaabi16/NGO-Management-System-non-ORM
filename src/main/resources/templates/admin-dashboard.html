@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -97,6 +97,38 @@
             margin-bottom: 20px;
         }
 
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-title {
+            color: #333;
+            font-size: 24px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .btn-create {
+            padding: 12px 25px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-create:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -120,14 +152,6 @@
 
         tr:hover {
             background-color: #f9f9f9;
-        }
-
-        .table-title {
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #667eea;
         }
 
         .badge {
@@ -154,6 +178,222 @@
             color: #c2185b;
         }
 
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-edit:hover {
+            background: #ffb300;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover:not(:disabled) {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .pagination a, .pagination span {
+            padding: 8px 12px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #667eea;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .pagination a:hover:not(.disabled) {
+            background: #667eea;
+            color: white;
+        }
+
+        .pagination .active {
+            background: #667eea;
+            color: white;
+        }
+
+        .pagination .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #ccc;
+            color: #ccc;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 40px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #555;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background-color: #f9f9f9;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Success/Error Message */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            animation: slideDown 0.3s;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
         .logout-btn {
             background: #dc3545;
             color: white;
@@ -171,11 +411,163 @@
             transform: translateY(-2px);
         }
 
-        .header-controls {
+        .optional {
+            color: #999;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .btn-filter {
+            padding: 12px 20px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 10px;
+        }
+
+        .btn-filter:hover {
+            background: #f0f0f0;
+        }
+
+        .filter-arrow {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .filter-arrow.rotate {
+            transform: rotate(180deg);
+        }
+
+        .filter-menu {
+            display: none;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: slideDownFilter 0.3s ease;
+        }
+
+        .filter-menu.active {
+            display: block;
+        }
+
+        @keyframes slideDownFilter {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .filter-group {
             margin-bottom: 20px;
+        }
+
+        .filter-label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-option {
+            padding: 10px 16px;
+            background: #f5f5f5;
+            color: #333;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-option:hover {
+            background: #e8e8e8;
+            border-color: #667eea;
+        }
+
+        .filter-option.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .checkbox {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .filter-option.active .checkbox::before {
+            content: '☑';
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn-apply-filter,
+        .btn-clear-filter {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-apply-filter {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-apply-filter:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .btn-clear-filter {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-clear-filter:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
         }
 
         @media (max-width: 768px) {
@@ -188,11 +580,19 @@
             }
 
             table {
-                font-size: 14px;
+                font-size: 12px;
             }
 
             th, td {
-                padding: 10px;
+                padding: 8px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
             }
         }
     </style>
@@ -223,6 +623,10 @@
     </div>
 
     <div class="content-area">
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
         <!-- Welcome Message -->
         <div th:if="${currentView == null}" class="welcome-message">
             <div class="icon">🎯</div>
@@ -232,8 +636,41 @@
 
         <!-- Users Table -->
         <div th:if="${currentView == 'users'}">
-            <h2 class="table-title">📊 First 5 Users</h2>
-            <table>
+            <div class="table-header">
+                <h2 class="table-title">📊 Users Management</h2>
+                <button class="btn-create" onclick="openCreateModal()">➕ Create User</button>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <button class="btn-filter" onclick="toggleFilterMenu()">
+                    🔍 Filter Users
+                    <span class="filter-arrow">▼</span>
+                </button>
+
+                <div id="filterMenu" class="filter-menu">
+                    <div class="filter-group">
+                        <label class="filter-label">Filter by Role:</label>
+                        <div class="filter-options">
+                            <button class="filter-option" data-role="volunteer" onclick="toggleRoleFilter('volunteer')">
+                                <span class="checkbox">☐</span> Volunteer
+                            </button>
+                            <button class="filter-option" data-role="coordinator" onclick="toggleRoleFilter('coordinator')">
+                                <span class="checkbox">☐</span> Coordinator
+                            </button>
+                            <button class="filter-option" data-role="admin" onclick="toggleRoleFilter('admin')">
+                                <span class="checkbox">☐</span> Admin
+                            </button>
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn-apply-filter" onclick="applyFilters()">Apply Filters</button>
+                        <button class="btn-clear-filter" onclick="clearFilters()">Clear All</button>
+                    </div>
+                </div>
+            </div>
+
+            <table th:if="${usersPage != null && usersPage.content.size() > 0}">
                 <thead>
                 <tr>
                     <th>ID</th>
@@ -241,11 +678,12 @@
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Role</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="user : ${users}">
-                    <td th:text="${user.id_user}"></td>
+                <tr th:each="user, iterStat : ${usersPage.content}">
+                    <td th:text="${currentPage * 50 + iterStat.index + 1}"></td>
                     <td th:text="${user.first_name + ' ' + user.last_name}"></td>
                     <td th:text="${user.email}"></td>
                     <td th:text="${user.phone_number ?: 'N/A'}"></td>
@@ -253,9 +691,95 @@
                         <span th:class="'badge badge-' + ${user.role}"
                               th:text="${user.role}"></span>
                     </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-edit"
+                                    th:data-user-id="${user.id_user}"
+                                    onclick="openEditModal(this.getAttribute('data-user-id'))">
+                                ✏️ Edit
+                            </button>
+                            <button class="btn-delete"
+                                    th:data-user-id="${user.id_user}"
+                                    th:data-user-email="${user.email}"
+                                    th:data-user-role="${user.role}"
+                                    th:disabled="${user.role.name() == 'admin'}"
+                                    th:title="${user.role.name() == 'admin'} ? 'Cannot delete admin accounts' : 'Delete user'"
+                                    onclick="confirmDelete(this.getAttribute('data-user-id'), this.getAttribute('data-user-email'), this.getAttribute('data-user-role'))">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </td>
                 </tr>
                 </tbody>
             </table>
+
+            <div th:if="${usersPage == null || usersPage.content.size() == 0}" style="text-align: center; padding: 50px; color: #999;">
+                <p>No users found or error loading data.</p>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" th:if="${usersPage.totalPages > 1}">
+                <!-- Previous Button -->
+                <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1})}"
+                   th:class="${currentPage == 0} ? 'disabled' : ''"
+                   th:onclick="${currentPage == 0} ? 'return false;' : ''">
+                    ← Prev
+                </a>
+
+                <!-- First Page -->
+                <a th:if="${currentPage > 2}"
+                   th:href="@{/admin/dashboard(view='users', page=0)}">
+                    1
+                </a>
+
+                <!-- Ellipsis before -->
+                <span th:if="${currentPage > 3}">...</span>
+
+                <!-- Pages around current -->
+                <th:block th:if="${currentPage >= 2}">
+                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 2})}"
+                       th:text="${currentPage - 1}">
+                    </a>
+                </th:block>
+
+                <th:block th:if="${currentPage >= 1}">
+                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1})}"
+                       th:text="${currentPage}">
+                    </a>
+                </th:block>
+
+                <!-- Current page -->
+                <span class="active" th:text="${currentPage + 1}"></span>
+
+                <!-- Next pages -->
+                <th:block th:if="${currentPage < usersPage.totalPages - 1}">
+                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1})}"
+                       th:text="${currentPage + 2}">
+                    </a>
+                </th:block>
+
+                <th:block th:if="${currentPage < usersPage.totalPages - 2}">
+                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 2})}"
+                       th:text="${currentPage + 3}">
+                    </a>
+                </th:block>
+
+                <!-- Ellipsis after -->
+                <span th:if="${currentPage < usersPage.totalPages - 4}">...</span>
+
+                <!-- Last Page -->
+                <a th:if="${currentPage < usersPage.totalPages - 3}"
+                   th:href="@{/admin/dashboard(view='users', page=${usersPage.totalPages - 1})}"
+                   th:text="${usersPage.totalPages}">
+                </a>
+
+                <!-- Next Button -->
+                <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1})}"
+                   th:class="${currentPage >= usersPage.totalPages - 1} ? 'disabled' : ''"
+                   th:onclick="${currentPage >= usersPage.totalPages - 1} ? 'return false;' : ''">
+                    Next →
+                </a>
+            </div>
         </div>
 
         <!-- ONGs Table -->
@@ -317,5 +841,217 @@
         </div>
     </div>
 </div>
+
+<!-- Create User Modal -->
+<div id="createModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Create New User</h2>
+            <span class="close" onclick="closeCreateModal()">&times;</span>
+        </div>
+        <form th:action="@{/admin/users/create}" method="post">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="create_first_name">First Name</label>
+                    <input type="text" id="create_first_name" name="first_name" required/>
+                </div>
+                <div class="form-group">
+                    <label for="create_last_name">Last Name</label>
+                    <input type="text" id="create_last_name" name="last_name" required/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="create_email">Email</label>
+                <input type="email" id="create_email" name="email" required/>
+            </div>
+            <div class="form-group">
+                <label for="create_password">Password</label>
+                <input type="password" id="create_password" name="password" required/>
+            </div>
+            <div class="form-group">
+                <label for="create_phone">Phone Number <span class="optional">(optional)</span></label>
+                <input type="text" id="create_phone" name="phone_number"/>
+            </div>
+            <div class="form-group">
+                <label for="create_role">Role</label>
+                <select id="create_role" name="role" required>
+                    <option value="volunteer">Volunteer</option>
+                    <option value="coordinator">Coordinator</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">Create User</button>
+        </form>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit User</h2>
+            <span class="close" onclick="closeEditModal()">&times;</span>
+        </div>
+        <form id="editForm" method="post">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit_first_name">First Name</label>
+                    <input type="text" id="edit_first_name" name="first_name" required/>
+                </div>
+                <div class="form-group">
+                    <label for="edit_last_name">Last Name</label>
+                    <input type="text" id="edit_last_name" name="last_name" required/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="edit_email">Email</label>
+                <input type="email" id="edit_email" name="email" required/>
+            </div>
+            <div class="form-group">
+                <label for="edit_phone">Phone Number <span class="optional">(optional)</span></label>
+                <input type="text" id="edit_phone" name="phone_number"/>
+            </div>
+            <div class="form-group">
+                <label for="edit_role">Role</label>
+                <select id="edit_role" name="role" required>
+                    <option value="volunteer">Volunteer</option>
+                    <option value="coordinator">Coordinator</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">Update User</button>
+        </form>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var currentUserEmail = /*[[${currentUserEmail}]]*/ '';
+    var selectedRoles = [];
+    /*]]>*/
+
+    // Filter Menu Toggle
+    function toggleFilterMenu() {
+        const menu = document.getElementById('filterMenu');
+        const arrow = document.querySelector('.filter-arrow');
+        menu.classList.toggle('active');
+        arrow.classList.toggle('rotate');
+    }
+
+    // Toggle Role Filter
+    function toggleRoleFilter(role) {
+        const button = document.querySelector(`.filter-option[data-role="${role}"]`);
+        button.classList.toggle('active');
+
+        const index = selectedRoles.indexOf(role);
+        if (index > -1) {
+            selectedRoles.splice(index, 1);
+        } else {
+            selectedRoles.push(role);
+        }
+    }
+
+    // Apply Filters
+    function applyFilters() {
+        if (selectedRoles.length === 0) {
+            window.location.href = '/admin/dashboard?view=users';
+            return;
+        }
+
+        const params = new URLSearchParams();
+        params.append('view', 'users');
+        selectedRoles.forEach(role => params.append('roles', role));
+
+        window.location.href = '/admin/dashboard?' + params.toString();
+    }
+
+    // Clear Filters
+    function clearFilters() {
+        selectedRoles = [];
+        document.querySelectorAll('.filter-option').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        window.location.href = '/admin/dashboard?view=users';
+    }
+
+    // Initialize filters from URL on page load
+    window.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const rolesFromUrl = urlParams.getAll('roles');
+
+        rolesFromUrl.forEach(role => {
+            selectedRoles.push(role);
+            const button = document.querySelector(`.filter-option[data-role="${role}"]`);
+            if (button) {
+                button.classList.add('active');
+            }
+        });
+    });
+
+    // Create Modal
+    function openCreateModal() {
+        document.getElementById('createModal').style.display = 'block';
+    }
+
+    function closeCreateModal() {
+        document.getElementById('createModal').style.display = 'none';
+    }
+
+    // Edit Modal
+    function openEditModal(userId) {
+        fetch('/admin/users/edit/' + userId)
+            .then(response => response.json())
+            .then(user => {
+                document.getElementById('edit_first_name').value = user.first_name;
+                document.getElementById('edit_last_name').value = user.last_name;
+                document.getElementById('edit_email').value = user.email;
+                document.getElementById('edit_phone').value = user.phone_number || '';
+                document.getElementById('edit_role').value = user.role;
+                document.getElementById('editForm').action = '/admin/users/update/' + userId;
+                document.getElementById('editModal').style.display = 'block';
+            });
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    // Delete Confirmation
+    function confirmDelete(userId, userEmail, userRole) {
+        if (userRole === 'admin') {
+            alert('⚠️ Admin accounts cannot be deleted for security reasons!');
+            return;
+        }
+
+        if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/admin/users/delete/' + userId;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const createModal = document.getElementById('createModal');
+        const editModal = document.getElementById('editModal');
+        if (event.target == createModal) {
+            closeCreateModal();
+        }
+        if (event.target == editModal) {
+            closeEditModal();
+        }
+    }
+
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.animation = 'fadeIn 0.3s reverse';
+            setTimeout(() => alert.remove(), 300);
+        });
+    }, 5000);
+</script>
 </body>
 </html>

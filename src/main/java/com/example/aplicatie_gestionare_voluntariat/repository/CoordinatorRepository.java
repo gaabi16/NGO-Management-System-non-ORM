@@ -3,12 +3,10 @@ package com.example.aplicatie_gestionare_voluntariat.repository;
 import com.example.aplicatie_gestionare_voluntariat.model.Coordinator;
 import com.example.aplicatie_gestionare_voluntariat.model.Ong;
 import com.example.aplicatie_gestionare_voluntariat.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -16,8 +14,11 @@ import java.util.List;
 @Repository
 public class CoordinatorRepository {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
+
+    public CoordinatorRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     private final RowMapper<Coordinator> coordinatorRowMapper = new RowMapper<Coordinator>() {
         @Override
@@ -28,85 +29,55 @@ public class CoordinatorRepository {
             coordinator.setIdOng(rs.getInt("id_ong"));
             coordinator.setDepartment(rs.getString("department"));
 
-            int experienceYears = rs.getInt("experience_years");
-            if (!rs.wasNull()) {
-                coordinator.setExperienceYears(experienceYears);
-            }
+            Integer expYears = (Integer) rs.getObject("experience_years");
+            coordinator.setExperienceYears(expYears);
 
             coordinator.setEmploymentType(rs.getString("employment_type"));
 
-            // Map User dacă există coloane
+            // Mapare User (din JOIN)
             try {
                 User user = new User();
-                user.setId_user(rs.getInt("user_id"));
-                user.setFirst_name(rs.getString("first_name"));
-                user.setLast_name(rs.getString("last_name"));
-                user.setEmail(rs.getString("email"));
+                user.setIdUser(rs.getInt("user_id"));
+                user.setEmail(rs.getString("user_email"));
+                user.setFirstName(rs.getString("user_first_name"));
+                user.setLastName(rs.getString("user_last_name"));
+                user.setPhoneNumber(rs.getString("user_phone_number"));
+                user.setRole(User.Role.valueOf(rs.getString("user_role")));
                 coordinator.setUser(user);
-            } catch (SQLException e) {
-                // Coloanele user nu există în acest query
+            } catch (Exception e) {
+                // Dacă nu există datele user în ResultSet, setăm null
+                coordinator.setUser(null);
             }
 
-            // Map Ong dacă există coloane
+            // Mapare Ong (din JOIN)
             try {
                 Ong ong = new Ong();
                 ong.setIdOng(rs.getInt("ong_id"));
                 ong.setName(rs.getString("ong_name"));
+                ong.setEmail(rs.getString("ong_email"));
+                ong.setPhone(rs.getString("ong_phone"));
                 coordinator.setOng(ong);
-            } catch (SQLException e) {
-                // Coloanele ong nu există în acest query
+            } catch (Exception e) {
+                // Dacă nu există datele ong în ResultSet, setăm null
+                coordinator.setOng(null);
             }
 
             return coordinator;
         }
     };
 
-    public List<Coordinator> findAll(int limit, int offset) {
-        String sql = "SELECT c.*, " +
-                "u.id_user as user_id, u.first_name, u.last_name, u.email, " +
-                "o.id_ong as ong_id, o.name as ong_name " +
+    public List<Coordinator> findFirst5() {
+        String sql = "SELECT " +
+                "c.id_coordinator, c.id_user, c.id_ong, c.department, " +
+                "c.experience_years, c.employment_type, " +
+                "u.id_user as user_id, u.email as user_email, u.first_name as user_first_name, " +
+                "u.last_name as user_last_name, u.phone_number as user_phone_number, u.role as user_role, " +
+                "o.id_ong as ong_id, o.name as ong_name, o.email as ong_email, o.phone as ong_phone " +
                 "FROM coordinators c " +
                 "LEFT JOIN users u ON c.id_user = u.id_user " +
                 "LEFT JOIN ongs o ON c.id_ong = o.id_ong " +
-                "ORDER BY c.id_coordinator LIMIT ? OFFSET ?";
-        return jdbcTemplate.query(sql, coordinatorRowMapper, limit, offset);
-    }
+                "ORDER BY c.id_coordinator ASC LIMIT 5";
 
-    public List<Coordinator> findAll() {
-        String sql = "SELECT c.*, " +
-                "u.id_user as user_id, u.first_name, u.last_name, u.email, " +
-                "o.id_ong as ong_id, o.name as ong_name " +
-                "FROM coordinators c " +
-                "LEFT JOIN users u ON c.id_user = u.id_user " +
-                "LEFT JOIN ongs o ON c.id_ong = o.id_ong " +
-                "ORDER BY c.id_coordinator";
         return jdbcTemplate.query(sql, coordinatorRowMapper);
-    }
-
-    public Coordinator save(Coordinator coordinator) {
-        if (coordinator.getIdCoordinator() == null) {
-            // INSERT
-            String sql = "INSERT INTO coordinators (id_user, id_ong, department, experience_years, employment_type) " +
-                    "VALUES (?, ?, ?, ?, ?) RETURNING id_coordinator";
-            Integer id = jdbcTemplate.queryForObject(sql, Integer.class,
-                    coordinator.getIdUser(),
-                    coordinator.getIdOng(),
-                    coordinator.getDepartment(),
-                    coordinator.getExperienceYears(),
-                    coordinator.getEmploymentType());
-            coordinator.setIdCoordinator(id);
-        } else {
-            // UPDATE
-            String sql = "UPDATE coordinators SET id_user = ?, id_ong = ?, department = ?, " +
-                    "experience_years = ?, employment_type = ? WHERE id_coordinator = ?";
-            jdbcTemplate.update(sql,
-                    coordinator.getIdUser(),
-                    coordinator.getIdOng(),
-                    coordinator.getDepartment(),
-                    coordinator.getExperienceYears(),
-                    coordinator.getEmploymentType(),
-                    coordinator.getIdCoordinator());
-        }
-        return coordinator;
     }
 }

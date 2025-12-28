@@ -1,7 +1,6 @@
 package com.example.aplicatie_gestionare_voluntariat.repository;
 
 import com.example.aplicatie_gestionare_voluntariat.model.Ong;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -14,8 +13,11 @@ import java.util.List;
 @Repository
 public class OngRepository {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
+
+    public OngRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     private final RowMapper<Ong> ongRowMapper = new RowMapper<Ong>() {
         @Override
@@ -35,6 +37,11 @@ public class OngRepository {
             return ong;
         }
     };
+
+    public List<Ong> findFirst5() {
+        String sql = "SELECT * FROM ongs ORDER BY id_ong ASC LIMIT 5";
+        return jdbcTemplate.query(sql, ongRowMapper);
+    }
 
     public List<Ong> findAll(int limit, int offset) {
         String sql = "SELECT * FROM ongs ORDER BY id_ong LIMIT ? OFFSET ?";
