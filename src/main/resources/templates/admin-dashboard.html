@@ -526,6 +526,10 @@
             font-weight: bold;
         }
 
+        .filter-option:not(.active) .checkbox::before {
+            content: '☐';
+        }
+
         .filter-option.active .checkbox::before {
             content: '☑';
         }
@@ -653,13 +657,13 @@
                         <label class="filter-label">Filter by Role:</label>
                         <div class="filter-options">
                             <button class="filter-option" data-role="volunteer" onclick="toggleRoleFilter('volunteer')">
-                                <span class="checkbox">☐</span> Volunteer
+                                <span class="checkbox"></span> Volunteer
                             </button>
                             <button class="filter-option" data-role="coordinator" onclick="toggleRoleFilter('coordinator')">
-                                <span class="checkbox">☐</span> Coordinator
+                                <span class="checkbox"></span> Coordinator
                             </button>
                             <button class="filter-option" data-role="admin" onclick="toggleRoleFilter('admin')">
-                                <span class="checkbox">☐</span> Admin
+                                <span class="checkbox"></span> Admin
                             </button>
                         </div>
                     </div>
