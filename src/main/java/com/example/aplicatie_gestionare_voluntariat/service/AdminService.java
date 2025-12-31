@@ -3,14 +3,16 @@ package com.example.aplicatie_gestionare_voluntariat.service;
 import com.example.aplicatie_gestionare_voluntariat.model.Coordinator;
 import com.example.aplicatie_gestionare_voluntariat.model.Ong;
 import com.example.aplicatie_gestionare_voluntariat.model.User;
+import com.example.aplicatie_gestionare_voluntariat.model.Volunteer;
 import com.example.aplicatie_gestionare_voluntariat.repository.CoordinatorRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.OngRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.UserRepository;
+import com.example.aplicatie_gestionare_voluntariat.repository.VolunteerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,6 +26,9 @@ public class AdminService {
 
     @Autowired
     private CoordinatorRepository coordinatorRepository;
+
+    @Autowired
+    private VolunteerRepository volunteerRepository;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -80,36 +85,67 @@ public class AdminService {
     }
 
     // CRUD pentru Users
+    @Transactional
     public User createUser(User user) {
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
         }
-        return userRepository.save(user);
+
+        User savedUser = userRepository.save(user);
+
+        // Dacă rolul este volunteer, creează și înregistrarea în tabelul volunteers
+        if(savedUser.getRole() == User.Role.volunteer) {
+            Volunteer volunteer = new Volunteer(savedUser.getIdUser());
+            volunteerRepository.save(volunteer);
+        }
+
+        return savedUser;
     }
 
     public User getUserById(Integer id) {
         return userRepository.findById(id).orElse(null);
     }
 
+    @Transactional
     public User updateUser(Integer id, User updatedUser) {
         User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser != null) {
+            User.Role oldRole = existingUser.getRole();
+            User.Role newRole = updatedUser.getRole();
+
             existingUser.setEmail(updatedUser.getEmail());
             existingUser.setFirstName(updatedUser.getFirstName());
             existingUser.setLastName(updatedUser.getLastName());
             existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
-            existingUser.setRole(updatedUser.getRole());
+            existingUser.setRole(newRole);
 
             // Actualizează parola doar dacă este furnizată
             if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
                 existingUser.setPasswordHash(passwordEncoder.encode(updatedUser.getPassword()));
             }
 
-            return userRepository.save(existingUser);
+            User savedUser = userRepository.save(existingUser);
+
+            // Gestionează schimbarea rolului
+            if (oldRole != newRole) {
+                // Dacă s-a schimbat de la volunteer la altceva, șterge din volunteers
+                if (oldRole == User.Role.volunteer && newRole != User.Role.volunteer) {
+                    volunteerRepository.deleteByUserId(id);
+                }
+
+                // Dacă s-a schimbat la volunteer, adaugă în volunteers
+                if (newRole == User.Role.volunteer && oldRole != User.Role.volunteer) {
+                    Volunteer volunteer = new Volunteer(savedUser.getIdUser());
+                    volunteerRepository.save(volunteer);
+                }
+            }
+
+            return savedUser;
         }
         return null;
     }
 
+    @Transactional
     public boolean deleteUser(Integer id, String currentUserEmail) {
         User userToDelete = userRepository.findById(id).orElse(null);
         if (userToDelete == null) {
@@ -121,6 +157,12 @@ public class AdminService {
             throw new IllegalStateException("Admin accounts cannot be deleted for security reasons!");
         }
 
+        // Șterge mai întâi din tabelul volunteers dacă este volunteer
+        if (userToDelete.getRole() == User.Role.volunteer) {
+            volunteerRepository.deleteByUserId(id);
+        }
+
+        // Apoi șterge utilizatorul
         userRepository.deleteById(id);
         return true;
     }
