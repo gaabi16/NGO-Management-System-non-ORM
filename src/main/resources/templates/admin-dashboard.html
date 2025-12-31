@@ -724,7 +724,7 @@
             <!-- Pagination -->
             <div class="pagination" th:if="${usersPage.totalPages > 1}">
                 <!-- Previous Button -->
-                <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1})}"
+                <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}"
                    th:class="${currentPage == 0} ? 'disabled' : ''"
                    th:onclick="${currentPage == 0} ? 'return false;' : ''">
                     ← Prev
@@ -732,7 +732,7 @@
 
                 <!-- First Page -->
                 <a th:if="${currentPage > 2}"
-                   th:href="@{/admin/dashboard(view='users', page=0)}">
+                   th:href="@{/admin/dashboard(view='users', page=0, roles=${param.roles})}">
                     1
                 </a>
 
@@ -741,13 +741,13 @@
 
                 <!-- Pages around current -->
                 <th:block th:if="${currentPage >= 2}">
-                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 2})}"
+                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 2}, roles=${param.roles})}"
                        th:text="${currentPage - 1}">
                     </a>
                 </th:block>
 
                 <th:block th:if="${currentPage >= 1}">
-                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1})}"
+                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}"
                        th:text="${currentPage}">
                     </a>
                 </th:block>
@@ -757,13 +757,13 @@
 
                 <!-- Next pages -->
                 <th:block th:if="${currentPage < usersPage.totalPages - 1}">
-                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1})}"
+                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}"
                        th:text="${currentPage + 2}">
                     </a>
                 </th:block>
 
                 <th:block th:if="${currentPage < usersPage.totalPages - 2}">
-                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 2})}"
+                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 2}, roles=${param.roles})}"
                        th:text="${currentPage + 3}">
                     </a>
                 </th:block>
@@ -773,12 +773,12 @@
 
                 <!-- Last Page -->
                 <a th:if="${currentPage < usersPage.totalPages - 3}"
-                   th:href="@{/admin/dashboard(view='users', page=${usersPage.totalPages - 1})}"
+                   th:href="@{/admin/dashboard(view='users', page=${usersPage.totalPages - 1}, roles=${param.roles})}"
                    th:text="${usersPage.totalPages}">
                 </a>
 
                 <!-- Next Button -->
-                <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1})}"
+                <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}"
                    th:class="${currentPage >= usersPage.totalPages - 1} ? 'disabled' : ''"
                    th:onclick="${currentPage >= usersPage.totalPages - 1} ? 'return false;' : ''">
                     Next →
