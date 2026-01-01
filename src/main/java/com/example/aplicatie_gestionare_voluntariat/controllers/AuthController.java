@@ -1,6 +1,6 @@
 package com.example.aplicatie_gestionare_voluntariat.controllers;
 
-import com.example.aplicatie_gestionare_voluntariat.model.User;
+import com.example.aplicatie_gestionare_voluntariat.dto.VolunteerRegistrationDto;
 import com.example.aplicatie_gestionare_voluntariat.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,23 +31,23 @@ public class AuthController {
 
     @GetMapping("/signup")
     public String signupForm(Model model) {
-        model.addAttribute("user", new User());
+        model.addAttribute("volunteerRegistration", new VolunteerRegistrationDto());
         return "signup";
     }
 
     @PostMapping("/signup")
-    public String signupSubmit(@ModelAttribute("user") User user,
+    public String signupSubmit(@ModelAttribute("volunteerRegistration") VolunteerRegistrationDto registrationDto,
                                HttpServletRequest request,
                                HttpServletResponse response) {
         // Salvează parola înainte de criptare pentru autologin
-        String rawPassword = user.getPassword();
+        String rawPassword = registrationDto.getPassword();
 
-        // Înregistrează utilizatorul
-        User registeredUser = userService.registerUser(user);
+        // Înregistrează utilizatorul cu toate datele de volunteer
+        String registeredEmail = userService.registerVolunteer(registrationDto);
 
         // Autentifică automat utilizatorul după înregistrare
         UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(registeredUser.getEmail(), rawPassword);
+                new UsernamePasswordAuthenticationToken(registeredEmail, rawPassword);
 
         Authentication authentication = authenticationManager.authenticate(authToken);
 
