@@ -27,7 +27,9 @@
             border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         h2 {
@@ -42,6 +44,15 @@
             text-align: center;
             margin-bottom: 30px;
             font-size: 14px;
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
         }
 
         .form-row {
@@ -69,7 +80,9 @@
 
         input[type="text"],
         input[type="email"],
-        input[type="password"] {
+        input[type="password"],
+        input[type="date"],
+        textarea {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
@@ -77,11 +90,19 @@
             font-size: 15px;
             transition: all 0.3s ease;
             background-color: #f9f9f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
         }
 
         input[type="text"]:focus,
         input[type="email"]:focus,
-        input[type="password"]:focus {
+        input[type="password"]:focus,
+        input[type="date"]:focus,
+        textarea:focus {
             outline: none;
             border-color: #667eea;
             background-color: white;
@@ -142,10 +163,46 @@
             font-weight: normal;
         }
 
+        .required {
+            color: #dc3545;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .info-text {
+            color: #666;
+            font-size: 13px;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
         @media (max-width: 600px) {
             .form-row {
                 grid-template-columns: 1fr;
             }
+
+            .container {
+                padding: 30px 20px;
+            }
+        }
+
+        /* Scrollbar styling */
+        .container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .container::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
         }
     </style>
 </head>
@@ -153,34 +210,66 @@
 <div class="container">
     <div class="icon">🌟</div>
     <h2>Join Us</h2>
-    <p class="subtitle">Create your account to start volunteering</p>
+    <p class="subtitle">Create your volunteer account</p>
 
-    <form th:action="@{/signup}" th:object="${user}" method="post">
+    <form th:action="@{/signup}" th:object="${volunteerRegistration}" method="post">
+        <!-- Basic Information Section -->
+        <div class="section-title">📋 Basic Information</div>
+
         <div class="form-row">
             <div class="form-group">
-                <label for="first_name">First Name</label>
-                <input type="text" id="first_name" th:field="*{first_name}" placeholder="John" required/>
+                <label for="firstName">First Name <span class="required">*</span></label>
+                <input type="text" id="firstName" th:field="*{firstName}" placeholder="John" required/>
             </div>
 
             <div class="form-group">
-                <label for="last_name">Last Name</label>
-                <input type="text" id="last_name" th:field="*{last_name}" placeholder="Doe" required/>
+                <label for="lastName">Last Name <span class="required">*</span></label>
+                <input type="text" id="lastName" th:field="*{lastName}" placeholder="Doe" required/>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="email">Email</label>
+            <label for="email">Email <span class="required">*</span></label>
             <input type="email" id="email" th:field="*{email}" placeholder="john.doe@example.com" required/>
         </div>
 
         <div class="form-group">
-            <label for="password">Password</label>
+            <label for="password">Password <span class="required">*</span></label>
             <input type="password" id="password" th:field="*{password}" placeholder="Create a strong password" required/>
         </div>
 
         <div class="form-group">
-            <label for="phone_number">Phone Number <span class="optional">(optional)</span></label>
-            <input type="text" id="phone_number" th:field="*{phone_number}" placeholder="+40 123 456 789"/>
+            <label for="phoneNumber">Phone Number <span class="optional">(optional)</span></label>
+            <input type="text" id="phoneNumber" th:field="*{phoneNumber}" placeholder="+40 123 456 789"/>
+        </div>
+
+        <!-- Volunteer Information Section -->
+        <div class="section-title">👤 Volunteer Profile</div>
+
+        <div class="form-group">
+            <label for="birthDate">Birth Date <span class="optional">(optional)</span></label>
+            <input type="date" id="birthDate" th:field="*{birthDate}"/>
+        </div>
+
+        <div class="form-group">
+            <label for="skills">Skills & Expertise <span class="optional">(optional)</span></label>
+            <textarea id="skills" th:field="*{skills}"
+                      placeholder="e.g., Community organizing, teaching, first aid, event planning..."></textarea>
+            <p class="info-text">Describe your skills and areas where you can help</p>
+        </div>
+
+        <div class="form-group">
+            <label for="availability">Availability <span class="optional">(optional)</span></label>
+            <input type="text" id="availability" th:field="*{availability}"
+                   placeholder="e.g., Weekends, evenings, flexible schedule"/>
+            <p class="info-text">When are you available to volunteer?</p>
+        </div>
+
+        <div class="form-group">
+            <label for="emergencyContact">Emergency Contact <span class="optional">(optional)</span></label>
+            <input type="text" id="emergencyContact" th:field="*{emergencyContact}"
+                   placeholder="Name and phone number"/>
+            <p class="info-text">Emergency contact person (name and phone number)</p>
         </div>
 
         <button type="submit">Create Account</button>

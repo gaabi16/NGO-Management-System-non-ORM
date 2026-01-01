@@ -1,5 +1,6 @@
 package com.example.aplicatie_gestionare_voluntariat.service;
 
+import com.example.aplicatie_gestionare_voluntariat.dto.VolunteerRegistrationDto;
 import com.example.aplicatie_gestionare_voluntariat.model.User;
 import com.example.aplicatie_gestionare_voluntariat.model.Volunteer;
 import com.example.aplicatie_gestionare_voluntariat.repository.UserRepository;
@@ -43,5 +44,33 @@ public class UserService {
         }
 
         return savedUser;
+    }
+
+    @Transactional
+    public String registerVolunteer(VolunteerRegistrationDto registrationDto) {
+        // Creează user-ul
+        User user = new User();
+        user.setFirstName(registrationDto.getFirstName());
+        user.setLastName(registrationDto.getLastName());
+        user.setEmail(registrationDto.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(registrationDto.getPassword()));
+        user.setPhoneNumber(registrationDto.getPhoneNumber());
+        user.setRole(User.Role.volunteer);
+
+        // Salvează utilizatorul
+        User savedUser = userRepository.save(user);
+
+        // Creează înregistrarea de volunteer cu toate detaliile
+        Volunteer volunteer = new Volunteer();
+        volunteer.setIdUser(savedUser.getIdUser());
+        volunteer.setBirthDate(registrationDto.getBirthDate());
+        volunteer.setSkills(registrationDto.getSkills());
+        volunteer.setAvailability(registrationDto.getAvailability());
+        volunteer.setEmergencyContact(registrationDto.getEmergencyContact());
+
+        // Salvează datele de volunteer
+        volunteerRepository.save(volunteer);
+
+        return savedUser.getEmail();
     }
 }
