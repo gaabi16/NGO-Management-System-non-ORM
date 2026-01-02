@@ -1,9 +1,12 @@
 package com.example.aplicatie_gestionare_voluntariat.controllers;
 
-import com.example.aplicatie_gestionare_voluntariat.model.User;
+import com.example.aplicatie_gestionare_voluntariat.model.Coordinator;
 import com.example.aplicatie_gestionare_voluntariat.model.Ong;
+import com.example.aplicatie_gestionare_voluntariat.model.User;
+import com.example.aplicatie_gestionare_voluntariat.model.Volunteer;
 import com.example.aplicatie_gestionare_voluntariat.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Controller;
@@ -11,7 +14,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -26,7 +32,7 @@ public class AdminController {
             @RequestParam(required = false) String view,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) List<String> roles,
-            @RequestParam(required = false) String search, // NOU: Parametru de căutare pentru ONGs
+            @RequestParam(required = false) String search,
             Model model,
             Authentication authentication) {
 
@@ -36,6 +42,9 @@ public class AdminController {
 
         model.addAttribute("currentView", view);
         model.addAttribute("currentUserEmail", authentication.getName());
+
+        // Ongs for dropdown
+        model.addAttribute("allOngs", adminService.getAllOngs());
 
         if ("users".equals(view)) {
             AdminService.PageWrapper<User> usersPage;
@@ -51,11 +60,9 @@ public class AdminController {
             model.addAttribute("currentPage", page);
 
         } else if ("ongs".equals(view)) {
-            // Trimitem parametrul search către service
             AdminService.PageWrapper<Ong> ongsPage = adminService.getOngsPage(page, 50, search);
             model.addAttribute("ongsPage", ongsPage);
             model.addAttribute("currentPage", page);
-            // Adăugăm search în model pentru a fi folosit în view (pagination links, input value)
             model.addAttribute("currentSearch", search);
 
         } else if ("coordinators".equals(view)) {
@@ -66,6 +73,7 @@ public class AdminController {
     }
 
     // --- USER ACTIONS ---
+
     @PostMapping("/users/create")
     public String createUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
         try {
@@ -73,21 +81,47 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("successMessage", "User created successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error creating user: " + e.getMessage());
-            e.printStackTrace();
         }
         return "redirect:/admin/dashboard?view=users";
     }
 
     @GetMapping("/users/edit/{id}")
     @ResponseBody
-    public User getUserForEdit(@PathVariable Integer id) {
-        return adminService.getUserById(id);
+    public Map<String, Object> getUserForEdit(@PathVariable Integer id) {
+        Map<String, Object> response = new HashMap<>();
+        User user = adminService.getUserById(id);
+        response.put("user", user);
+
+        // Verificăm și încărcăm datele specifice rolului
+        if (user.getRole() == User.Role.coordinator) {
+            Coordinator coord = adminService.getCoordinatorDetailsByUserId(id);
+            response.put("coordinator", coord);
+        } else if (user.getRole() == User.Role.volunteer) {
+            Volunteer vol = adminService.getVolunteerDetailsByUserId(id);
+            response.put("volunteer", vol);
+        }
+
+        return response;
     }
 
     @PostMapping("/users/update/{id}")
-    public String updateUser(@PathVariable Integer id, @ModelAttribute User user, RedirectAttributes redirectAttributes) {
+    public String updateUser(@PathVariable Integer id,
+                             @ModelAttribute User user,
+                             // Coordinator Params
+                             @RequestParam(required = false) Integer coordinatorOngId,
+                             @RequestParam(required = false) String department,
+                             @RequestParam(required = false) Integer experienceYears,
+                             @RequestParam(required = false) String employmentType,
+                             // Volunteer Params
+                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate birthDate,
+                             @RequestParam(required = false) String skills,
+                             @RequestParam(required = false) String availability,
+                             @RequestParam(required = false) String emergencyContact,
+                             RedirectAttributes redirectAttributes) {
         try {
-            adminService.updateUser(id, user);
+            adminService.updateUser(id, user,
+                    coordinatorOngId, department, experienceYears, employmentType,
+                    birthDate, skills, availability, emergencyContact);
             redirectAttributes.addFlashAttribute("successMessage", "User updated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating user: " + e.getMessage());
@@ -110,7 +144,6 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error deleting user: " + e.getMessage());
-            e.printStackTrace();
         }
         return "redirect:/admin/dashboard?view=users";
     }
@@ -123,7 +156,6 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("successMessage", "ONG created successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error creating ONG: " + e.getMessage());
-            e.printStackTrace();
         }
         return "redirect:/admin/dashboard?view=ongs";
     }
@@ -141,7 +173,6 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("successMessage", "ONG updated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating ONG: " + e.getMessage());
-            e.printStackTrace();
         }
         return "redirect:/admin/dashboard?view=ongs";
     }
@@ -157,7 +188,6 @@ public class AdminController {
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error deleting ONG: " + e.getMessage());
-            e.printStackTrace();
         }
         return "redirect:/admin/dashboard?view=ongs";
     }
