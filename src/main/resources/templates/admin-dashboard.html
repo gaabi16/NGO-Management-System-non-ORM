@@ -627,25 +627,21 @@
     </div>
 
     <div class="content-area">
-        <!-- Success/Error Messages -->
         <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
 
-        <!-- Welcome Message -->
         <div th:if="${currentView == null}" class="welcome-message">
             <div class="icon">🎯</div>
             <h2>Welcome to the Admin Dashboard</h2>
             <p>Select a category above to view data</p>
         </div>
 
-        <!-- Users Table -->
         <div th:if="${currentView == 'users'}">
             <div class="table-header">
                 <h2 class="table-title">📊 Users Management</h2>
                 <button class="btn-create" onclick="openCreateModal()">➕ Create User</button>
             </div>
 
-            <!-- Filter Section -->
             <div class="filter-section">
                 <button class="btn-filter" onclick="toggleFilterMenu()">
                     🔍 Filter Users
@@ -721,63 +717,43 @@
                 <p>No users found or error loading data.</p>
             </div>
 
-            <!-- Pagination -->
             <div class="pagination" th:if="${usersPage.totalPages > 1}">
-                <!-- Previous Button -->
                 <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}"
                    th:class="${currentPage == 0} ? 'disabled' : ''"
                    th:onclick="${currentPage == 0} ? 'return false;' : ''">
                     ← Prev
                 </a>
-
-                <!-- First Page -->
                 <a th:if="${currentPage > 2}"
                    th:href="@{/admin/dashboard(view='users', page=0, roles=${param.roles})}">
                     1
                 </a>
-
-                <!-- Ellipsis before -->
                 <span th:if="${currentPage > 3}">...</span>
-
-                <!-- Pages around current -->
                 <th:block th:if="${currentPage >= 2}">
                     <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 2}, roles=${param.roles})}"
                        th:text="${currentPage - 1}">
                     </a>
                 </th:block>
-
                 <th:block th:if="${currentPage >= 1}">
                     <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}"
                        th:text="${currentPage}">
                     </a>
                 </th:block>
-
-                <!-- Current page -->
                 <span class="active" th:text="${currentPage + 1}"></span>
-
-                <!-- Next pages -->
                 <th:block th:if="${currentPage < usersPage.totalPages - 1}">
                     <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}"
                        th:text="${currentPage + 2}">
                     </a>
                 </th:block>
-
                 <th:block th:if="${currentPage < usersPage.totalPages - 2}">
                     <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 2}, roles=${param.roles})}"
                        th:text="${currentPage + 3}">
                     </a>
                 </th:block>
-
-                <!-- Ellipsis after -->
                 <span th:if="${currentPage < usersPage.totalPages - 4}">...</span>
-
-                <!-- Last Page -->
                 <a th:if="${currentPage < usersPage.totalPages - 3}"
                    th:href="@{/admin/dashboard(view='users', page=${usersPage.totalPages - 1}, roles=${param.roles})}"
                    th:text="${usersPage.totalPages}">
                 </a>
-
-                <!-- Next Button -->
                 <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}"
                    th:class="${currentPage >= usersPage.totalPages - 1} ? 'disabled' : ''"
                    th:onclick="${currentPage >= usersPage.totalPages - 1} ? 'return false;' : ''">
@@ -786,10 +762,9 @@
             </div>
         </div>
 
-        <!-- ONGs Table -->
         <div th:if="${currentView == 'ongs'}">
-            <h2 class="table-title">🏢 First 5 ONGs</h2>
-            <table>
+            <h2 class="table-title">🏢 ONGs Management</h2>
+            <table th:if="${ongsPage != null && ongsPage.content.size() > 0}">
                 <thead>
                 <tr>
                     <th>ID</th>
@@ -800,8 +775,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="ong : ${ongs}">
-                    <td th:text="${ong.idOng}"></td>
+                <tr th:each="ong, iterStat : ${ongsPage.content}">
+                    <td th:text="${currentPage * 50 + iterStat.index + 1}"></td>
                     <td th:text="${ong.name}"></td>
                     <td th:text="${ong.email ?: 'N/A'}"></td>
                     <td th:text="${ong.phone ?: 'N/A'}"></td>
@@ -809,9 +784,66 @@
                 </tr>
                 </tbody>
             </table>
+
+            <div th:if="${ongsPage == null || ongsPage.content.size() == 0}" style="text-align: center; padding: 50px; color: #999;">
+                <p>No ONGs found or error loading data.</p>
+            </div>
+
+            <div class="pagination" th:if="${ongsPage.totalPages > 1}">
+                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 1})}"
+                   th:class="${currentPage == 0} ? 'disabled' : ''"
+                   th:onclick="${currentPage == 0} ? 'return false;' : ''">
+                    ← Prev
+                </a>
+
+                <a th:if="${currentPage > 2}"
+                   th:href="@{/admin/dashboard(view='ongs', page=0)}">
+                    1
+                </a>
+
+                <span th:if="${currentPage > 3}">...</span>
+
+                <th:block th:if="${currentPage >= 2}">
+                    <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 2})}"
+                       th:text="${currentPage - 1}">
+                    </a>
+                </th:block>
+
+                <th:block th:if="${currentPage >= 1}">
+                    <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 1})}"
+                       th:text="${currentPage}">
+                    </a>
+                </th:block>
+
+                <span class="active" th:text="${currentPage + 1}"></span>
+
+                <th:block th:if="${currentPage < ongsPage.totalPages - 1}">
+                    <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 1})}"
+                       th:text="${currentPage + 2}">
+                    </a>
+                </th:block>
+
+                <th:block th:if="${currentPage < ongsPage.totalPages - 2}">
+                    <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 2})}"
+                       th:text="${currentPage + 3}">
+                    </a>
+                </th:block>
+
+                <span th:if="${currentPage < ongsPage.totalPages - 4}">...</span>
+
+                <a th:if="${currentPage < ongsPage.totalPages - 3}"
+                   th:href="@{/admin/dashboard(view='ongs', page=${ongsPage.totalPages - 1})}"
+                   th:text="${ongsPage.totalPages}">
+                </a>
+
+                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 1})}"
+                   th:class="${currentPage >= ongsPage.totalPages - 1} ? 'disabled' : ''"
+                   th:onclick="${currentPage >= ongsPage.totalPages - 1} ? 'return false;' : ''">
+                    Next →
+                </a>
+            </div>
         </div>
 
-        <!-- Coordinators Table -->
         <div th:if="${currentView == 'coordinators'}">
             <h2 class="table-title">📋 First 5 Coordinators</h2>
             <table>
@@ -846,7 +878,6 @@
     </div>
 </div>
 
-<!-- Create User Modal -->
 <div id="createModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -889,7 +920,6 @@
     </div>
 </div>
 
-<!-- Edit User Modal -->
 <div id="editModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
