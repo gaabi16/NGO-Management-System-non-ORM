@@ -84,6 +84,14 @@ public class AdminService {
         return new PageWrapper<>(users, totalElements, page, size);
     }
 
+    // NOU: Metoda pentru paginarea ONG-urilor
+    public PageWrapper<Ong> getOngsPage(int page, int size) {
+        int offset = page * size;
+        List<Ong> ongs = ongRepository.findAll(size, offset); // Atenție: repository-ul are (limit, offset)
+        long totalElements = ongRepository.count();
+        return new PageWrapper<>(ongs, totalElements, page, size);
+    }
+
     // CRUD pentru Users
     @Transactional
     public User createUser(User user) {
