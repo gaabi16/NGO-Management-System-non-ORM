@@ -284,6 +284,8 @@
             max-width: 500px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             animation: slideDown 0.3s;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         @keyframes slideDown {
@@ -338,6 +340,7 @@
         input[type="email"],
         input[type="password"],
         input[type="date"],
+        input[type="number"],
         textarea,
         select {
             width: 100%;
@@ -579,6 +582,53 @@
         .btn-clear-filter:hover {
             background: #5a6268;
             transform: translateY(-1px);
+        }
+
+        /* Role Specific Fields Styling */
+        #coordinatorFields, #volunteerFields {
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        #coordinatorFields {
+            background-color: #f3f4fc;
+            border-left: 4px solid #667eea;
+        }
+
+        #volunteerFields {
+            background-color: #e8f5e9;
+            border-left: 4px solid #28a745;
+        }
+
+        #coordinatorFields h3 {
+            font-size: 16px;
+            color: #667eea;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #dce1f7;
+            padding-bottom: 8px;
+        }
+
+        #volunteerFields h3 {
+            font-size: 16px;
+            color: #28a745;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #c8e6c9;
+            padding-bottom: 8px;
+        }
+
+        /* Search input inside modal */
+        .search-input-modal {
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat 98% 50%;
         }
 
         @media (max-width: 768px) {
@@ -991,12 +1041,72 @@
             </div>
             <div class="form-group">
                 <label for="edit_role">Role</label>
-                <select id="edit_role" name="role" required>
+                <select id="edit_role" name="role" required onchange="toggleRoleSpecificFields()">
                     <option value="volunteer">Volunteer</option>
                     <option value="coordinator">Coordinator</option>
                     <option value="admin">Admin</option>
                 </select>
             </div>
+
+            <div id="coordinatorFields" style="display: none;">
+                <h3>Coordinator Details</h3>
+
+                <div class="form-group">
+                    <label for="ongSearchInput">Find ONG (Search by Name or Reg. Number):</label>
+                    <input type="text" id="ongSearchInput" class="search-input-modal" placeholder="Type to filter list...">
+                </div>
+
+                <div class="form-group">
+                    <label for="coord_ong">Select ONG <span style="color:red">*</span></label>
+                    <select id="coord_ong" name="coordinatorOngId">
+                        <option value="">-- Select ONG --</option>
+                        <option th:each="ong : ${allOngs}"
+                                th:value="${ong.idOng}"
+                                th:text="${ong.name} + ' (Reg: ' + ${ong.registrationNumber} + ')'">
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="coord_department">Department <span style="color:red">*</span></label>
+                    <input type="text" id="coord_department" name="department" placeholder="e.g. HR, Logistics">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="coord_experience">Experience (Years) <span style="color:red">*</span></label>
+                        <input type="number" id="coord_experience" name="experienceYears" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="coord_employment">Employment Type <span style="color:red">*</span></label>
+                        <select id="coord_employment" name="employmentType">
+                            <option value="">-- Select Type --</option>
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Volunteer">Volunteer Basis</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="volunteerFields" style="display: none;">
+                <h3>Volunteer Details</h3>
+                <div class="form-group">
+                    <label for="vol_birth_date">Birth Date <span style="color:red">*</span></label>
+                    <input type="date" id="vol_birth_date" name="birthDate">
+                </div>
+                <div class="form-group">
+                    <label for="vol_skills">Skills <span style="color:red">*</span></label>
+                    <textarea id="vol_skills" name="skills" placeholder="List skills separated by commas..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="vol_availability">Availability <span style="color:red">*</span></label>
+                    <input type="text" id="vol_availability" name="availability" placeholder="e.g. Weekends, Evenings">
+                </div>
+                <div class="form-group">
+                    <label for="vol_emergency">Emergency Contact <span style="color:red">*</span></label>
+                    <input type="text" id="vol_emergency" name="emergencyContact" placeholder="Name and Phone Number">
+                </div>
+            </div>
+
             <button type="submit" class="btn-submit">Update User</button>
         </form>
     </div>
@@ -1096,203 +1206,252 @@
     var selectedRoles = [];
     /*]]>*/
 
-    // --- USER FILTERS ---
+    // --- FILTERS ---
     function toggleFilterMenu() {
         const menu = document.getElementById('filterMenu');
         const arrow = document.querySelector('.filter-arrow');
         menu.classList.toggle('active');
         arrow.classList.toggle('rotate');
     }
-
     function toggleRoleFilter(role) {
         const button = document.querySelector(`.filter-option[data-role="${role}"]`);
         button.classList.toggle('active');
-
         const index = selectedRoles.indexOf(role);
-        if (index > -1) {
-            selectedRoles.splice(index, 1);
-        } else {
-            selectedRoles.push(role);
-        }
+        if (index > -1) selectedRoles.splice(index, 1); else selectedRoles.push(role);
     }
-
     function applyFilters() {
-        if (selectedRoles.length === 0) {
-            window.location.href = '/admin/dashboard?view=users';
-            return;
-        }
-
+        if (selectedRoles.length === 0) { window.location.href = '/admin/dashboard?view=users'; return; }
         const params = new URLSearchParams();
         params.append('view', 'users');
         selectedRoles.forEach(role => params.append('roles', role));
-
         window.location.href = '/admin/dashboard?' + params.toString();
     }
-
-    function clearFilters() {
-        selectedRoles = [];
-        document.querySelectorAll('.filter-option').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        window.location.href = '/admin/dashboard?view=users';
-    }
-
-    // Initialize filters from URL on page load
-    window.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-
-        // Restore user filters
-        const rolesFromUrl = urlParams.getAll('roles');
-        rolesFromUrl.forEach(role => {
-            selectedRoles.push(role);
-            const button = document.querySelector(`.filter-option[data-role="${role}"]`);
-            if (button) {
-                button.classList.add('active');
-            }
-        });
-
-        // Restore active ONG search state (auto-open menu if searching)
-        const searchFromUrl = urlParams.get('search');
-        if (searchFromUrl) {
-            const ongMenu = document.getElementById('ongFilterMenu');
-            const ongArrow = document.getElementById('ongFilterArrow');
-            if(ongMenu) {
-                ongMenu.classList.add('active');
-            }
-            if(ongArrow) {
-                ongArrow.classList.add('rotate');
-            }
-        }
-    });
-
-    // --- ONG FILTERS ---
+    function clearFilters() { selectedRoles = []; window.location.href = '/admin/dashboard?view=users'; }
     function toggleOngFilterMenu() {
         const menu = document.getElementById('ongFilterMenu');
         const arrow = document.getElementById('ongFilterArrow');
         menu.classList.toggle('active');
         arrow.classList.toggle('rotate');
     }
-
     function applyOngFilters() {
         const regNumber = document.getElementById('filter_reg_number').value;
         const params = new URLSearchParams();
         params.append('view', 'ongs');
-
-        if (regNumber && regNumber.trim() !== "") {
-            params.append('search', regNumber);
-        }
-
+        if (regNumber && regNumber.trim() !== "") params.append('search', regNumber);
         window.location.href = '/admin/dashboard?' + params.toString();
     }
+    function clearOngFilters() { document.getElementById('filter_reg_number').value = ''; window.location.href = '/admin/dashboard?view=ongs'; }
 
-    function clearOngFilters() {
-        document.getElementById('filter_reg_number').value = '';
-        window.location.href = '/admin/dashboard?view=ongs';
+    window.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const rolesFromUrl = urlParams.getAll('roles');
+        rolesFromUrl.forEach(role => {
+            selectedRoles.push(role);
+            const button = document.querySelector(`.filter-option[data-role="${role}"]`);
+            if (button) button.classList.add('active');
+        });
+        const searchFromUrl = urlParams.get('search');
+        if (searchFromUrl) {
+            const ongMenu = document.getElementById('ongFilterMenu');
+            if(ongMenu) ongMenu.classList.add('active');
+        }
+    });
+
+    // --- MODALS ---
+    function openCreateModal() { document.getElementById('createModal').style.display = 'block'; }
+    function closeCreateModal() { document.getElementById('createModal').style.display = 'none'; }
+
+    // Function to toggle Role Specific fields with Required attributes
+    function toggleRoleSpecificFields() {
+        const roleSelect = document.getElementById('edit_role');
+        const coordFields = document.getElementById('coordinatorFields');
+        const volFields = document.getElementById('volunteerFields');
+
+        // Coordinator Inputs
+        const coordOng = document.getElementById('coord_ong');
+        const coordDept = document.getElementById('coord_department');
+        const coordExp = document.getElementById('coord_experience');
+        const coordEmp = document.getElementById('coord_employment');
+
+        // Volunteer Inputs
+        const volBirth = document.getElementById('vol_birth_date');
+        const volSkills = document.getElementById('vol_skills');
+        const volAvail = document.getElementById('vol_availability');
+        const volEmerg = document.getElementById('vol_emergency');
+
+        if (roleSelect.value === 'coordinator') {
+            // Show Coordinator, Hide Volunteer
+            coordFields.style.display = 'block';
+            volFields.style.display = 'none';
+
+            // Set Required for Coord
+            coordOng.setAttribute('required', 'required');
+            coordDept.setAttribute('required', 'required');
+            coordExp.setAttribute('required', 'required');
+            coordEmp.setAttribute('required', 'required');
+
+            // Remove Required for Vol
+            volBirth.removeAttribute('required');
+            volSkills.removeAttribute('required');
+            volAvail.removeAttribute('required');
+            volEmerg.removeAttribute('required');
+
+        } else if (roleSelect.value === 'volunteer') {
+            // Show Volunteer, Hide Coordinator
+            coordFields.style.display = 'none';
+            volFields.style.display = 'block';
+
+            // Remove Required for Coord
+            coordOng.removeAttribute('required');
+            coordDept.removeAttribute('required');
+            coordExp.removeAttribute('required');
+            coordEmp.removeAttribute('required');
+
+            // Set Required for Vol
+            volBirth.setAttribute('required', 'required');
+            volSkills.setAttribute('required', 'required');
+            volAvail.setAttribute('required', 'required');
+            volEmerg.setAttribute('required', 'required');
+
+        } else {
+            // Hide Both (Admin)
+            coordFields.style.display = 'none';
+            volFields.style.display = 'none';
+
+            // Remove Required for All
+            coordOng.removeAttribute('required');
+            coordDept.removeAttribute('required');
+            coordExp.removeAttribute('required');
+            coordEmp.removeAttribute('required');
+            volBirth.removeAttribute('required');
+            volSkills.removeAttribute('required');
+            volAvail.removeAttribute('required');
+            volEmerg.removeAttribute('required');
+        }
     }
 
-    // --- USER MODALS ---
-    function openCreateModal() {
-        document.getElementById('createModal').style.display = 'block';
-    }
+    // Search Logic for ONG Dropdown inside Modal
+    document.getElementById('ongSearchInput').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let select = document.getElementById('coord_ong');
+        let options = select.options;
 
-    function closeCreateModal() {
-        document.getElementById('createModal').style.display = 'none';
-    }
+        for (let i = 0; i < options.length; i++) {
+            let text = options[i].text.toLowerCase();
+            // Ignore placeholder (empty value)
+            if (options[i].value === "") continue;
+
+            if (text.indexOf(filter) > -1) {
+                options[i].style.display = ""; // Show
+                options[i].hidden = false;
+            } else {
+                options[i].style.display = "none"; // Hide
+                options[i].hidden = true;
+            }
+        }
+    });
+
+    // Prevent Form Submission when pressing Enter in Search Input
+    document.getElementById('ongSearchInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Stop form submission
+            return false;
+        }
+    });
 
     function openEditModal(userId) {
         fetch('/admin/users/edit/' + userId)
             .then(response => response.json())
-            .then(user => {
+            .then(data => {
+                const user = data.user;
+                const coord = data.coordinator; // Poate fi null
+                const vol = data.volunteer; // Poate fi null
+
                 document.getElementById('edit_first_name').value = user.first_name;
                 document.getElementById('edit_last_name').value = user.last_name;
                 document.getElementById('edit_email').value = user.email;
                 document.getElementById('edit_phone').value = user.phone_number || '';
                 document.getElementById('edit_role').value = user.role;
+
+                // Reset fields
+                // Coord
+                document.getElementById('coord_ong').value = '';
+                document.getElementById('coord_department').value = '';
+                document.getElementById('coord_experience').value = '';
+                document.getElementById('coord_employment').value = '';
+                document.getElementById('ongSearchInput').value = '';
+
+                // Vol
+                document.getElementById('vol_birth_date').value = '';
+                document.getElementById('vol_skills').value = '';
+                document.getElementById('vol_availability').value = '';
+                document.getElementById('vol_emergency').value = '';
+
+                // Reset dropdown visibility
+                const select = document.getElementById('coord_ong');
+                const options = select.getElementsByTagName('option');
+                for (let i=0; i<options.length; i++) {
+                    options[i].style.display = "";
+                    options[i].hidden = false;
+                }
+
+                // Populate Coordinator if exists
+                if (coord) {
+                    if(coord.ong) document.getElementById('coord_ong').value = coord.ong.idOng;
+                    document.getElementById('coord_department').value = coord.department || '';
+                    document.getElementById('coord_experience').value = coord.experienceYears || '';
+                    document.getElementById('coord_employment').value = coord.employmentType || '';
+                }
+
+                // Populate Volunteer if exists
+                if (vol) {
+                    document.getElementById('vol_birth_date').value = vol.birthDate || '';
+                    document.getElementById('vol_skills').value = vol.skills || '';
+                    document.getElementById('vol_availability').value = vol.availability || '';
+                    document.getElementById('vol_emergency').value = vol.emergencyContact || '';
+                }
+
                 document.getElementById('editForm').action = '/admin/users/update/' + userId;
+
+                // Trigger toggle logic manually based on current role
+                toggleRoleSpecificFields();
+
                 document.getElementById('editModal').style.display = 'block';
             });
     }
 
-    function closeEditModal() {
-        document.getElementById('editModal').style.display = 'none';
-    }
-
-    // --- ONG MODALS ---
-    function openCreateOngModal() {
-        document.getElementById('createOngModal').style.display = 'block';
-    }
-
-    function closeCreateOngModal() {
-        document.getElementById('createOngModal').style.display = 'none';
-    }
-
+    function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+    function openCreateOngModal() { document.getElementById('createOngModal').style.display = 'block'; }
+    function closeCreateOngModal() { document.getElementById('createOngModal').style.display = 'none'; }
     function openEditOngModal(ongId) {
-        fetch('/admin/ongs/edit/' + ongId)
-            .then(response => response.json())
-            .then(ong => {
-                document.getElementById('edit_ong_name').value = ong.name;
-                document.getElementById('edit_ong_description').value = ong.description || '';
-                document.getElementById('edit_ong_address').value = ong.address || '';
-                document.getElementById('edit_ong_reg').value = ong.registrationNumber || '';
-                document.getElementById('edit_ong_founding').value = ong.foundingDate || '';
-                document.getElementById('edit_ong_email').value = ong.email || '';
-                document.getElementById('edit_ong_phone').value = ong.phone || '';
-
-                document.getElementById('editOngForm').action = '/admin/ongs/update/' + ongId;
-                document.getElementById('editOngModal').style.display = 'block';
-            });
-    }
-
-    function closeEditOngModal() {
-        document.getElementById('editOngModal').style.display = 'none';
-    }
-
-    // --- DELETE CONFIRMATIONS ---
-    function confirmDelete(userId, userEmail, userRole) {
-        if (userRole === 'admin') {
-            alert('⚠️ Admin accounts cannot be deleted for security reasons!');
-            return;
-        }
-
-        if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/admin/users/delete/' + userId;
-            document.body.appendChild(form);
-            form.submit();
-        }
-    }
-
-    function confirmDeleteOng(ongId) {
-        if (confirm('Are you sure you want to delete this ONG? This action cannot be undone.')) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/admin/ongs/delete/' + ongId;
-            document.body.appendChild(form);
-            form.submit();
-        }
-    }
-
-    // Close modal when clicking outside
-    window.onclick = function(event) {
-        const createModal = document.getElementById('createModal');
-        const editModal = document.getElementById('editModal');
-        const createOngModal = document.getElementById('createOngModal');
-        const editOngModal = document.getElementById('editOngModal');
-
-        if (event.target == createModal) closeCreateModal();
-        if (event.target == editModal) closeEditModal();
-        if (event.target == createOngModal) closeCreateOngModal();
-        if (event.target == editOngModal) closeEditOngModal();
-    }
-
-    // Auto-hide alerts after 5 seconds
-    setTimeout(function() {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
-            alert.style.animation = 'fadeIn 0.3s reverse';
-            setTimeout(() => alert.remove(), 300);
+        fetch('/admin/ongs/edit/' + ongId).then(r => r.json()).then(ong => {
+            document.getElementById('edit_ong_name').value = ong.name;
+            document.getElementById('edit_ong_description').value = ong.description || '';
+            document.getElementById('edit_ong_address').value = ong.address || '';
+            document.getElementById('edit_ong_reg').value = ong.registrationNumber || '';
+            document.getElementById('edit_ong_founding').value = ong.foundingDate || '';
+            document.getElementById('edit_ong_email').value = ong.email || '';
+            document.getElementById('edit_ong_phone').value = ong.phone || '';
+            document.getElementById('editOngForm').action = '/admin/ongs/update/' + ongId;
+            document.getElementById('editOngModal').style.display = 'block';
         });
+    }
+    function closeEditOngModal() { document.getElementById('editOngModal').style.display = 'none'; }
+    function confirmDelete(id, email, role) {
+        if (role === 'admin') { alert('⚠️ Admin accounts cannot be deleted!'); return; }
+        if (confirm('Delete this user?')) { const f = document.createElement('form'); f.method = 'POST'; f.action = '/admin/users/delete/' + id; document.body.appendChild(f); f.submit(); }
+    }
+    function confirmDeleteOng(id) {
+        if (confirm('Delete this ONG?')) { const f = document.createElement('form'); f.method = 'POST'; f.action = '/admin/ongs/delete/' + id; document.body.appendChild(f); f.submit(); }
+    }
+    window.onclick = function(e) {
+        if (e.target == document.getElementById('createModal')) closeCreateModal();
+        if (e.target == document.getElementById('editModal')) closeEditModal();
+        if (e.target == document.getElementById('createOngModal')) closeCreateOngModal();
+        if (e.target == document.getElementById('editOngModal')) closeEditOngModal();
+    }
+    setTimeout(function() {
+        document.querySelectorAll('.alert').forEach(a => { a.style.animation = 'fadeIn 0.3s reverse'; setTimeout(() => a.remove(), 300); });
     }, 5000);
 </script>
 </body>

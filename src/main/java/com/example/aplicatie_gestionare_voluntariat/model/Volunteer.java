@@ -3,87 +3,41 @@ package com.example.aplicatie_gestionare_voluntariat.model;
 import java.time.LocalDate;
 
 public class Volunteer {
-
     private Integer idVolunteer;
-    private Integer idUser;
+    private Integer idUser; // Foreign key către User
+    private User user; // Obiect User complet (pentru join-uri)
+
+    // Câmpuri noi
     private LocalDate birthDate;
     private String skills;
     private String availability;
     private String emergencyContact;
 
-    // Relație pentru afișare
-    private User user;
-
-    // Constructori
     public Volunteer() {}
 
     public Volunteer(Integer idUser) {
         this.idUser = idUser;
     }
 
-    public Volunteer(Integer idUser, LocalDate birthDate, String skills,
-                     String availability, String emergencyContact) {
-        this.idUser = idUser;
-        this.birthDate = birthDate;
-        this.skills = skills;
-        this.availability = availability;
-        this.emergencyContact = emergencyContact;
-    }
+    // Getters and Setters
+    public Integer getIdVolunteer() { return idVolunteer; }
+    public void setIdVolunteer(Integer idVolunteer) { this.idVolunteer = idVolunteer; }
 
-    // Getteri și Setteri
-    public Integer getIdVolunteer() {
-        return idVolunteer;
-    }
+    public Integer getIdUser() { return idUser; }
+    public void setIdUser(Integer idUser) { this.idUser = idUser; }
 
-    public void setIdVolunteer(Integer idVolunteer) {
-        this.idVolunteer = idVolunteer;
-    }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
-    public Integer getIdUser() {
-        return idUser;
-    }
+    public LocalDate getBirthDate() { return birthDate; }
+    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
 
-    public void setIdUser(Integer idUser) {
-        this.idUser = idUser;
-    }
+    public String getSkills() { return skills; }
+    public void setSkills(String skills) { this.skills = skills; }
 
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
+    public String getAvailability() { return availability; }
+    public void setAvailability(String availability) { this.availability = availability; }
 
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
-    }
-
-    public String getSkills() {
-        return skills;
-    }
-
-    public void setSkills(String skills) {
-        this.skills = skills;
-    }
-
-    public String getAvailability() {
-        return availability;
-    }
-
-    public void setAvailability(String availability) {
-        this.availability = availability;
-    }
-
-    public String getEmergencyContact() {
-        return emergencyContact;
-    }
-
-    public void setEmergencyContact(String emergencyContact) {
-        this.emergencyContact = emergencyContact;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
+    public String getEmergencyContact() { return emergencyContact; }
+    public void setEmergencyContact(String emergencyContact) { this.emergencyContact = emergencyContact; }
 }
