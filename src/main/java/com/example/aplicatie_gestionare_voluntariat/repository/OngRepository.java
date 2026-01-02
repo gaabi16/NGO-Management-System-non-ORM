@@ -9,6 +9,7 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class OngRepository {
@@ -43,7 +44,6 @@ public class OngRepository {
         return jdbcTemplate.query(sql, ongRowMapper);
     }
 
-    // Această metodă exista deja, o folosim pentru paginare
     public List<Ong> findAll(int limit, int offset) {
         String sql = "SELECT * FROM ongs ORDER BY id_ong ASC LIMIT ? OFFSET ?";
         return jdbcTemplate.query(sql, ongRowMapper, limit, offset);
@@ -54,10 +54,22 @@ public class OngRepository {
         return jdbcTemplate.query(sql, ongRowMapper);
     }
 
-    // Metoda nouă necesară pentru calculul paginilor
     public long count() {
         String sql = "SELECT COUNT(*) FROM ongs";
         return jdbcTemplate.queryForObject(sql, Long.class);
+    }
+
+    // Metoda nouă: Găsește după ID
+    public Optional<Ong> findById(Integer id) {
+        String sql = "SELECT * FROM ongs WHERE id_ong = ?";
+        List<Ong> ongs = jdbcTemplate.query(sql, ongRowMapper, id);
+        return ongs.isEmpty() ? Optional.empty() : Optional.of(ongs.get(0));
+    }
+
+    // Metoda nouă: Șterge după ID
+    public void deleteById(Integer id) {
+        String sql = "DELETE FROM ongs WHERE id_ong = ?";
+        jdbcTemplate.update(sql, id);
     }
 
     public Ong save(Ong ong) {
