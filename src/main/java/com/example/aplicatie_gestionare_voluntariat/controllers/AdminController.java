@@ -55,7 +55,6 @@ public class AdminController {
             model.addAttribute("currentPage", page);
 
         } else if ("ongs".equals(view)) {
-            // AICI AM MODIFICAT PENTRU PAGINARE
             AdminService.PageWrapper<Ong> ongsPage = adminService.getOngsPage(page, 50);
             model.addAttribute("ongsPage", ongsPage);
             model.addAttribute("currentPage", page);
@@ -66,6 +65,8 @@ public class AdminController {
 
         return "admin-dashboard";
     }
+
+    // --- USER ACTIONS ---
 
     @PostMapping("/users/create")
     public String createUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
@@ -115,5 +116,55 @@ public class AdminController {
             e.printStackTrace();
         }
         return "redirect:/admin/dashboard?view=users";
+    }
+
+    // --- ONG ACTIONS (NOU) ---
+
+    @PostMapping("/ongs/create")
+    public String createOng(@ModelAttribute Ong ong, RedirectAttributes redirectAttributes) {
+        try {
+            adminService.createOng(ong);
+            redirectAttributes.addFlashAttribute("successMessage", "ONG created successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error creating ONG: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return "redirect:/admin/dashboard?view=ongs";
+    }
+
+    @GetMapping("/ongs/edit/{id}")
+    @ResponseBody
+    public Ong getOngForEdit(@PathVariable Integer id) {
+        return adminService.getOngById(id);
+    }
+
+    @PostMapping("/ongs/update/{id}")
+    public String updateOng(@PathVariable Integer id, @ModelAttribute Ong ong,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            adminService.updateOng(id, ong);
+            redirectAttributes.addFlashAttribute("successMessage", "ONG updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error updating ONG: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return "redirect:/admin/dashboard?view=ongs";
+    }
+
+    @PostMapping("/ongs/delete/{id}")
+    public String deleteOng(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            boolean deleted = adminService.deleteOng(id);
+            if (deleted) {
+                redirectAttributes.addFlashAttribute("successMessage", "ONG deleted successfully!");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "ONG not found!");
+            }
+        } catch (Exception e) {
+            // Prinde erori de foreign key constraint, etc.
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting ONG (check for dependencies): " + e.getMessage());
+            e.printStackTrace();
+        }
+        return "redirect:/admin/dashboard?view=ongs";
     }
 }
