@@ -84,28 +84,36 @@ public class AdminService {
         return new PageWrapper<>(users, totalElements, page, size);
     }
 
-    public PageWrapper<Ong> getOngsPage(int page, int size) {
+    // MODIFICAT: Adăugat parametru search
+    public PageWrapper<Ong> getOngsPage(int page, int size, String search) {
         int offset = page * size;
-        List<Ong> ongs = ongRepository.findAll(size, offset);
-        long totalElements = ongRepository.count();
+        List<Ong> ongs;
+        long totalElements;
+
+        if (search != null && !search.trim().isEmpty()) {
+            // Căutare după Registration Number
+            ongs = ongRepository.findByRegistrationNumberPaginated(search.trim(), size, offset);
+            totalElements = ongRepository.countByRegistrationNumber(search.trim());
+        } else {
+            // Paginare standard
+            ongs = ongRepository.findAll(size, offset);
+            totalElements = ongRepository.count();
+        }
+
         return new PageWrapper<>(ongs, totalElements, page, size);
     }
 
     // --- CRUD USERS ---
-
     @Transactional
     public User createUser(User user) {
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
         }
-
         User savedUser = userRepository.save(user);
-
         if(savedUser.getRole() == User.Role.volunteer) {
             Volunteer volunteer = new Volunteer(savedUser.getIdUser());
             volunteerRepository.save(volunteer);
         }
-
         return savedUser;
     }
 
@@ -149,9 +157,7 @@ public class AdminService {
     @Transactional
     public boolean deleteUser(Integer id, String currentUserEmail) {
         User userToDelete = userRepository.findById(id).orElse(null);
-        if (userToDelete == null) {
-            return false;
-        }
+        if (userToDelete == null) { return false; }
         if (userToDelete.getRole() == User.Role.admin) {
             throw new IllegalStateException("Admin accounts cannot be deleted for security reasons!");
         }
@@ -162,8 +168,7 @@ public class AdminService {
         return true;
     }
 
-    // --- CRUD ONGS (NOU) ---
-
+    // --- CRUD ONGS ---
     @Transactional
     public Ong createOng(Ong ong) {
         return ongRepository.save(ong);
@@ -192,11 +197,7 @@ public class AdminService {
     @Transactional
     public boolean deleteOng(Integer id) {
         Ong ongToDelete = ongRepository.findById(id).orElse(null);
-        if (ongToDelete == null) {
-            return false;
-        }
-        // Notă: Dacă există chei străine (activități, coordonatori etc.), ștergerea va eșua
-        // cu o excepție SQL, care va fi prinsă în controller.
+        if (ongToDelete == null) { return false; }
         ongRepository.deleteById(id);
         return true;
     }
