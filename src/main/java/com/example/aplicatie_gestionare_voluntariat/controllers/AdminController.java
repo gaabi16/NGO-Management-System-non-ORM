@@ -1,6 +1,7 @@
 package com.example.aplicatie_gestionare_voluntariat.controllers;
 
 import com.example.aplicatie_gestionare_voluntariat.model.User;
+import com.example.aplicatie_gestionare_voluntariat.model.Ong;
 import com.example.aplicatie_gestionare_voluntariat.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -53,19 +54,12 @@ public class AdminController {
             model.addAttribute("usersPage", usersPage);
             model.addAttribute("currentPage", page);
 
-            // Debug
-            System.out.println("=== DEBUG INFO ===");
-            System.out.println("View: " + view);
-            System.out.println("Current page: " + page);
-            System.out.println("Filtered roles: " + roles);
-            System.out.println("Total users: " + usersPage.getTotalElements());
-            System.out.println("Total pages: " + usersPage.getTotalPages());
-            System.out.println("Users on this page: " + usersPage.getContent().size());
-            System.out.println("Current user email: " + authentication.getName());
-            System.out.println("==================");
-
         } else if ("ongs".equals(view)) {
-            model.addAttribute("ongs", adminService.getFirst5Ongs());
+            // AICI AM MODIFICAT PENTRU PAGINARE
+            AdminService.PageWrapper<Ong> ongsPage = adminService.getOngsPage(page, 50);
+            model.addAttribute("ongsPage", ongsPage);
+            model.addAttribute("currentPage", page);
+
         } else if ("coordinators".equals(view)) {
             model.addAttribute("coordinators", adminService.getFirst5Coordinators());
         }
