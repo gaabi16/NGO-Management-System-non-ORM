@@ -26,10 +26,10 @@ public class AdminController {
             @RequestParam(required = false) String view,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) List<String> roles,
+            @RequestParam(required = false) String search, // NOU: Parametru de căutare pentru ONGs
             Model model,
             Authentication authentication) {
 
-        // Verifică dacă utilizatorul este admin
         if (!authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_admin"))) {
             return "redirect:/home";
         }
@@ -37,12 +37,9 @@ public class AdminController {
         model.addAttribute("currentView", view);
         model.addAttribute("currentUserEmail", authentication.getName());
 
-        // Încarcă datele în funcție de parametrul view
         if ("users".equals(view)) {
             AdminService.PageWrapper<User> usersPage;
-
             if (roles != null && !roles.isEmpty()) {
-                // Convert String roles to User.Role enum
                 List<User.Role> roleEnums = roles.stream()
                         .map(User.Role::valueOf)
                         .collect(Collectors.toList());
@@ -50,14 +47,16 @@ public class AdminController {
             } else {
                 usersPage = adminService.getUsersPage(page, 50);
             }
-
             model.addAttribute("usersPage", usersPage);
             model.addAttribute("currentPage", page);
 
         } else if ("ongs".equals(view)) {
-            AdminService.PageWrapper<Ong> ongsPage = adminService.getOngsPage(page, 50);
+            // Trimitem parametrul search către service
+            AdminService.PageWrapper<Ong> ongsPage = adminService.getOngsPage(page, 50, search);
             model.addAttribute("ongsPage", ongsPage);
             model.addAttribute("currentPage", page);
+            // Adăugăm search în model pentru a fi folosit în view (pagination links, input value)
+            model.addAttribute("currentSearch", search);
 
         } else if ("coordinators".equals(view)) {
             model.addAttribute("coordinators", adminService.getFirst5Coordinators());
@@ -67,7 +66,6 @@ public class AdminController {
     }
 
     // --- USER ACTIONS ---
-
     @PostMapping("/users/create")
     public String createUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
         try {
@@ -87,8 +85,7 @@ public class AdminController {
     }
 
     @PostMapping("/users/update/{id}")
-    public String updateUser(@PathVariable Integer id, @ModelAttribute User user,
-                             RedirectAttributes redirectAttributes) {
+    public String updateUser(@PathVariable Integer id, @ModelAttribute User user, RedirectAttributes redirectAttributes) {
         try {
             adminService.updateUser(id, user);
             redirectAttributes.addFlashAttribute("successMessage", "User updated successfully!");
@@ -118,8 +115,7 @@ public class AdminController {
         return "redirect:/admin/dashboard?view=users";
     }
 
-    // --- ONG ACTIONS (NOU) ---
-
+    // --- ONG ACTIONS ---
     @PostMapping("/ongs/create")
     public String createOng(@ModelAttribute Ong ong, RedirectAttributes redirectAttributes) {
         try {
@@ -139,8 +135,7 @@ public class AdminController {
     }
 
     @PostMapping("/ongs/update/{id}")
-    public String updateOng(@PathVariable Integer id, @ModelAttribute Ong ong,
-                            RedirectAttributes redirectAttributes) {
+    public String updateOng(@PathVariable Integer id, @ModelAttribute Ong ong, RedirectAttributes redirectAttributes) {
         try {
             adminService.updateOng(id, ong);
             redirectAttributes.addFlashAttribute("successMessage", "ONG updated successfully!");
@@ -161,8 +156,7 @@ public class AdminController {
                 redirectAttributes.addFlashAttribute("errorMessage", "ONG not found!");
             }
         } catch (Exception e) {
-            // Prinde erori de foreign key constraint, etc.
-            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting ONG (check for dependencies): " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting ONG: " + e.getMessage());
             e.printStackTrace();
         }
         return "redirect:/admin/dashboard?view=ongs";
