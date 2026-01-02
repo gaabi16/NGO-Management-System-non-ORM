@@ -43,14 +43,21 @@ public class OngRepository {
         return jdbcTemplate.query(sql, ongRowMapper);
     }
 
+    // Această metodă exista deja, o folosim pentru paginare
     public List<Ong> findAll(int limit, int offset) {
-        String sql = "SELECT * FROM ongs ORDER BY id_ong LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM ongs ORDER BY id_ong ASC LIMIT ? OFFSET ?";
         return jdbcTemplate.query(sql, ongRowMapper, limit, offset);
     }
 
     public List<Ong> findAll() {
         String sql = "SELECT * FROM ongs ORDER BY id_ong";
         return jdbcTemplate.query(sql, ongRowMapper);
+    }
+
+    // Metoda nouă necesară pentru calculul paginilor
+    public long count() {
+        String sql = "SELECT COUNT(*) FROM ongs";
+        return jdbcTemplate.queryForObject(sql, Long.class);
     }
 
     public Ong save(Ong ong) {
