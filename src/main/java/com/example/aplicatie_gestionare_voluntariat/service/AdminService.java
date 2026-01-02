@@ -84,21 +84,36 @@ public class AdminService {
         return new PageWrapper<>(users, totalElements, page, size);
     }
 
-    // CRUD pentru Users
+    // MODIFICAT: Adăugat parametru search
+    public PageWrapper<Ong> getOngsPage(int page, int size, String search) {
+        int offset = page * size;
+        List<Ong> ongs;
+        long totalElements;
+
+        if (search != null && !search.trim().isEmpty()) {
+            // Căutare după Registration Number
+            ongs = ongRepository.findByRegistrationNumberPaginated(search.trim(), size, offset);
+            totalElements = ongRepository.countByRegistrationNumber(search.trim());
+        } else {
+            // Paginare standard
+            ongs = ongRepository.findAll(size, offset);
+            totalElements = ongRepository.count();
+        }
+
+        return new PageWrapper<>(ongs, totalElements, page, size);
+    }
+
+    // --- CRUD USERS ---
     @Transactional
     public User createUser(User user) {
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
         }
-
         User savedUser = userRepository.save(user);
-
-        // Dacă rolul este volunteer, creează și înregistrarea în tabelul volunteers
         if(savedUser.getRole() == User.Role.volunteer) {
             Volunteer volunteer = new Volunteer(savedUser.getIdUser());
             volunteerRepository.save(volunteer);
         }
-
         return savedUser;
     }
 
@@ -119,27 +134,21 @@ public class AdminService {
             existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
             existingUser.setRole(newRole);
 
-            // Actualizează parola doar dacă este furnizată
             if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
                 existingUser.setPasswordHash(passwordEncoder.encode(updatedUser.getPassword()));
             }
 
             User savedUser = userRepository.save(existingUser);
 
-            // Gestionează schimbarea rolului
             if (oldRole != newRole) {
-                // Dacă s-a schimbat de la volunteer la altceva, șterge din volunteers
                 if (oldRole == User.Role.volunteer && newRole != User.Role.volunteer) {
                     volunteerRepository.deleteByUserId(id);
                 }
-
-                // Dacă s-a schimbat la volunteer, adaugă în volunteers
                 if (newRole == User.Role.volunteer && oldRole != User.Role.volunteer) {
                     Volunteer volunteer = new Volunteer(savedUser.getIdUser());
                     volunteerRepository.save(volunteer);
                 }
             }
-
             return savedUser;
         }
         return null;
@@ -148,22 +157,48 @@ public class AdminService {
     @Transactional
     public boolean deleteUser(Integer id, String currentUserEmail) {
         User userToDelete = userRepository.findById(id).orElse(null);
-        if (userToDelete == null) {
-            return false;
-        }
-
-        // Verifică dacă utilizatorul de șters este admin
+        if (userToDelete == null) { return false; }
         if (userToDelete.getRole() == User.Role.admin) {
             throw new IllegalStateException("Admin accounts cannot be deleted for security reasons!");
         }
-
-        // Șterge mai întâi din tabelul volunteers dacă este volunteer
         if (userToDelete.getRole() == User.Role.volunteer) {
             volunteerRepository.deleteByUserId(id);
         }
-
-        // Apoi șterge utilizatorul
         userRepository.deleteById(id);
+        return true;
+    }
+
+    // --- CRUD ONGS ---
+    @Transactional
+    public Ong createOng(Ong ong) {
+        return ongRepository.save(ong);
+    }
+
+    public Ong getOngById(Integer id) {
+        return ongRepository.findById(id).orElse(null);
+    }
+
+    @Transactional
+    public Ong updateOng(Integer id, Ong updatedOng) {
+        Ong existingOng = ongRepository.findById(id).orElse(null);
+        if (existingOng != null) {
+            existingOng.setName(updatedOng.getName());
+            existingOng.setDescription(updatedOng.getDescription());
+            existingOng.setAddress(updatedOng.getAddress());
+            existingOng.setRegistrationNumber(updatedOng.getRegistrationNumber());
+            existingOng.setPhone(updatedOng.getPhone());
+            existingOng.setEmail(updatedOng.getEmail());
+            existingOng.setFoundingDate(updatedOng.getFoundingDate());
+            return ongRepository.save(existingOng);
+        }
+        return null;
+    }
+
+    @Transactional
+    public boolean deleteOng(Integer id) {
+        Ong ongToDelete = ongRepository.findById(id).orElse(null);
+        if (ongToDelete == null) { return false; }
+        ongRepository.deleteById(id);
         return true;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.aplicatie_gestionare_voluntariat.controllers;
 
 import com.example.aplicatie_gestionare_voluntariat.model.User;
+import com.example.aplicatie_gestionare_voluntariat.model.Ong;
 import com.example.aplicatie_gestionare_voluntariat.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -25,10 +26,10 @@ public class AdminController {
             @RequestParam(required = false) String view,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) List<String> roles,
+            @RequestParam(required = false) String search, // NOU: Parametru de căutare pentru ONGs
             Model model,
             Authentication authentication) {
 
-        // Verifică dacă utilizatorul este admin
         if (!authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_admin"))) {
             return "redirect:/home";
         }
@@ -36,12 +37,9 @@ public class AdminController {
         model.addAttribute("currentView", view);
         model.addAttribute("currentUserEmail", authentication.getName());
 
-        // Încarcă datele în funcție de parametrul view
         if ("users".equals(view)) {
             AdminService.PageWrapper<User> usersPage;
-
             if (roles != null && !roles.isEmpty()) {
-                // Convert String roles to User.Role enum
                 List<User.Role> roleEnums = roles.stream()
                         .map(User.Role::valueOf)
                         .collect(Collectors.toList());
@@ -49,23 +47,17 @@ public class AdminController {
             } else {
                 usersPage = adminService.getUsersPage(page, 50);
             }
-
             model.addAttribute("usersPage", usersPage);
             model.addAttribute("currentPage", page);
 
-            // Debug
-            System.out.println("=== DEBUG INFO ===");
-            System.out.println("View: " + view);
-            System.out.println("Current page: " + page);
-            System.out.println("Filtered roles: " + roles);
-            System.out.println("Total users: " + usersPage.getTotalElements());
-            System.out.println("Total pages: " + usersPage.getTotalPages());
-            System.out.println("Users on this page: " + usersPage.getContent().size());
-            System.out.println("Current user email: " + authentication.getName());
-            System.out.println("==================");
-
         } else if ("ongs".equals(view)) {
-            model.addAttribute("ongs", adminService.getFirst5Ongs());
+            // Trimitem parametrul search către service
+            AdminService.PageWrapper<Ong> ongsPage = adminService.getOngsPage(page, 50, search);
+            model.addAttribute("ongsPage", ongsPage);
+            model.addAttribute("currentPage", page);
+            // Adăugăm search în model pentru a fi folosit în view (pagination links, input value)
+            model.addAttribute("currentSearch", search);
+
         } else if ("coordinators".equals(view)) {
             model.addAttribute("coordinators", adminService.getFirst5Coordinators());
         }
@@ -73,6 +65,7 @@ public class AdminController {
         return "admin-dashboard";
     }
 
+    // --- USER ACTIONS ---
     @PostMapping("/users/create")
     public String createUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
         try {
@@ -92,8 +85,7 @@ public class AdminController {
     }
 
     @PostMapping("/users/update/{id}")
-    public String updateUser(@PathVariable Integer id, @ModelAttribute User user,
-                             RedirectAttributes redirectAttributes) {
+    public String updateUser(@PathVariable Integer id, @ModelAttribute User user, RedirectAttributes redirectAttributes) {
         try {
             adminService.updateUser(id, user);
             redirectAttributes.addFlashAttribute("successMessage", "User updated successfully!");
@@ -121,5 +113,52 @@ public class AdminController {
             e.printStackTrace();
         }
         return "redirect:/admin/dashboard?view=users";
+    }
+
+    // --- ONG ACTIONS ---
+    @PostMapping("/ongs/create")
+    public String createOng(@ModelAttribute Ong ong, RedirectAttributes redirectAttributes) {
+        try {
+            adminService.createOng(ong);
+            redirectAttributes.addFlashAttribute("successMessage", "ONG created successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error creating ONG: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return "redirect:/admin/dashboard?view=ongs";
+    }
+
+    @GetMapping("/ongs/edit/{id}")
+    @ResponseBody
+    public Ong getOngForEdit(@PathVariable Integer id) {
+        return adminService.getOngById(id);
+    }
+
+    @PostMapping("/ongs/update/{id}")
+    public String updateOng(@PathVariable Integer id, @ModelAttribute Ong ong, RedirectAttributes redirectAttributes) {
+        try {
+            adminService.updateOng(id, ong);
+            redirectAttributes.addFlashAttribute("successMessage", "ONG updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error updating ONG: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return "redirect:/admin/dashboard?view=ongs";
+    }
+
+    @PostMapping("/ongs/delete/{id}")
+    public String deleteOng(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            boolean deleted = adminService.deleteOng(id);
+            if (deleted) {
+                redirectAttributes.addFlashAttribute("successMessage", "ONG deleted successfully!");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "ONG not found!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting ONG: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return "redirect:/admin/dashboard?view=ongs";
     }
 }

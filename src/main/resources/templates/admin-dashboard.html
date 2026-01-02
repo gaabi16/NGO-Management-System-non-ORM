@@ -337,6 +337,8 @@
         input[type="text"],
         input[type="email"],
         input[type="password"],
+        input[type="date"],
+        textarea,
         select {
             width: 100%;
             padding: 12px 15px;
@@ -347,7 +349,12 @@
             background-color: #f9f9f9;
         }
 
-        input:focus, select:focus {
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
             background-color: white;
@@ -627,25 +634,21 @@
     </div>
 
     <div class="content-area">
-        <!-- Success/Error Messages -->
         <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
 
-        <!-- Welcome Message -->
         <div th:if="${currentView == null}" class="welcome-message">
             <div class="icon">🎯</div>
             <h2>Welcome to the Admin Dashboard</h2>
             <p>Select a category above to view data</p>
         </div>
 
-        <!-- Users Table -->
         <div th:if="${currentView == 'users'}">
             <div class="table-header">
                 <h2 class="table-title">📊 Users Management</h2>
                 <button class="btn-create" onclick="openCreateModal()">➕ Create User</button>
             </div>
 
-            <!-- Filter Section -->
             <div class="filter-section">
                 <button class="btn-filter" onclick="toggleFilterMenu()">
                     🔍 Filter Users
@@ -721,63 +724,43 @@
                 <p>No users found or error loading data.</p>
             </div>
 
-            <!-- Pagination -->
             <div class="pagination" th:if="${usersPage.totalPages > 1}">
-                <!-- Previous Button -->
                 <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}"
                    th:class="${currentPage == 0} ? 'disabled' : ''"
                    th:onclick="${currentPage == 0} ? 'return false;' : ''">
                     ← Prev
                 </a>
-
-                <!-- First Page -->
                 <a th:if="${currentPage > 2}"
                    th:href="@{/admin/dashboard(view='users', page=0, roles=${param.roles})}">
                     1
                 </a>
-
-                <!-- Ellipsis before -->
                 <span th:if="${currentPage > 3}">...</span>
-
-                <!-- Pages around current -->
                 <th:block th:if="${currentPage >= 2}">
                     <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 2}, roles=${param.roles})}"
                        th:text="${currentPage - 1}">
                     </a>
                 </th:block>
-
                 <th:block th:if="${currentPage >= 1}">
                     <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}"
                        th:text="${currentPage}">
                     </a>
                 </th:block>
-
-                <!-- Current page -->
                 <span class="active" th:text="${currentPage + 1}"></span>
-
-                <!-- Next pages -->
                 <th:block th:if="${currentPage < usersPage.totalPages - 1}">
                     <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}"
                        th:text="${currentPage + 2}">
                     </a>
                 </th:block>
-
                 <th:block th:if="${currentPage < usersPage.totalPages - 2}">
                     <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 2}, roles=${param.roles})}"
                        th:text="${currentPage + 3}">
                     </a>
                 </th:block>
-
-                <!-- Ellipsis after -->
                 <span th:if="${currentPage < usersPage.totalPages - 4}">...</span>
-
-                <!-- Last Page -->
                 <a th:if="${currentPage < usersPage.totalPages - 3}"
                    th:href="@{/admin/dashboard(view='users', page=${usersPage.totalPages - 1}, roles=${param.roles})}"
                    th:text="${usersPage.totalPages}">
                 </a>
-
-                <!-- Next Button -->
                 <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}"
                    th:class="${currentPage >= usersPage.totalPages - 1} ? 'disabled' : ''"
                    th:onclick="${currentPage >= usersPage.totalPages - 1} ? 'return false;' : ''">
@@ -786,10 +769,31 @@
             </div>
         </div>
 
-        <!-- ONGs Table -->
         <div th:if="${currentView == 'ongs'}">
-            <h2 class="table-title">🏢 First 5 ONGs</h2>
-            <table>
+            <div class="table-header">
+                <h2 class="table-title">🏢 ONGs Management</h2>
+                <button class="btn-create" onclick="openCreateOngModal()">➕ Create ONG</button>
+            </div>
+
+            <div class="filter-section">
+                <button class="btn-filter" onclick="toggleOngFilterMenu()">
+                    🔍 Filter ONGs
+                    <span class="filter-arrow" id="ongFilterArrow">▼</span>
+                </button>
+
+                <div id="ongFilterMenu" class="filter-menu">
+                    <div class="filter-group">
+                        <label class="filter-label" for="filter_reg_number">Search by Registration Number:</label>
+                        <input type="text" id="filter_reg_number" placeholder="Enter registration number..." th:value="${currentSearch}">
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn-apply-filter" onclick="applyOngFilters()">Apply Filters</button>
+                        <button class="btn-clear-filter" onclick="clearOngFilters()">Clear All</button>
+                    </div>
+                </div>
+            </div>
+
+            <table th:if="${ongsPage != null && ongsPage.content.size() > 0}">
                 <thead>
                 <tr>
                     <th>ID</th>
@@ -797,21 +801,93 @@
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Registration #</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="ong : ${ongs}">
-                    <td th:text="${ong.idOng}"></td>
+                <tr th:each="ong, iterStat : ${ongsPage.content}">
+                    <td th:text="${currentPage * 50 + iterStat.index + 1}"></td>
                     <td th:text="${ong.name}"></td>
                     <td th:text="${ong.email ?: 'N/A'}"></td>
                     <td th:text="${ong.phone ?: 'N/A'}"></td>
                     <td th:text="${ong.registrationNumber ?: 'N/A'}"></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-edit"
+                                    th:data-ong-id="${ong.idOng}"
+                                    onclick="openEditOngModal(this.getAttribute('data-ong-id'))">
+                                ✏️ Edit
+                            </button>
+                            <button class="btn-delete"
+                                    th:data-ong-id="${ong.idOng}"
+                                    onclick="confirmDeleteOng(this.getAttribute('data-ong-id'))">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </td>
                 </tr>
                 </tbody>
             </table>
+
+            <div th:if="${ongsPage == null || ongsPage.content.size() == 0}" style="text-align: center; padding: 50px; color: #999;">
+                <p>No ONGs found or error loading data.</p>
+            </div>
+
+            <div class="pagination" th:if="${ongsPage.totalPages > 1}">
+                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 1}, search=${currentSearch})}"
+                   th:class="${currentPage == 0} ? 'disabled' : ''"
+                   th:onclick="${currentPage == 0} ? 'return false;' : ''">
+                    ← Prev
+                </a>
+
+                <a th:if="${currentPage > 2}"
+                   th:href="@{/admin/dashboard(view='ongs', page=0, search=${currentSearch})}">
+                    1
+                </a>
+
+                <span th:if="${currentPage > 3}">...</span>
+
+                <th:block th:if="${currentPage >= 2}">
+                    <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 2}, search=${currentSearch})}"
+                       th:text="${currentPage - 1}">
+                    </a>
+                </th:block>
+
+                <th:block th:if="${currentPage >= 1}">
+                    <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 1}, search=${currentSearch})}"
+                       th:text="${currentPage}">
+                    </a>
+                </th:block>
+
+                <span class="active" th:text="${currentPage + 1}"></span>
+
+                <th:block th:if="${currentPage < ongsPage.totalPages - 1}">
+                    <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 1}, search=${currentSearch})}"
+                       th:text="${currentPage + 2}">
+                    </a>
+                </th:block>
+
+                <th:block th:if="${currentPage < ongsPage.totalPages - 2}">
+                    <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 2}, search=${currentSearch})}"
+                       th:text="${currentPage + 3}">
+                    </a>
+                </th:block>
+
+                <span th:if="${currentPage < ongsPage.totalPages - 4}">...</span>
+
+                <a th:if="${currentPage < ongsPage.totalPages - 3}"
+                   th:href="@{/admin/dashboard(view='ongs', page=${ongsPage.totalPages - 1}, search=${currentSearch})}"
+                   th:text="${ongsPage.totalPages}">
+                </a>
+
+                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 1}, search=${currentSearch})}"
+                   th:class="${currentPage >= ongsPage.totalPages - 1} ? 'disabled' : ''"
+                   th:onclick="${currentPage >= ongsPage.totalPages - 1} ? 'return false;' : ''">
+                    Next →
+                </a>
+            </div>
         </div>
 
-        <!-- Coordinators Table -->
         <div th:if="${currentView == 'coordinators'}">
             <h2 class="table-title">📋 First 5 Coordinators</h2>
             <table>
@@ -846,7 +922,6 @@
     </div>
 </div>
 
-<!-- Create User Modal -->
 <div id="createModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -889,7 +964,6 @@
     </div>
 </div>
 
-<!-- Edit User Modal -->
 <div id="editModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -928,13 +1002,101 @@
     </div>
 </div>
 
+<div id="createOngModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Create New ONG</h2>
+            <span class="close" onclick="closeCreateOngModal()">&times;</span>
+        </div>
+        <form th:action="@{/admin/ongs/create}" method="post">
+            <div class="form-group">
+                <label for="create_ong_name">Name</label>
+                <input type="text" id="create_ong_name" name="name" required/>
+            </div>
+            <div class="form-group">
+                <label for="create_ong_description">Description</label>
+                <textarea id="create_ong_description" name="description"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="create_ong_address">Address</label>
+                <input type="text" id="create_ong_address" name="address"/>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="create_ong_reg">Reg. Number</label>
+                    <input type="text" id="create_ong_reg" name="registrationNumber"/>
+                </div>
+                <div class="form-group">
+                    <label for="create_ong_founding">Founding Date</label>
+                    <input type="date" id="create_ong_founding" name="foundingDate"/>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="create_ong_email">Email</label>
+                    <input type="email" id="create_ong_email" name="email"/>
+                </div>
+                <div class="form-group">
+                    <label for="create_ong_phone">Phone</label>
+                    <input type="text" id="create_ong_phone" name="phone"/>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit">Create ONG</button>
+        </form>
+    </div>
+</div>
+
+<div id="editOngModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit ONG</h2>
+            <span class="close" onclick="closeEditOngModal()">&times;</span>
+        </div>
+        <form id="editOngForm" method="post">
+            <div class="form-group">
+                <label for="edit_ong_name">Name</label>
+                <input type="text" id="edit_ong_name" name="name" required/>
+            </div>
+            <div class="form-group">
+                <label for="edit_ong_description">Description</label>
+                <textarea id="edit_ong_description" name="description"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit_ong_address">Address</label>
+                <input type="text" id="edit_ong_address" name="address"/>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit_ong_reg">Reg. Number</label>
+                    <input type="text" id="edit_ong_reg" name="registrationNumber"/>
+                </div>
+                <div class="form-group">
+                    <label for="edit_ong_founding">Founding Date</label>
+                    <input type="date" id="edit_ong_founding" name="foundingDate"/>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit_ong_email">Email</label>
+                    <input type="email" id="edit_ong_email" name="email"/>
+                </div>
+                <div class="form-group">
+                    <label for="edit_ong_phone">Phone</label>
+                    <input type="text" id="edit_ong_phone" name="phone"/>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit">Update ONG</button>
+        </form>
+    </div>
+</div>
+
 <script th:inline="javascript">
     /*<![CDATA[*/
     var currentUserEmail = /*[[${currentUserEmail}]]*/ '';
     var selectedRoles = [];
     /*]]>*/
 
-    // Filter Menu Toggle
+    // --- USER FILTERS ---
     function toggleFilterMenu() {
         const menu = document.getElementById('filterMenu');
         const arrow = document.querySelector('.filter-arrow');
@@ -942,7 +1104,6 @@
         arrow.classList.toggle('rotate');
     }
 
-    // Toggle Role Filter
     function toggleRoleFilter(role) {
         const button = document.querySelector(`.filter-option[data-role="${role}"]`);
         button.classList.toggle('active');
@@ -955,7 +1116,6 @@
         }
     }
 
-    // Apply Filters
     function applyFilters() {
         if (selectedRoles.length === 0) {
             window.location.href = '/admin/dashboard?view=users';
@@ -969,7 +1129,6 @@
         window.location.href = '/admin/dashboard?' + params.toString();
     }
 
-    // Clear Filters
     function clearFilters() {
         selectedRoles = [];
         document.querySelectorAll('.filter-option').forEach(btn => {
@@ -981,8 +1140,9 @@
     // Initialize filters from URL on page load
     window.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
-        const rolesFromUrl = urlParams.getAll('roles');
 
+        // Restore user filters
+        const rolesFromUrl = urlParams.getAll('roles');
         rolesFromUrl.forEach(role => {
             selectedRoles.push(role);
             const button = document.querySelector(`.filter-option[data-role="${role}"]`);
@@ -990,9 +1150,47 @@
                 button.classList.add('active');
             }
         });
+
+        // Restore active ONG search state (auto-open menu if searching)
+        const searchFromUrl = urlParams.get('search');
+        if (searchFromUrl) {
+            const ongMenu = document.getElementById('ongFilterMenu');
+            const ongArrow = document.getElementById('ongFilterArrow');
+            if(ongMenu) {
+                ongMenu.classList.add('active');
+            }
+            if(ongArrow) {
+                ongArrow.classList.add('rotate');
+            }
+        }
     });
 
-    // Create Modal
+    // --- ONG FILTERS ---
+    function toggleOngFilterMenu() {
+        const menu = document.getElementById('ongFilterMenu');
+        const arrow = document.getElementById('ongFilterArrow');
+        menu.classList.toggle('active');
+        arrow.classList.toggle('rotate');
+    }
+
+    function applyOngFilters() {
+        const regNumber = document.getElementById('filter_reg_number').value;
+        const params = new URLSearchParams();
+        params.append('view', 'ongs');
+
+        if (regNumber && regNumber.trim() !== "") {
+            params.append('search', regNumber);
+        }
+
+        window.location.href = '/admin/dashboard?' + params.toString();
+    }
+
+    function clearOngFilters() {
+        document.getElementById('filter_reg_number').value = '';
+        window.location.href = '/admin/dashboard?view=ongs';
+    }
+
+    // --- USER MODALS ---
     function openCreateModal() {
         document.getElementById('createModal').style.display = 'block';
     }
@@ -1001,7 +1199,6 @@
         document.getElementById('createModal').style.display = 'none';
     }
 
-    // Edit Modal
     function openEditModal(userId) {
         fetch('/admin/users/edit/' + userId)
             .then(response => response.json())
@@ -1020,7 +1217,37 @@
         document.getElementById('editModal').style.display = 'none';
     }
 
-    // Delete Confirmation
+    // --- ONG MODALS ---
+    function openCreateOngModal() {
+        document.getElementById('createOngModal').style.display = 'block';
+    }
+
+    function closeCreateOngModal() {
+        document.getElementById('createOngModal').style.display = 'none';
+    }
+
+    function openEditOngModal(ongId) {
+        fetch('/admin/ongs/edit/' + ongId)
+            .then(response => response.json())
+            .then(ong => {
+                document.getElementById('edit_ong_name').value = ong.name;
+                document.getElementById('edit_ong_description').value = ong.description || '';
+                document.getElementById('edit_ong_address').value = ong.address || '';
+                document.getElementById('edit_ong_reg').value = ong.registrationNumber || '';
+                document.getElementById('edit_ong_founding').value = ong.foundingDate || '';
+                document.getElementById('edit_ong_email').value = ong.email || '';
+                document.getElementById('edit_ong_phone').value = ong.phone || '';
+
+                document.getElementById('editOngForm').action = '/admin/ongs/update/' + ongId;
+                document.getElementById('editOngModal').style.display = 'block';
+            });
+    }
+
+    function closeEditOngModal() {
+        document.getElementById('editOngModal').style.display = 'none';
+    }
+
+    // --- DELETE CONFIRMATIONS ---
     function confirmDelete(userId, userEmail, userRole) {
         if (userRole === 'admin') {
             alert('⚠️ Admin accounts cannot be deleted for security reasons!');
@@ -1036,16 +1263,27 @@
         }
     }
 
+    function confirmDeleteOng(ongId) {
+        if (confirm('Are you sure you want to delete this ONG? This action cannot be undone.')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/admin/ongs/delete/' + ongId;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
     // Close modal when clicking outside
     window.onclick = function(event) {
         const createModal = document.getElementById('createModal');
         const editModal = document.getElementById('editModal');
-        if (event.target == createModal) {
-            closeCreateModal();
-        }
-        if (event.target == editModal) {
-            closeEditModal();
-        }
+        const createOngModal = document.getElementById('createOngModal');
+        const editOngModal = document.getElementById('editOngModal');
+
+        if (event.target == createModal) closeCreateModal();
+        if (event.target == editModal) closeEditModal();
+        if (event.target == createOngModal) closeCreateOngModal();
+        if (event.target == editOngModal) closeEditOngModal();
     }
 
     // Auto-hide alerts after 5 seconds

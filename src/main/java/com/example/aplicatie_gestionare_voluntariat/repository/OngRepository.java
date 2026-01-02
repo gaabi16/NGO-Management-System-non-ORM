@@ -9,6 +9,7 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class OngRepository {
@@ -44,13 +45,47 @@ public class OngRepository {
     }
 
     public List<Ong> findAll(int limit, int offset) {
-        String sql = "SELECT * FROM ongs ORDER BY id_ong LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM ongs ORDER BY id_ong ASC LIMIT ? OFFSET ?";
         return jdbcTemplate.query(sql, ongRowMapper, limit, offset);
     }
 
     public List<Ong> findAll() {
         String sql = "SELECT * FROM ongs ORDER BY id_ong";
         return jdbcTemplate.query(sql, ongRowMapper);
+    }
+
+    public long count() {
+        String sql = "SELECT COUNT(*) FROM ongs";
+        return jdbcTemplate.queryForObject(sql, Long.class);
+    }
+
+    // --- METODE NOI PENTRU FILTER (SEARCH) ---
+
+    public List<Ong> findByRegistrationNumberPaginated(String regNumber, int limit, int offset) {
+        // Folosim ILIKE pentru case-insensitive search (PostgreSQL) sau LIKE (MySQL)
+        // Presupunem standard SQL cu LIKE
+        String sql = "SELECT * FROM ongs WHERE LOWER(registration_number) LIKE LOWER(?) ORDER BY id_ong ASC LIMIT ? OFFSET ?";
+        String searchPattern = "%" + regNumber + "%";
+        return jdbcTemplate.query(sql, ongRowMapper, searchPattern, limit, offset);
+    }
+
+    public long countByRegistrationNumber(String regNumber) {
+        String sql = "SELECT COUNT(*) FROM ongs WHERE LOWER(registration_number) LIKE LOWER(?)";
+        String searchPattern = "%" + regNumber + "%";
+        return jdbcTemplate.queryForObject(sql, Long.class, searchPattern);
+    }
+
+    // ----------------------------------------
+
+    public Optional<Ong> findById(Integer id) {
+        String sql = "SELECT * FROM ongs WHERE id_ong = ?";
+        List<Ong> ongs = jdbcTemplate.query(sql, ongRowMapper, id);
+        return ongs.isEmpty() ? Optional.empty() : Optional.of(ongs.get(0));
+    }
+
+    public void deleteById(Integer id) {
+        String sql = "DELETE FROM ongs WHERE id_ong = ?";
+        jdbcTemplate.update(sql, id);
     }
 
     public Ong save(Ong ong) {
