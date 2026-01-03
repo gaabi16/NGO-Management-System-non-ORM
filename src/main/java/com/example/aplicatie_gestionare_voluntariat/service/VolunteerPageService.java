@@ -49,16 +49,19 @@ public class VolunteerPageService {
         stats.put("coordinators", coordinators);
 
         // 2. Calculăm numărul total de participanți
-        // Formula: (Voluntari unici la activități) + (Total Coordonatori)
-
-        // Folosim DISTINCT pentru a număra un voluntar o singură dată, chiar dacă e la 5 activități
+        // LOGICA NOUĂ:
+        // - Numărăm doar voluntarii cu status 'accepted'
+        // - Excludem activitățile care sunt 'completed'
         String sqlUniqueVolunteers = "SELECT COUNT(DISTINCT va.id_volunteer) FROM volunteer_activities va " +
-                "JOIN activities a ON va.id_activity = a.id_activity WHERE a.id_ong = ?";
+                "JOIN activities a ON va.id_activity = a.id_activity " +
+                "WHERE a.id_ong = ? " +
+                "AND va.status = 'accepted' " +
+                "AND a.status != 'completed'";
 
         Long uniqueVolunteersCount = jdbcTemplate.queryForObject(sqlUniqueVolunteers, Long.class, ongId);
         if (uniqueVolunteersCount == null) uniqueVolunteersCount = 0L;
 
-        // Adunăm voluntarii unici cu numărul de coordonatori
+        // Adunăm voluntarii filtrați cu numărul de coordonatori
         long totalParticipants = uniqueVolunteersCount + coordinators.size();
 
         stats.put("totalVolunteers", totalParticipants);
