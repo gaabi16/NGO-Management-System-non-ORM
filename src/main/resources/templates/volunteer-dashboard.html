@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .nav-brand { font-size: 1.5rem; font-weight: bold; }
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-btn {
+            color: white; text-decoration: none; font-weight: 500;
+            padding: 8px 16px; border-radius: 20px; transition: background 0.3s;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.2); }
+        .logout-btn { background: #dc3545; border: none; cursor: pointer; }
+        .logout-btn:hover { background: #c82333; }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            margin-bottom: 30px;
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        .hero h1 span { color: #667eea; font-weight: 600; }
+        .hero p { color: #666; font-size: 1.2rem; }
+
+        /* Grid */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px 40px 20px; }
+        .section-title { font-size: 1.8rem; color: #444; margin-bottom: 20px; border-left: 5px solid #667eea; padding-left: 15px; }
+
+        .ong-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        /* Card */
+        .ong-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .ong-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+        .card-header {
+            background-color: #667eea;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+        .card-body { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-title { font-size: 1.4rem; font-weight: 700; color: #333; margin-bottom: 10px; }
+        .card-desc { color: #666; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px; flex-grow: 1; }
+        .card-footer {
+            margin-top: auto;
+            color: #667eea;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-brand">VolunteerHub</div>
+    <div class="nav-links">
+        <a href="/volunteer/dashboard" class="nav-btn">Home</a>
+        <a href="#" class="nav-btn">My Activities</a>
+        <a href="#" class="nav-btn">Profile</a>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="nav-btn logout-btn">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>Hello, <span th:text="${firstName}">Volunteer</span>! 👋</h1>
+    <p>Ready to make a difference today? Explore organizations below.</p>
+</div>
+
+<div class="container">
+    <h2 class="section-title">Partner Organizations</h2>
+
+    <div class="ong-grid">
+        <a th:each="ong : ${ongs}"
+           th:href="@{/volunteer/ong/{id}(id=${ong.idOng})}"
+           class="ong-card">
+            <div class="card-header">
+                <span th:text="${#strings.substring(ong.name, 0, 1)}">L</span>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title" th:text="${ong.name}">Organization Name</h3>
+                <p class="card-desc"
+                   th:text="${#strings.length(ong.description) > 100 ? #strings.substring(ong.description,0,100) + '...' : ong.description}">
+                    Description goes here...
+                </p>
+                <div class="card-footer">
+                    View Details &rarr;
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

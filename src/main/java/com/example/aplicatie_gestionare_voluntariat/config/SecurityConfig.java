@@ -27,6 +27,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/signup", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("admin")
+                        .requestMatchers("/volunteer/**").hasRole("volunteer") // [NOU] Permite acces voluntarilor
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

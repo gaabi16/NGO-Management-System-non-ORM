@@ -15,13 +15,15 @@ public class HomeController {
 
     @GetMapping("/home")
     public String home(Authentication authentication) {
-        // Dacă utilizatorul este admin, redirecționează către dashboard-ul admin
-        if (authentication != null &&
-                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_admin"))) {
-            return "redirect:/admin/dashboard";
+        if (authentication != null) {
+            if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_admin"))) {
+                return "redirect:/admin/dashboard";
+            }
+            // [NOU] Redirecționare pentru volunteer
+            if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_volunteer"))) {
+                return "redirect:/volunteer/dashboard";
+            }
         }
-
-        // Pentru ceilalți utilizatori, afișează pagina normală
         return "index";
     }
 }
