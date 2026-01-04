@@ -73,4 +73,67 @@ public class UserService {
 
         return savedUser.getEmail();
     }
+
+    // --- METODE NOI PENTRU PROFIL ---
+
+    public VolunteerRegistrationDto getVolunteerProfile(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Volunteer volunteer = volunteerRepository.findByUserId(user.getIdUser())
+                .orElseThrow(() -> new RuntimeException("Volunteer details not found"));
+
+        VolunteerRegistrationDto dto = new VolunteerRegistrationDto();
+        // Date User
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setEmail(user.getEmail());
+        dto.setPhoneNumber(user.getPhoneNumber());
+
+        // Date Volunteer
+        dto.setBirthDate(volunteer.getBirthDate());
+        dto.setSkills(volunteer.getSkills());
+        dto.setAvailability(volunteer.getAvailability());
+        dto.setEmergencyContact(volunteer.getEmergencyContact());
+
+        return dto;
+    }
+
+    @Transactional
+    public void updateVolunteerProfile(String email, VolunteerRegistrationDto dto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Update User info
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setPhoneNumber(dto.getPhoneNumber());
+        // Nu permitem schimbarea email-ului sau parolei în acest flux simplu momentan,
+        // dar am putea adăuga logică dacă e necesar.
+        userRepository.save(user);
+
+        // Update Volunteer info
+        Volunteer volunteer = volunteerRepository.findByUserId(user.getIdUser())
+                .orElse(new Volunteer(user.getIdUser()));
+
+        volunteer.setBirthDate(dto.getBirthDate());
+        volunteer.setSkills(dto.getSkills());
+        volunteer.setAvailability(dto.getAvailability());
+        volunteer.setEmergencyContact(dto.getEmergencyContact());
+
+        volunteerRepository.save(volunteer);
+    }
+
+    @Transactional
+    public void deleteVolunteerAccount(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Stergem intai dependintele (volunteers, activitati - prin constrangeri DB sau manual daca e nevoie)
+        // În implementarea actuală, deleteByUserId din VolunteerRepository e suficient
+        volunteerRepository.deleteByUserId(user.getIdUser());
+
+        // Apoi stergem userul
+        userRepository.deleteById(user.getIdUser());
+    }
 }
