@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - VolunteerHub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .nav-brand { font-size: 1.5rem; font-weight: bold; }
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-btn {
+            color: white; text-decoration: none; font-weight: 500;
+            padding: 8px 16px; border-radius: 20px; transition: background 0.3s;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.2); }
+        .logout-btn { background: #dc3545; border: none; cursor: pointer; }
+        .logout-btn:hover { background: #c82333; }
+
+        /* Main Profile Layout */
+        .profile-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            width: 100%;
+            display: flex;
+            gap: 30px;
+            padding: 0 20px;
+            flex: 1;
+        }
+
+        /* Left Sidebar Menu */
+        .profile-menu {
+            width: 280px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            height: fit-content;
+            overflow: hidden;
+        }
+
+        .menu-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        .menu-avatar {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .menu-user-name {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .menu-list {
+            list-style: none;
+            padding: 10px 0;
+        }
+
+        .menu-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #555;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid transparent;
+        }
+
+        .menu-item:hover {
+            background-color: #f8f9fa;
+            color: #667eea;
+        }
+
+        .menu-item.active {
+            background-color: #f0f2ff;
+            color: #667eea;
+            border-left-color: #667eea;
+        }
+
+        .menu-item.danger {
+            color: #dc3545;
+        }
+        .menu-item.danger:hover {
+            background-color: #fff5f5;
+        }
+
+        /* Right Content Area */
+        .profile-content {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 40px;
+            position: relative;
+        }
+
+        .content-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .content-title {
+            font-size: 1.8rem;
+            color: #333;
+        }
+
+        /* Form Styling */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            background-color: #fff;
+            color: #333;
+        }
+
+        input:disabled, textarea:disabled {
+            background-color: #f8f9fa;
+            color: #666;
+            cursor: not-allowed;
+            border-color: #eee;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .action-buttons {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            display: none; /* Hidden by default */
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); }
+
+        .btn-save { background: #28a745; color: white; }
+        .btn-discard { background: #6c757d; color: white; }
+        .btn-save:hover { background: #218838; }
+        .btn-discard:hover { background: #5a6268; }
+
+        /* Status Messages & Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-align: center;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        /* Delete Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s;
+        }
+        .warning-icon { font-size: 3rem; margin-bottom: 15px; }
+        .modal-title { font-size: 1.5rem; color: #333; margin-bottom: 10px; }
+        .modal-text { color: #666; margin-bottom: 25px; line-height: 1.5; }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; }
+        .btn-delete-confirm { background: #dc3545; color: white; }
+        .btn-cancel { background: #e2e6ea; color: #333; }
+
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-brand">VolunteerHub</div>
+    <div class="nav-links">
+        <a href="/volunteer/dashboard" class="nav-btn">Home</a>
+        <a href="#" class="nav-btn">My Activities</a>
+        <a href="/volunteer/profile" class="nav-btn" style="background: rgba(255,255,255,0.2);">Profile</a>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="nav-btn logout-btn">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="profile-container">
+    <div class="profile-menu">
+        <div class="menu-header">
+            <div class="menu-avatar">👤</div>
+            <div class="menu-user-name" th:text="${profile.firstName + ' ' + profile.lastName}">User Name</div>
+        </div>
+        <ul class="menu-list">
+            <li class="menu-item active" id="menuInfo" onclick="setViewMode()">
+                📋 Profile Info
+            </li>
+            <li class="menu-item" id="menuEdit" onclick="setEditMode()">
+                ✏️ Edit Account
+            </li>
+            <li class="menu-item danger" onclick="openDeleteModal()">
+                🗑️ Delete Account
+            </li>
+        </ul>
+    </div>
+
+    <div class="profile-content">
+        <div th:if="${param.updated}" class="alert alert-success">
+            ✅ Profile updated successfully!
+        </div>
+
+        <div class="content-header">
+            <h2 class="content-title">Personal Information</h2>
+        </div>
+
+        <form id="profileForm" th:action="@{/volunteer/profile/update}" method="post" th:object="${profile}">
+
+            <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.1rem;">Account Details</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" th:field="*{firstName}" disabled required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" th:field="*{lastName}" disabled required>
+                </div>
+                <div class="form-group">
+                    <label>Email (Read-only)</label>
+                    <input type="email" th:field="*{email}" disabled style="background-color: #e9ecef; cursor: not-allowed;">
+                    <input type="hidden" th:field="*{email}">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" th:field="*{phoneNumber}" disabled>
+                </div>
+            </div>
+
+            <h3 style="color: #28a745; margin: 20px 0 15px 0; font-size: 1.1rem;">Volunteer Details</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Birth Date</label>
+                    <input type="date" th:field="*{birthDate}" disabled required>
+                </div>
+                <div class="form-group">
+                    <label>Emergency Contact</label>
+                    <input type="text" th:field="*{emergencyContact}" disabled required>
+                </div>
+                <div class="form-group full-width">
+                    <label>Availability</label>
+                    <input type="text" th:field="*{availability}" disabled required>
+                </div>
+                <div class="form-group full-width">
+                    <label>Skills</label>
+                    <textarea th:field="*{skills}" rows="4" disabled required></textarea>
+                </div>
+            </div>
+
+            <div class="action-buttons" id="actionButtons">
+                <button type="button" class="btn btn-discard" onclick="cancelEdit()">Discard Changes</button>
+                <button type="submit" class="btn btn-save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="warning-icon">⚠️</div>
+        <h3 class="modal-title">Delete Account?</h3>
+        <p class="modal-text">
+            Are you sure you want to delete your account? This action is permanent and cannot be undone.
+            All your volunteer history and enrollments will be removed.
+        </p>
+        <div class="modal-actions">
+            <button class="btn btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <form th:action="@{/volunteer/profile/delete}" method="post">
+                <button type="submit" class="btn btn-delete-confirm">Yes, Delete My Account</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('profileForm');
+    const inputs = form.querySelectorAll('input:not([type="hidden"]):not([name="email"]), textarea');
+    const actionButtons = document.getElementById('actionButtons');
+    const menuInfo = document.getElementById('menuInfo');
+    const menuEdit = document.getElementById('menuEdit');
+
+    function setEditMode() {
+        // UI Updates
+        menuInfo.classList.remove('active');
+        menuEdit.classList.add('active');
+        actionButtons.style.display = 'flex';
+
+        // Enable inputs
+        inputs.forEach(input => {
+            input.disabled = false;
+        });
+    }
+
+    function setViewMode() {
+        // UI Updates
+        menuInfo.classList.add('active');
+        menuEdit.classList.remove('active');
+        actionButtons.style.display = 'none';
+
+        // Disable inputs
+        inputs.forEach(input => {
+            input.disabled = true;
+        });
+    }
+
+    function cancelEdit() {
+        // Reload page to reset form data
+        window.location.reload();
+    }
+
+    // Modal Logic
+    const deleteModal = document.getElementById('deleteModal');
+
+    function openDeleteModal() {
+        deleteModal.style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        deleteModal.style.display = 'none';
+    }
+
+    // Close modal if clicking outside
+    window.onclick = function(event) {
+        if (event.target == deleteModal) {
+            closeDeleteModal();
+        }
+    }
+
+    // [MODIFICARE] Script pentru ascunderea automata a alertelor dupa 5 secunde
+    setTimeout(function() {
+        document.querySelectorAll('.alert').forEach(a => {
+            a.style.transition = 'opacity 0.3s ease';
+            a.style.opacity = '0';
+            setTimeout(() => a.remove(), 300);
+        });
+    }, 3000);
+</script>
+
+</body>
+</html>
