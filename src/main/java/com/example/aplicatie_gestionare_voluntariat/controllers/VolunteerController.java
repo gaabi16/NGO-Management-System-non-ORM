@@ -1,12 +1,17 @@
 package com.example.aplicatie_gestionare_voluntariat.controllers;
 
+import com.example.aplicatie_gestionare_voluntariat.dto.VolunteerRegistrationDto;
 import com.example.aplicatie_gestionare_voluntariat.model.Activity;
 import com.example.aplicatie_gestionare_voluntariat.model.Ong;
 import com.example.aplicatie_gestionare_voluntariat.model.User;
 import com.example.aplicatie_gestionare_voluntariat.repository.UserRepository;
+import com.example.aplicatie_gestionare_voluntariat.service.UserService;
 import com.example.aplicatie_gestionare_voluntariat.service.VolunteerPageService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +28,9 @@ public class VolunteerController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication authentication) {
@@ -43,7 +51,7 @@ public class VolunteerController {
         }
 
         Map<String, Object> stats = volunteerPageService.getOngStatistics(id);
-        List<Activity> activities = volunteerPageService.getOngActivities(id); // Acum este List<Activity>
+        List<Activity> activities = volunteerPageService.getOngActivities(id);
         String email = authentication.getName();
         User user = userRepository.findByEmail(email).orElse(new User());
 
@@ -62,5 +70,35 @@ public class VolunteerController {
                                Authentication authentication) {
         volunteerPageService.enrollInActivity(authentication.getName(), id, motivation);
         return "redirect:/volunteer/ong/" + ongId + "?success=true";
+    }
+
+    // --- PROFIL ROUTES ---
+
+    @GetMapping("/profile")
+    public String profile(Model model, Authentication authentication) {
+        VolunteerRegistrationDto profileData = userService.getVolunteerProfile(authentication.getName());
+        model.addAttribute("profile", profileData);
+        return "volunteer-profile";
+    }
+
+    @PostMapping("/profile/update")
+    public String updateProfile(@ModelAttribute VolunteerRegistrationDto profileDto,
+                                Authentication authentication) {
+        userService.updateVolunteerProfile(authentication.getName(), profileDto);
+        return "redirect:/volunteer/profile?updated=true";
+    }
+
+    @PostMapping("/profile/delete")
+    public String deleteAccount(Authentication authentication, HttpServletRequest request) {
+        userService.deleteVolunteerAccount(authentication.getName());
+
+        // Logout manual
+        SecurityContextHolder.clearContext();
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        return "redirect:/login?accountDeleted=true";
     }
 }

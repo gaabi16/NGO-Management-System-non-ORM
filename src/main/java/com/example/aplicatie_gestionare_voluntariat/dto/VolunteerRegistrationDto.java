@@ -1,5 +1,7 @@
 package com.example.aplicatie_gestionare_voluntariat.dto;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDate;
 
 public class VolunteerRegistrationDto {
@@ -12,7 +14,9 @@ public class VolunteerRegistrationDto {
     private String phoneNumber;
 
     // Volunteer fields
+    @DateTimeFormat(pattern = "yyyy-MM-dd") // [MODIFICARE] Asigură formatarea corectă pentru input type="date"
     private LocalDate birthDate;
+
     private String skills;
     private String availability;
     private String emergencyContact;
