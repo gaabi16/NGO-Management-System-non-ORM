@@ -24,11 +24,11 @@ public class OngRepository {
         @Override
         public Ong mapRow(ResultSet rs, int rowNum) throws SQLException {
             Ong ong = new Ong();
-            ong.setIdOng(rs.getInt("id_ong"));
+            ong.setRegistrationNumber(rs.getString("registration_number")); // PK
             ong.setName(rs.getString("name"));
             ong.setDescription(rs.getString("description"));
             ong.setAddress(rs.getString("address"));
-            ong.setRegistrationNumber(rs.getString("registration_number"));
+            ong.setCountry(rs.getString("country")); // Nou
             ong.setPhone(rs.getString("phone"));
             ong.setEmail(rs.getString("email"));
             Date foundingDate = rs.getDate("founding_date");
@@ -40,17 +40,17 @@ public class OngRepository {
     };
 
     public List<Ong> findFirst5() {
-        String sql = "SELECT * FROM ongs ORDER BY id_ong ASC LIMIT 5";
+        String sql = "SELECT * FROM ongs ORDER BY registration_number ASC LIMIT 5";
         return jdbcTemplate.query(sql, ongRowMapper);
     }
 
     public List<Ong> findAll(int limit, int offset) {
-        String sql = "SELECT * FROM ongs ORDER BY id_ong ASC LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM ongs ORDER BY registration_number ASC LIMIT ? OFFSET ?";
         return jdbcTemplate.query(sql, ongRowMapper, limit, offset);
     }
 
     public List<Ong> findAll() {
-        String sql = "SELECT * FROM ongs ORDER BY id_ong";
+        String sql = "SELECT * FROM ongs ORDER BY registration_number";
         return jdbcTemplate.query(sql, ongRowMapper);
     }
 
@@ -59,12 +59,8 @@ public class OngRepository {
         return jdbcTemplate.queryForObject(sql, Long.class);
     }
 
-    // --- METODE NOI PENTRU FILTER (SEARCH) ---
-
     public List<Ong> findByRegistrationNumberPaginated(String regNumber, int limit, int offset) {
-        // Folosim ILIKE pentru case-insensitive search (PostgreSQL) sau LIKE (MySQL)
-        // Presupunem standard SQL cu LIKE
-        String sql = "SELECT * FROM ongs WHERE LOWER(registration_number) LIKE LOWER(?) ORDER BY id_ong ASC LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM ongs WHERE LOWER(registration_number) LIKE LOWER(?) ORDER BY registration_number ASC LIMIT ? OFFSET ?";
         String searchPattern = "%" + regNumber + "%";
         return jdbcTemplate.query(sql, ongRowMapper, searchPattern, limit, offset);
     }
@@ -75,46 +71,48 @@ public class OngRepository {
         return jdbcTemplate.queryForObject(sql, Long.class, searchPattern);
     }
 
-    // ----------------------------------------
-
-    public Optional<Ong> findById(Integer id) {
-        String sql = "SELECT * FROM ongs WHERE id_ong = ?";
-        List<Ong> ongs = jdbcTemplate.query(sql, ongRowMapper, id);
+    public Optional<Ong> findById(String registrationNumber) {
+        String sql = "SELECT * FROM ongs WHERE registration_number = ?";
+        List<Ong> ongs = jdbcTemplate.query(sql, ongRowMapper, registrationNumber);
         return ongs.isEmpty() ? Optional.empty() : Optional.of(ongs.get(0));
     }
 
-    public void deleteById(Integer id) {
-        String sql = "DELETE FROM ongs WHERE id_ong = ?";
-        jdbcTemplate.update(sql, id);
+    public void deleteById(String registrationNumber) {
+        String sql = "DELETE FROM ongs WHERE registration_number = ?";
+        jdbcTemplate.update(sql, registrationNumber);
     }
 
     public Ong save(Ong ong) {
-        if (ong.getIdOng() == null) {
+        // Verificăm dacă există (folosind String PK)
+        String checkSql = "SELECT COUNT(*) FROM ongs WHERE registration_number = ?";
+        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, ong.getRegistrationNumber());
+
+        if (count == null || count == 0) {
             // INSERT
-            String sql = "INSERT INTO ongs (name, description, address, registration_number, phone, email, founding_date) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id_ong";
-            Integer id = jdbcTemplate.queryForObject(sql, Integer.class,
+            String sql = "INSERT INTO ongs (registration_number, name, description, address, country, phone, email, founding_date) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            jdbcTemplate.update(sql,
+                    ong.getRegistrationNumber(),
                     ong.getName(),
                     ong.getDescription(),
                     ong.getAddress(),
-                    ong.getRegistrationNumber(),
+                    ong.getCountry(),
                     ong.getPhone(),
                     ong.getEmail(),
                     ong.getFoundingDate());
-            ong.setIdOng(id);
         } else {
             // UPDATE
-            String sql = "UPDATE ongs SET name = ?, description = ?, address = ?, " +
-                    "registration_number = ?, phone = ?, email = ?, founding_date = ? WHERE id_ong = ?";
+            String sql = "UPDATE ongs SET name = ?, description = ?, address = ?, country = ?, " +
+                    "phone = ?, email = ?, founding_date = ? WHERE registration_number = ?";
             jdbcTemplate.update(sql,
                     ong.getName(),
                     ong.getDescription(),
                     ong.getAddress(),
-                    ong.getRegistrationNumber(),
+                    ong.getCountry(),
                     ong.getPhone(),
                     ong.getEmail(),
                     ong.getFoundingDate(),
-                    ong.getIdOng());
+                    ong.getRegistrationNumber());
         }
         return ong;
     }

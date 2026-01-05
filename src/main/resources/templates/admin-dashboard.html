@@ -219,7 +219,6 @@
             opacity: 0.6;
         }
 
-        /* Pagination */
         .pagination {
             display: flex;
             justify-content: center;
@@ -257,7 +256,6 @@
             color: #ccc;
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -336,13 +334,7 @@
             font-size: 14px;
         }
 
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="date"],
-        input[type="number"],
-        textarea,
-        select {
+        input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="number"], textarea, select {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
@@ -383,7 +375,6 @@
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
-        /* Success/Error Message */
         .alert {
             padding: 15px 20px;
             border-radius: 8px;
@@ -427,7 +418,6 @@
             font-weight: normal;
         }
 
-        /* Filter Section */
         .filter-section {
             margin: 20px 0;
             position: relative;
@@ -477,14 +467,8 @@
         }
 
         @keyframes slideDownFilter {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .filter-group {
@@ -551,8 +535,7 @@
             border-top: 1px solid #e0e0e0;
         }
 
-        .btn-apply-filter,
-        .btn-clear-filter {
+        .btn-apply-filter, .btn-clear-filter {
             padding: 10px 20px;
             border: none;
             border-radius: 6px;
@@ -584,7 +567,6 @@
             transform: translateY(-1px);
         }
 
-        /* Role Specific Fields Styling */
         #coordinatorFields, #volunteerFields {
             padding: 15px;
             border-radius: 8px;
@@ -620,7 +602,6 @@
             padding-bottom: 8px;
         }
 
-        /* Search input inside modal */
         .search-input-modal {
             width: 100%;
             padding: 8px 12px;
@@ -632,29 +613,12 @@
         }
 
         @media (max-width: 768px) {
-            .button-group {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
-
-            table {
-                font-size: 12px;
-            }
-
-            th, td {
-                padding: 8px;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
+            .button-group { flex-direction: column; }
+            .btn { width: 100%; }
+            table { font-size: 12px; }
+            th, td { padding: 8px; }
+            .form-row { grid-template-columns: 1fr; }
+            .action-buttons { flex-direction: column; }
         }
     </style>
 </head>
@@ -666,21 +630,9 @@
     </div>
 
     <div class="button-group">
-        <a href="/admin/dashboard?view=users"
-           th:classappend="${currentView == 'users'} ? 'active' : ''"
-           class="btn">
-            👥 View Users
-        </a>
-        <a href="/admin/dashboard?view=ongs"
-           th:classappend="${currentView == 'ongs'} ? 'active' : ''"
-           class="btn">
-            🏢 View ONGs
-        </a>
-        <a href="/admin/dashboard?view=coordinators"
-           th:classappend="${currentView == 'coordinators'} ? 'active' : ''"
-           class="btn">
-            📋 View Coordinators
-        </a>
+        <a href="/admin/dashboard?view=users" th:classappend="${currentView == 'users'} ? 'active' : ''" class="btn">👥 View Users</a>
+        <a href="/admin/dashboard?view=ongs" th:classappend="${currentView == 'ongs'} ? 'active' : ''" class="btn">🏢 View ONGs</a>
+        <a href="/admin/dashboard?view=coordinators" th:classappend="${currentView == 'coordinators'} ? 'active' : ''" class="btn">📋 View Coordinators</a>
     </div>
 
     <div class="content-area">
@@ -700,122 +652,38 @@
             </div>
 
             <div class="filter-section">
-                <button class="btn-filter" onclick="toggleFilterMenu()">
-                    🔍 Filter Users
-                    <span class="filter-arrow">▼</span>
-                </button>
-
+                <button class="btn-filter" onclick="toggleFilterMenu()">🔍 Filter Users <span class="filter-arrow">▼</span></button>
                 <div id="filterMenu" class="filter-menu">
                     <div class="filter-group">
                         <label class="filter-label">Filter by Role:</label>
                         <div class="filter-options">
-                            <button class="filter-option" data-role="volunteer" onclick="toggleRoleFilter('volunteer')">
-                                <span class="checkbox"></span> Volunteer
-                            </button>
-                            <button class="filter-option" data-role="coordinator" onclick="toggleRoleFilter('coordinator')">
-                                <span class="checkbox"></span> Coordinator
-                            </button>
-                            <button class="filter-option" data-role="admin" onclick="toggleRoleFilter('admin')">
-                                <span class="checkbox"></span> Admin
-                            </button>
+                            <button class="filter-option" data-role="volunteer" onclick="toggleRoleFilter('volunteer')"><span class="checkbox"></span> Volunteer</button>
+                            <button class="filter-option" data-role="coordinator" onclick="toggleRoleFilter('coordinator')"><span class="checkbox"></span> Coordinator</button>
+                            <button class="filter-option" data-role="admin" onclick="toggleRoleFilter('admin')"><span class="checkbox"></span> Admin</button>
                         </div>
                     </div>
-                    <div class="filter-actions">
-                        <button class="btn-apply-filter" onclick="applyFilters()">Apply Filters</button>
-                        <button class="btn-clear-filter" onclick="clearFilters()">Clear All</button>
-                    </div>
+                    <div class="filter-actions"><button class="btn-apply-filter" onclick="applyFilters()">Apply Filters</button><button class="btn-clear-filter" onclick="clearFilters()">Clear All</button></div>
                 </div>
             </div>
 
             <table th:if="${usersPage != null && usersPage.content.size() > 0}">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Role</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
+                <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Actions</th></tr></thead>
                 <tbody>
                 <tr th:each="user, iterStat : ${usersPage.content}">
                     <td th:text="${currentPage * 50 + iterStat.index + 1}"></td>
                     <td th:text="${user.first_name + ' ' + user.last_name}"></td>
                     <td th:text="${user.email}"></td>
                     <td th:text="${user.phone_number ?: 'N/A'}"></td>
-                    <td>
-                        <span th:class="'badge badge-' + ${user.role}"
-                              th:text="${user.role}"></span>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn-edit"
-                                    th:data-user-id="${user.id_user}"
-                                    onclick="openEditModal(this.getAttribute('data-user-id'))">
-                                ✏️ Edit
-                            </button>
-                            <button class="btn-delete"
-                                    th:data-user-id="${user.id_user}"
-                                    th:data-user-email="${user.email}"
-                                    th:data-user-role="${user.role}"
-                                    th:disabled="${user.role.name() == 'admin'}"
-                                    th:title="${user.role.name() == 'admin'} ? 'Cannot delete admin accounts' : 'Delete user'"
-                                    onclick="confirmDelete(this.getAttribute('data-user-id'), this.getAttribute('data-user-email'), this.getAttribute('data-user-role'))">
-                                🗑️ Delete
-                            </button>
-                        </div>
-                    </td>
+                    <td><span th:class="'badge badge-' + ${user.role}" th:text="${user.role}"></span></td>
+                    <td><div class="action-buttons"><button class="btn-edit" th:data-user-id="${user.id_user}" onclick="openEditModal(this.getAttribute('data-user-id'))">✏️ Edit</button><button class="btn-delete" th:data-user-id="${user.id_user}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:disabled="${user.role.name() == 'admin'}" onclick="confirmDelete(this.getAttribute('data-user-id'), this.getAttribute('data-user-email'), this.getAttribute('data-user-role'))">🗑️ Delete</button></div></td>
                 </tr>
                 </tbody>
             </table>
 
-            <div th:if="${usersPage == null || usersPage.content.size() == 0}" style="text-align: center; padding: 50px; color: #999;">
-                <p>No users found or error loading data.</p>
-            </div>
-
             <div class="pagination" th:if="${usersPage.totalPages > 1}">
-                <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}"
-                   th:class="${currentPage == 0} ? 'disabled' : ''"
-                   th:onclick="${currentPage == 0} ? 'return false;' : ''">
-                    ← Prev
-                </a>
-                <a th:if="${currentPage > 2}"
-                   th:href="@{/admin/dashboard(view='users', page=0, roles=${param.roles})}">
-                    1
-                </a>
-                <span th:if="${currentPage > 3}">...</span>
-                <th:block th:if="${currentPage >= 2}">
-                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 2}, roles=${param.roles})}"
-                       th:text="${currentPage - 1}">
-                    </a>
-                </th:block>
-                <th:block th:if="${currentPage >= 1}">
-                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}"
-                       th:text="${currentPage}">
-                    </a>
-                </th:block>
+                <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}" th:class="${currentPage == 0} ? 'disabled' : ''" th:onclick="${currentPage == 0} ? 'return false;' : ''">← Prev</a>
                 <span class="active" th:text="${currentPage + 1}"></span>
-                <th:block th:if="${currentPage < usersPage.totalPages - 1}">
-                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}"
-                       th:text="${currentPage + 2}">
-                    </a>
-                </th:block>
-                <th:block th:if="${currentPage < usersPage.totalPages - 2}">
-                    <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 2}, roles=${param.roles})}"
-                       th:text="${currentPage + 3}">
-                    </a>
-                </th:block>
-                <span th:if="${currentPage < usersPage.totalPages - 4}">...</span>
-                <a th:if="${currentPage < usersPage.totalPages - 3}"
-                   th:href="@{/admin/dashboard(view='users', page=${usersPage.totalPages - 1}, roles=${param.roles})}"
-                   th:text="${usersPage.totalPages}">
-                </a>
-                <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}"
-                   th:class="${currentPage >= usersPage.totalPages - 1} ? 'disabled' : ''"
-                   th:onclick="${currentPage >= usersPage.totalPages - 1} ? 'return false;' : ''">
-                    Next →
-                </a>
+                <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}" th:class="${currentPage >= usersPage.totalPages - 1} ? 'disabled' : ''" th:onclick="${currentPage >= usersPage.totalPages - 1} ? 'return false;' : ''">Next →</a>
             </div>
         </div>
 
@@ -826,131 +694,55 @@
             </div>
 
             <div class="filter-section">
-                <button class="btn-filter" onclick="toggleOngFilterMenu()">
-                    🔍 Filter ONGs
-                    <span class="filter-arrow" id="ongFilterArrow">▼</span>
-                </button>
-
+                <button class="btn-filter" onclick="toggleOngFilterMenu()">🔍 Filter ONGs <span class="filter-arrow" id="ongFilterArrow">▼</span></button>
                 <div id="ongFilterMenu" class="filter-menu">
                     <div class="filter-group">
                         <label class="filter-label" for="filter_reg_number">Search by Registration Number:</label>
                         <input type="text" id="filter_reg_number" placeholder="Enter registration number..." th:value="${currentSearch}">
                     </div>
-                    <div class="filter-actions">
-                        <button class="btn-apply-filter" onclick="applyOngFilters()">Apply Filters</button>
-                        <button class="btn-clear-filter" onclick="clearOngFilters()">Clear All</button>
-                    </div>
+                    <div class="filter-actions"><button class="btn-apply-filter" onclick="applyOngFilters()">Apply Filters</button><button class="btn-clear-filter" onclick="clearOngFilters()">Clear All</button></div>
                 </div>
             </div>
 
             <table th:if="${ongsPage != null && ongsPage.content.size() > 0}">
                 <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>Reg #</th>
                     <th>Name</th>
+                    <th>Country</th>
                     <th>Email</th>
                     <th>Phone</th>
-                    <th>Registration #</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="ong, iterStat : ${ongsPage.content}">
-                    <td th:text="${currentPage * 50 + iterStat.index + 1}"></td>
+                <tr th:each="ong : ${ongsPage.content}">
+                    <td th:text="${ong.registrationNumber}"></td>
                     <td th:text="${ong.name}"></td>
+                    <td th:text="${ong.country ?: 'N/A'}"></td>
                     <td th:text="${ong.email ?: 'N/A'}"></td>
                     <td th:text="${ong.phone ?: 'N/A'}"></td>
-                    <td th:text="${ong.registrationNumber ?: 'N/A'}"></td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn-edit"
-                                    th:data-ong-id="${ong.idOng}"
-                                    onclick="openEditOngModal(this.getAttribute('data-ong-id'))">
-                                ✏️ Edit
-                            </button>
-                            <button class="btn-delete"
-                                    th:data-ong-id="${ong.idOng}"
-                                    onclick="confirmDeleteOng(this.getAttribute('data-ong-id'))">
-                                🗑️ Delete
-                            </button>
+                            <button class="btn-edit" th:data-ong-id="${ong.registrationNumber}" onclick="openEditOngModal(this.getAttribute('data-ong-id'))">✏️ Edit</button>
+                            <button class="btn-delete" th:data-ong-id="${ong.registrationNumber}" onclick="confirmDeleteOng(this.getAttribute('data-ong-id'))">🗑️ Delete</button>
                         </div>
                     </td>
                 </tr>
                 </tbody>
             </table>
 
-            <div th:if="${ongsPage == null || ongsPage.content.size() == 0}" style="text-align: center; padding: 50px; color: #999;">
-                <p>No ONGs found or error loading data.</p>
-            </div>
-
             <div class="pagination" th:if="${ongsPage.totalPages > 1}">
-                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 1}, search=${currentSearch})}"
-                   th:class="${currentPage == 0} ? 'disabled' : ''"
-                   th:onclick="${currentPage == 0} ? 'return false;' : ''">
-                    ← Prev
-                </a>
-
-                <a th:if="${currentPage > 2}"
-                   th:href="@{/admin/dashboard(view='ongs', page=0, search=${currentSearch})}">
-                    1
-                </a>
-
-                <span th:if="${currentPage > 3}">...</span>
-
-                <th:block th:if="${currentPage >= 2}">
-                    <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 2}, search=${currentSearch})}"
-                       th:text="${currentPage - 1}">
-                    </a>
-                </th:block>
-
-                <th:block th:if="${currentPage >= 1}">
-                    <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 1}, search=${currentSearch})}"
-                       th:text="${currentPage}">
-                    </a>
-                </th:block>
-
+                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 1}, search=${currentSearch})}" th:class="${currentPage == 0} ? 'disabled' : ''" th:onclick="${currentPage == 0} ? 'return false;' : ''">← Prev</a>
                 <span class="active" th:text="${currentPage + 1}"></span>
-
-                <th:block th:if="${currentPage < ongsPage.totalPages - 1}">
-                    <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 1}, search=${currentSearch})}"
-                       th:text="${currentPage + 2}">
-                    </a>
-                </th:block>
-
-                <th:block th:if="${currentPage < ongsPage.totalPages - 2}">
-                    <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 2}, search=${currentSearch})}"
-                       th:text="${currentPage + 3}">
-                    </a>
-                </th:block>
-
-                <span th:if="${currentPage < ongsPage.totalPages - 4}">...</span>
-
-                <a th:if="${currentPage < ongsPage.totalPages - 3}"
-                   th:href="@{/admin/dashboard(view='ongs', page=${ongsPage.totalPages - 1}, search=${currentSearch})}"
-                   th:text="${ongsPage.totalPages}">
-                </a>
-
-                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 1}, search=${currentSearch})}"
-                   th:class="${currentPage >= ongsPage.totalPages - 1} ? 'disabled' : ''"
-                   th:onclick="${currentPage >= ongsPage.totalPages - 1} ? 'return false;' : ''">
-                    Next →
-                </a>
+                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 1}, search=${currentSearch})}" th:class="${currentPage >= ongsPage.totalPages - 1} ? 'disabled' : ''" th:onclick="${currentPage >= ongsPage.totalPages - 1} ? 'return false;' : ''">Next →</a>
             </div>
         </div>
 
         <div th:if="${currentView == 'coordinators'}">
             <h2 class="table-title">📋 First 5 Coordinators</h2>
             <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>User Name</th>
-                    <th>ONG</th>
-                    <th>Department</th>
-                    <th>Experience (Years)</th>
-                    <th>Employment Type</th>
-                </tr>
-                </thead>
+                <thead><tr><th>ID</th><th>User Name</th><th>ONG</th><th>Department</th><th>Experience (Years)</th><th>Employment Type</th></tr></thead>
                 <tbody>
                 <tr th:each="coordinator : ${coordinators}">
                     <td th:text="${coordinator.idCoordinator}"></td>
@@ -964,51 +756,19 @@
             </table>
         </div>
 
-        <div style="text-align: center;">
-            <form th:action="@{/logout}" method="post" style="display: inline;">
-                <button type="submit" class="logout-btn">Logout</button>
-            </form>
-        </div>
+        <div style="text-align: center;"><form th:action="@{/logout}" method="post" style="display: inline;"><button type="submit" class="logout-btn">Logout</button></form></div>
     </div>
 </div>
 
 <div id="createModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h2>Create New User</h2>
-            <span class="close" onclick="closeCreateModal()">&times;</span>
-        </div>
+        <div class="modal-header"><h2>Create New User</h2><span class="close" onclick="closeCreateModal()">&times;</span></div>
         <form th:action="@{/admin/users/create}" method="post">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="create_first_name">First Name</label>
-                    <input type="text" id="create_first_name" name="first_name" required/>
-                </div>
-                <div class="form-group">
-                    <label for="create_last_name">Last Name</label>
-                    <input type="text" id="create_last_name" name="last_name" required/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="create_email">Email</label>
-                <input type="email" id="create_email" name="email" required/>
-            </div>
-            <div class="form-group">
-                <label for="create_password">Password</label>
-                <input type="password" id="create_password" name="password" required/>
-            </div>
-            <div class="form-group">
-                <label for="create_phone">Phone Number <span class="optional">(optional)</span></label>
-                <input type="text" id="create_phone" name="phone_number"/>
-            </div>
-            <div class="form-group">
-                <label for="create_role">Role</label>
-                <select id="create_role" name="role" required>
-                    <option value="volunteer">Volunteer</option>
-                    <option value="coordinator">Coordinator</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
+            <div class="form-row"><div class="form-group"><label>First Name</label><input type="text" name="first_name" required/></div><div class="form-group"><label>Last Name</label><input type="text" name="last_name" required/></div></div>
+            <div class="form-group"><label>Email</label><input type="email" name="email" required/></div>
+            <div class="form-group"><label>Password</label><input type="password" name="password" required/></div>
+            <div class="form-group"><label>Phone</label><input type="text" name="phone_number"/></div>
+            <div class="form-group"><label>Role</label><select name="role" required><option value="volunteer">Volunteer</option><option value="coordinator">Coordinator</option><option value="admin">Admin</option></select></div>
             <button type="submit" class="btn-submit">Create User</button>
         </form>
     </div>
@@ -1016,97 +776,34 @@
 
 <div id="editModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h2>Edit User</h2>
-            <span class="close" onclick="closeEditModal()">&times;</span>
-        </div>
+        <div class="modal-header"><h2>Edit User</h2><span class="close" onclick="closeEditModal()">&times;</span></div>
         <form id="editForm" method="post">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="edit_first_name">First Name</label>
-                    <input type="text" id="edit_first_name" name="first_name" required/>
-                </div>
-                <div class="form-group">
-                    <label for="edit_last_name">Last Name</label>
-                    <input type="text" id="edit_last_name" name="last_name" required/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="edit_email">Email</label>
-                <input type="email" id="edit_email" name="email" required/>
-            </div>
-            <div class="form-group">
-                <label for="edit_phone">Phone Number <span class="optional">(optional)</span></label>
-                <input type="text" id="edit_phone" name="phone_number"/>
-            </div>
-            <div class="form-group">
-                <label for="edit_role">Role</label>
-                <select id="edit_role" name="role" required onchange="toggleRoleSpecificFields()">
-                    <option value="volunteer">Volunteer</option>
-                    <option value="coordinator">Coordinator</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
+            <div class="form-row"><div class="form-group"><label>First Name</label><input type="text" id="edit_first_name" name="first_name" required/></div><div class="form-group"><label>Last Name</label><input type="text" id="edit_last_name" name="last_name" required/></div></div>
+            <div class="form-group"><label>Email</label><input type="email" id="edit_email" name="email" required/></div>
+            <div class="form-group"><label>Phone</label><input type="text" id="edit_phone" name="phone_number"/></div>
+            <div class="form-group"><label>Role</label><select id="edit_role" name="role" required onchange="toggleRoleSpecificFields()"><option value="volunteer">Volunteer</option><option value="coordinator">Coordinator</option><option value="admin">Admin</option></select></div>
 
             <div id="coordinatorFields" style="display: none;">
                 <h3>Coordinator Details</h3>
-
+                <div class="form-group"><label>Find ONG (Search by Name or Reg. Number):</label><input type="text" id="ongSearchInput" class="search-input-modal" placeholder="Type to filter..."></div>
                 <div class="form-group">
-                    <label for="ongSearchInput">Find ONG (Search by Name or Reg. Number):</label>
-                    <input type="text" id="ongSearchInput" class="search-input-modal" placeholder="Type to filter list...">
-                </div>
-
-                <div class="form-group">
-                    <label for="coord_ong">Select ONG <span style="color:red">*</span></label>
-                    <select id="coord_ong" name="coordinatorOngId">
+                    <label>Select ONG <span style="color:red">*</span></label>
+                    <select id="coord_ong" name="coordinatorOngRegNumber">
                         <option value="">-- Select ONG --</option>
-                        <option th:each="ong : ${allOngs}"
-                                th:value="${ong.idOng}"
-                                th:text="${ong.name} + ' (Reg: ' + ${ong.registrationNumber} + ')'">
-                        </option>
+                        <option th:each="ong : ${allOngs}" th:value="${ong.registrationNumber}" th:text="${ong.name} + ' (Reg: ' + ${ong.registrationNumber} + ')'"></option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="coord_department">Department <span style="color:red">*</span></label>
-                    <input type="text" id="coord_department" name="department" placeholder="e.g. HR, Logistics">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="coord_experience">Experience (Years) <span style="color:red">*</span></label>
-                        <input type="number" id="coord_experience" name="experienceYears" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label for="coord_employment">Employment Type <span style="color:red">*</span></label>
-                        <select id="coord_employment" name="employmentType">
-                            <option value="">-- Select Type --</option>
-                            <option value="Full-time">Full-time</option>
-                            <option value="Part-time">Part-time</option>
-                            <option value="Volunteer">Volunteer Basis</option>
-                        </select>
-                    </div>
-                </div>
+                <div class="form-group"><label>Department</label><input type="text" id="coord_department" name="department"></div>
+                <div class="form-row"><div class="form-group"><label>Experience</label><input type="number" id="coord_experience" name="experienceYears"></div><div class="form-group"><label>Type</label><select id="coord_employment" name="employmentType"><option value="">-- Select --</option><option value="Full-time">Full-time</option><option value="Part-time">Part-time</option></select></div></div>
             </div>
 
             <div id="volunteerFields" style="display: none;">
                 <h3>Volunteer Details</h3>
-                <div class="form-group">
-                    <label for="vol_birth_date">Birth Date <span style="color:red">*</span></label>
-                    <input type="date" id="vol_birth_date" name="birthDate">
-                </div>
-                <div class="form-group">
-                    <label for="vol_skills">Skills <span style="color:red">*</span></label>
-                    <textarea id="vol_skills" name="skills" placeholder="List skills separated by commas..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="vol_availability">Availability <span style="color:red">*</span></label>
-                    <input type="text" id="vol_availability" name="availability" placeholder="e.g. Weekends, Evenings">
-                </div>
-                <div class="form-group">
-                    <label for="vol_emergency">Emergency Contact <span style="color:red">*</span></label>
-                    <input type="text" id="vol_emergency" name="emergencyContact" placeholder="Name and Phone Number">
-                </div>
+                <div class="form-group"><label>Birth Date</label><input type="date" id="vol_birth_date" name="birthDate"></div>
+                <div class="form-group"><label>Skills</label><textarea id="vol_skills" name="skills"></textarea></div>
+                <div class="form-group"><label>Availability</label><input type="text" id="vol_availability" name="availability"></div>
+                <div class="form-group"><label>Emergency</label><input type="text" id="vol_emergency" name="emergencyContact"></div>
             </div>
-
             <button type="submit" class="btn-submit">Update User</button>
         </form>
     </div>
@@ -1114,43 +811,14 @@
 
 <div id="createOngModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h2>Create New ONG</h2>
-            <span class="close" onclick="closeCreateOngModal()">&times;</span>
-        </div>
+        <div class="modal-header"><h2>Create New ONG</h2><span class="close" onclick="closeCreateOngModal()">&times;</span></div>
         <form th:action="@{/admin/ongs/create}" method="post">
-            <div class="form-group">
-                <label for="create_ong_name">Name</label>
-                <input type="text" id="create_ong_name" name="name" required/>
-            </div>
-            <div class="form-group">
-                <label for="create_ong_description">Description</label>
-                <textarea id="create_ong_description" name="description"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="create_ong_address">Address</label>
-                <input type="text" id="create_ong_address" name="address"/>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="create_ong_reg">Reg. Number</label>
-                    <input type="text" id="create_ong_reg" name="registrationNumber"/>
-                </div>
-                <div class="form-group">
-                    <label for="create_ong_founding">Founding Date</label>
-                    <input type="date" id="create_ong_founding" name="foundingDate"/>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="create_ong_email">Email</label>
-                    <input type="email" id="create_ong_email" name="email"/>
-                </div>
-                <div class="form-group">
-                    <label for="create_ong_phone">Phone</label>
-                    <input type="text" id="create_ong_phone" name="phone"/>
-                </div>
-            </div>
+            <div class="form-group"><label>Name <span style="color:red">*</span></label><input type="text" name="name" required/></div>
+            <div class="form-group"><label>Reg. Number (ID) <span style="color:red">*</span></label><input type="text" name="registrationNumber" required/></div>
+            <div class="form-group"><label>Description</label><textarea name="description"></textarea></div>
+            <div class="form-row"><div class="form-group"><label>Address <span style="color:red">*</span></label><input type="text" name="address" required/></div><div class="form-group"><label>Country <span style="color:red">*</span></label><input type="text" name="country" required/></div></div>
+            <div class="form-row"><div class="form-group"><label>Email <span style="color:red">*</span></label><input type="email" name="email" required/></div><div class="form-group"><label>Phone <span style="color:red">*</span></label><input type="text" name="phone" required/></div></div>
+            <div class="form-group"><label>Founding Date</label><input type="date" name="foundingDate"/></div>
             <button type="submit" class="btn-submit">Create ONG</button>
         </form>
     </div>
@@ -1158,301 +826,124 @@
 
 <div id="editOngModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h2>Edit ONG</h2>
-            <span class="close" onclick="closeEditOngModal()">&times;</span>
-        </div>
+        <div class="modal-header"><h2>Edit ONG</h2><span class="close" onclick="closeEditOngModal()">&times;</span></div>
         <form id="editOngForm" method="post">
-            <div class="form-group">
-                <label for="edit_ong_name">Name</label>
-                <input type="text" id="edit_ong_name" name="name" required/>
-            </div>
-            <div class="form-group">
-                <label for="edit_ong_description">Description</label>
-                <textarea id="edit_ong_description" name="description"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="edit_ong_address">Address</label>
-                <input type="text" id="edit_ong_address" name="address"/>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="edit_ong_reg">Reg. Number</label>
-                    <input type="text" id="edit_ong_reg" name="registrationNumber"/>
-                </div>
-                <div class="form-group">
-                    <label for="edit_ong_founding">Founding Date</label>
-                    <input type="date" id="edit_ong_founding" name="foundingDate"/>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="edit_ong_email">Email</label>
-                    <input type="email" id="edit_ong_email" name="email"/>
-                </div>
-                <div class="form-group">
-                    <label for="edit_ong_phone">Phone</label>
-                    <input type="text" id="edit_ong_phone" name="phone"/>
-                </div>
-            </div>
+            <div class="form-group"><label>Name</label><input type="text" id="edit_ong_name" name="name" required/></div>
+            <div class="form-group"><label>Reg. Number (Read-only)</label><input type="text" id="edit_ong_reg" name="registrationNumber" readonly style="background-color: #eee;"/></div>
+            <div class="form-group"><label>Description</label><textarea id="edit_ong_description" name="description"></textarea></div>
+            <div class="form-row"><div class="form-group"><label>Address</label><input type="text" id="edit_ong_address" name="address"/></div><div class="form-group"><label>Country</label><input type="text" id="edit_ong_country" name="country"/></div></div>
+            <div class="form-row"><div class="form-group"><label>Email</label><input type="email" id="edit_ong_email" name="email"/></div><div class="form-group"><label>Phone</label><input type="text" id="edit_ong_phone" name="phone"/></div></div>
+            <div class="form-group"><label>Founding Date</label><input type="date" id="edit_ong_founding" name="foundingDate"/></div>
             <button type="submit" class="btn-submit">Update ONG</button>
         </form>
     </div>
 </div>
 
 <script th:inline="javascript">
-    /*<![CDATA[*/
     var currentUserEmail = /*[[${currentUserEmail}]]*/ '';
     var selectedRoles = [];
-    /*]]>*/
 
-    // --- FILTERS ---
-    function toggleFilterMenu() {
-        const menu = document.getElementById('filterMenu');
-        const arrow = document.querySelector('.filter-arrow');
-        menu.classList.toggle('active');
-        arrow.classList.toggle('rotate');
-    }
+    // Filters logic
+    function toggleFilterMenu() { document.getElementById('filterMenu').classList.toggle('active'); document.querySelector('.filter-arrow').classList.toggle('rotate'); }
     function toggleRoleFilter(role) {
-        const button = document.querySelector(`.filter-option[data-role="${role}"]`);
-        button.classList.toggle('active');
-        const index = selectedRoles.indexOf(role);
-        if (index > -1) selectedRoles.splice(index, 1); else selectedRoles.push(role);
+        const btn = document.querySelector(`.filter-option[data-role="${role}"]`);
+        btn.classList.toggle('active');
+        if(selectedRoles.includes(role)) selectedRoles = selectedRoles.filter(r => r !== role);
+        else selectedRoles.push(role);
     }
     function applyFilters() {
-        if (selectedRoles.length === 0) { window.location.href = '/admin/dashboard?view=users'; return; }
-        const params = new URLSearchParams();
-        params.append('view', 'users');
-        selectedRoles.forEach(role => params.append('roles', role));
-        window.location.href = '/admin/dashboard?' + params.toString();
+        let url = new URL(window.location.href);
+        url.searchParams.set('view', 'users');
+        url.searchParams.delete('roles');
+        selectedRoles.forEach(r => url.searchParams.append('roles', r));
+        url.searchParams.set('page', '0');
+        window.location.href = url.toString();
     }
     function clearFilters() { selectedRoles = []; window.location.href = '/admin/dashboard?view=users'; }
-    function toggleOngFilterMenu() {
-        const menu = document.getElementById('ongFilterMenu');
-        const arrow = document.getElementById('ongFilterArrow');
-        menu.classList.toggle('active');
-        arrow.classList.toggle('rotate');
-    }
+
+    // ONG Filters logic
+    function toggleOngFilterMenu() { document.getElementById('ongFilterMenu').classList.toggle('active'); document.getElementById('ongFilterArrow').classList.toggle('rotate'); }
     function applyOngFilters() {
-        const regNumber = document.getElementById('filter_reg_number').value;
-        const params = new URLSearchParams();
-        params.append('view', 'ongs');
-        if (regNumber && regNumber.trim() !== "") params.append('search', regNumber);
-        window.location.href = '/admin/dashboard?' + params.toString();
+        let search = document.getElementById('filter_reg_number').value;
+        let url = new URL(window.location.href);
+        url.searchParams.set('view', 'ongs');
+        if(search) url.searchParams.set('search', search); else url.searchParams.delete('search');
+        url.searchParams.set('page', '0');
+        window.location.href = url.toString();
     }
-    function clearOngFilters() { document.getElementById('filter_reg_number').value = ''; window.location.href = '/admin/dashboard?view=ongs'; }
+    function clearOngFilters() { window.location.href = '/admin/dashboard?view=ongs'; }
 
-    window.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const rolesFromUrl = urlParams.getAll('roles');
-        rolesFromUrl.forEach(role => {
-            selectedRoles.push(role);
-            const button = document.querySelector(`.filter-option[data-role="${role}"]`);
-            if (button) button.classList.add('active');
-        });
-        const searchFromUrl = urlParams.get('search');
-        if (searchFromUrl) {
-            const ongMenu = document.getElementById('ongFilterMenu');
-            if(ongMenu) ongMenu.classList.add('active');
-        }
-    });
-
-    // --- MODALS ---
+    // Modals
     function openCreateModal() { document.getElementById('createModal').style.display = 'block'; }
     function closeCreateModal() { document.getElementById('createModal').style.display = 'none'; }
-
-    // Function to toggle Role Specific fields with Required attributes
     function toggleRoleSpecificFields() {
-        const roleSelect = document.getElementById('edit_role');
-        const coordFields = document.getElementById('coordinatorFields');
-        const volFields = document.getElementById('volunteerFields');
-
-        // Coordinator Inputs
-        const coordOng = document.getElementById('coord_ong');
-        const coordDept = document.getElementById('coord_department');
-        const coordExp = document.getElementById('coord_experience');
-        const coordEmp = document.getElementById('coord_employment');
-
-        // Volunteer Inputs
-        const volBirth = document.getElementById('vol_birth_date');
-        const volSkills = document.getElementById('vol_skills');
-        const volAvail = document.getElementById('vol_availability');
-        const volEmerg = document.getElementById('vol_emergency');
-
-        if (roleSelect.value === 'coordinator') {
-            // Show Coordinator, Hide Volunteer
-            coordFields.style.display = 'block';
-            volFields.style.display = 'none';
-
-            // Set Required for Coord
-            coordOng.setAttribute('required', 'required');
-            coordDept.setAttribute('required', 'required');
-            coordExp.setAttribute('required', 'required');
-            coordEmp.setAttribute('required', 'required');
-
-            // Remove Required for Vol
-            volBirth.removeAttribute('required');
-            volSkills.removeAttribute('required');
-            volAvail.removeAttribute('required');
-            volEmerg.removeAttribute('required');
-
-        } else if (roleSelect.value === 'volunteer') {
-            // Show Volunteer, Hide Coordinator
-            coordFields.style.display = 'none';
-            volFields.style.display = 'block';
-
-            // Remove Required for Coord
-            coordOng.removeAttribute('required');
-            coordDept.removeAttribute('required');
-            coordExp.removeAttribute('required');
-            coordEmp.removeAttribute('required');
-
-            // Set Required for Vol
-            volBirth.setAttribute('required', 'required');
-            volSkills.setAttribute('required', 'required');
-            volAvail.setAttribute('required', 'required');
-            volEmerg.setAttribute('required', 'required');
-
-        } else {
-            // Hide Both (Admin)
-            coordFields.style.display = 'none';
-            volFields.style.display = 'none';
-
-            // Remove Required for All
-            coordOng.removeAttribute('required');
-            coordDept.removeAttribute('required');
-            coordExp.removeAttribute('required');
-            coordEmp.removeAttribute('required');
-            volBirth.removeAttribute('required');
-            volSkills.removeAttribute('required');
-            volAvail.removeAttribute('required');
-            volEmerg.removeAttribute('required');
-        }
+        const role = document.getElementById('edit_role').value;
+        document.getElementById('coordinatorFields').style.display = role === 'coordinator' ? 'block' : 'none';
+        document.getElementById('volunteerFields').style.display = role === 'volunteer' ? 'block' : 'none';
     }
 
-    // Search Logic for ONG Dropdown inside Modal
-    document.getElementById('ongSearchInput').addEventListener('keyup', function() {
+    // ONG Search in Modal
+    document.getElementById('ongSearchInput').addEventListener('input', function() {
         let filter = this.value.toLowerCase();
-        let select = document.getElementById('coord_ong');
-        let options = select.options;
-
-        for (let i = 0; i < options.length; i++) {
-            let text = options[i].text.toLowerCase();
-            // Ignore placeholder (empty value)
-            if (options[i].value === "") continue;
-
-            if (text.indexOf(filter) > -1) {
-                options[i].style.display = ""; // Show
-                options[i].hidden = false;
-            } else {
-                options[i].style.display = "none"; // Hide
-                options[i].hidden = true;
-            }
-        }
-    });
-
-    // Prevent Form Submission when pressing Enter in Search Input
-    document.getElementById('ongSearchInput').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault(); // Stop form submission
-            return false;
+        let options = document.getElementById('coord_ong').options;
+        for (let i = 1; i < options.length; i++) {
+            let txt = options[i].text.toLowerCase();
+            options[i].style.display = txt.includes(filter) ? "" : "none";
         }
     });
 
     function openEditModal(userId) {
-        fetch('/admin/users/edit/' + userId)
-            .then(response => response.json())
-            .then(data => {
-                const user = data.user;
-                const coord = data.coordinator; // Poate fi null
-                const vol = data.volunteer; // Poate fi null
+        fetch('/admin/users/edit/' + userId).then(r => r.json()).then(data => {
+            const user = data.user;
+            document.getElementById('edit_first_name').value = user.first_name;
+            document.getElementById('edit_last_name').value = user.last_name;
+            document.getElementById('edit_email').value = user.email;
+            document.getElementById('edit_phone').value = user.phone_number || '';
+            document.getElementById('edit_role').value = user.role;
 
-                document.getElementById('edit_first_name').value = user.first_name;
-                document.getElementById('edit_last_name').value = user.last_name;
-                document.getElementById('edit_email').value = user.email;
-                document.getElementById('edit_phone').value = user.phone_number || '';
-                document.getElementById('edit_role').value = user.role;
-
-                // Reset fields
-                // Coord
-                document.getElementById('coord_ong').value = '';
-                document.getElementById('coord_department').value = '';
-                document.getElementById('coord_experience').value = '';
-                document.getElementById('coord_employment').value = '';
-                document.getElementById('ongSearchInput').value = '';
-
-                // Vol
-                document.getElementById('vol_birth_date').value = '';
-                document.getElementById('vol_skills').value = '';
-                document.getElementById('vol_availability').value = '';
-                document.getElementById('vol_emergency').value = '';
-
-                // Reset dropdown visibility
-                const select = document.getElementById('coord_ong');
-                const options = select.getElementsByTagName('option');
-                for (let i=0; i<options.length; i++) {
-                    options[i].style.display = "";
-                    options[i].hidden = false;
-                }
-
-                // Populate Coordinator if exists
-                if (coord) {
-                    if(coord.ong) document.getElementById('coord_ong').value = coord.ong.idOng;
-                    document.getElementById('coord_department').value = coord.department || '';
-                    document.getElementById('coord_experience').value = coord.experienceYears || '';
-                    document.getElementById('coord_employment').value = coord.employmentType || '';
-                }
-
-                // Populate Volunteer if exists
-                if (vol) {
-                    document.getElementById('vol_birth_date').value = vol.birthDate || '';
-                    document.getElementById('vol_skills').value = vol.skills || '';
-                    document.getElementById('vol_availability').value = vol.availability || '';
-                    document.getElementById('vol_emergency').value = vol.emergencyContact || '';
-                }
-
-                document.getElementById('editForm').action = '/admin/users/update/' + userId;
-
-                // Trigger toggle logic manually based on current role
-                toggleRoleSpecificFields();
-
-                document.getElementById('editModal').style.display = 'block';
-            });
+            // Populate extra fields
+            if (data.coordinator) {
+                if(data.coordinator.ongRegistrationNumber) document.getElementById('coord_ong').value = data.coordinator.ongRegistrationNumber;
+                document.getElementById('coord_department').value = data.coordinator.department || '';
+                document.getElementById('coord_experience').value = data.coordinator.experienceYears || '';
+                document.getElementById('coord_employment').value = data.coordinator.employmentType || '';
+            }
+            if (data.volunteer) {
+               document.getElementById('vol_birth_date').value = data.volunteer.birthDate || '';
+               document.getElementById('vol_skills').value = data.volunteer.skills || '';
+               document.getElementById('vol_availability').value = data.volunteer.availability || '';
+               document.getElementById('vol_emergency').value = data.volunteer.emergencyContact || '';
+            }
+            document.getElementById('editForm').action = '/admin/users/update/' + userId;
+            toggleRoleSpecificFields();
+            document.getElementById('editModal').style.display = 'block';
+        });
     }
-
     function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+
     function openCreateOngModal() { document.getElementById('createOngModal').style.display = 'block'; }
     function closeCreateOngModal() { document.getElementById('createOngModal').style.display = 'none'; }
+
     function openEditOngModal(ongId) {
         fetch('/admin/ongs/edit/' + ongId).then(r => r.json()).then(ong => {
             document.getElementById('edit_ong_name').value = ong.name;
+            document.getElementById('edit_ong_reg').value = ong.registrationNumber;
             document.getElementById('edit_ong_description').value = ong.description || '';
             document.getElementById('edit_ong_address').value = ong.address || '';
-            document.getElementById('edit_ong_reg').value = ong.registrationNumber || '';
-            document.getElementById('edit_ong_founding').value = ong.foundingDate || '';
+            document.getElementById('edit_ong_country').value = ong.country || '';
             document.getElementById('edit_ong_email').value = ong.email || '';
             document.getElementById('edit_ong_phone').value = ong.phone || '';
+            document.getElementById('edit_ong_founding').value = ong.foundingDate || '';
             document.getElementById('editOngForm').action = '/admin/ongs/update/' + ongId;
             document.getElementById('editOngModal').style.display = 'block';
         });
     }
     function closeEditOngModal() { document.getElementById('editOngModal').style.display = 'none'; }
-    function confirmDelete(id, email, role) {
-        if (role === 'admin') { alert('⚠️ Admin accounts cannot be deleted!'); return; }
-        if (confirm('Delete this user?')) { const f = document.createElement('form'); f.method = 'POST'; f.action = '/admin/users/delete/' + id; document.body.appendChild(f); f.submit(); }
-    }
-    function confirmDeleteOng(id) {
-        if (confirm('Delete this ONG?')) { const f = document.createElement('form'); f.method = 'POST'; f.action = '/admin/ongs/delete/' + id; document.body.appendChild(f); f.submit(); }
-    }
-    window.onclick = function(e) {
-        if (e.target == document.getElementById('createModal')) closeCreateModal();
-        if (e.target == document.getElementById('editModal')) closeEditModal();
-        if (e.target == document.getElementById('createOngModal')) closeCreateOngModal();
-        if (e.target == document.getElementById('editOngModal')) closeEditOngModal();
-    }
-    setTimeout(function() {
-        document.querySelectorAll('.alert').forEach(a => { a.style.animation = 'fadeIn 0.3s reverse'; setTimeout(() => a.remove(), 300); });
-    }, 5000);
+
+    function confirmDelete(id, email, role) { if(confirm('Delete user?')) { const f = document.createElement('form'); f.method='POST'; f.action='/admin/users/delete/'+id; document.body.appendChild(f); f.submit(); } }
+    function confirmDeleteOng(id) { if(confirm('Delete ONG?')) { const f = document.createElement('form'); f.method='POST'; f.action='/admin/ongs/delete/'+id; document.body.appendChild(f); f.submit(); } }
+
+    window.onclick = function(e) { if(e.target.className === 'modal') e.target.style.display = 'none'; }
 </script>
 </body>
 </html>
