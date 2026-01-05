@@ -30,11 +30,11 @@ public class AdminService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    // ... (metodele existente getFirst5Ongs, PageWrapper, getUsersPage etc. rămân neschimbate) ...
     public List<Ong> getFirst5Ongs() { return ongRepository.findFirst5(); }
     public List<Coordinator> getFirst5Coordinators() { return coordinatorRepository.findFirst5(); }
     public List<Ong> getAllOngs() { return ongRepository.findAll(); }
 
+    // PageWrapper existent...
     public static class PageWrapper<T> {
         private List<T> content;
         private int totalPages;
@@ -87,16 +87,12 @@ public class AdminService {
         return new PageWrapper<>(ongs, totalElements, page, size);
     }
 
-    // --- CRUD USERS ---
-
     @Transactional
     public User createUser(User user) {
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
         }
         User savedUser = userRepository.save(user);
-
-        // La creare simplă, setăm un volunteer default (fără date extra) dacă rolul e volunteer
         if(savedUser.getRole() == User.Role.volunteer) {
             Volunteer volunteer = new Volunteer(savedUser.getIdUser());
             volunteerRepository.save(volunteer);
@@ -104,24 +100,13 @@ public class AdminService {
         return savedUser;
     }
 
-    public User getUserById(Integer id) {
-        return userRepository.findById(id).orElse(null);
-    }
-
-    public Coordinator getCoordinatorDetailsByUserId(Integer userId) {
-        return coordinatorRepository.findByUserId(userId).orElse(null);
-    }
-
-    // NOU: Metoda pentru a lua detalii volunteer
-    public Volunteer getVolunteerDetailsByUserId(Integer userId) {
-        return volunteerRepository.findByUserId(userId).orElse(null);
-    }
+    public User getUserById(Integer id) { return userRepository.findById(id).orElse(null); }
+    public Coordinator getCoordinatorDetailsByUserId(Integer userId) { return coordinatorRepository.findByUserId(userId).orElse(null); }
+    public Volunteer getVolunteerDetailsByUserId(Integer userId) { return volunteerRepository.findByUserId(userId).orElse(null); }
 
     @Transactional
     public User updateUser(Integer id, User updatedUser,
-                           // Params Coordinator
-                           Integer coordinatorOngId, String department, Integer experienceYears, String employmentType,
-                           // Params Volunteer
+                           String coordinatorOngRegNumber, String department, Integer experienceYears, String employmentType,
                            LocalDate birthDate, String skills, String availability, String emergencyContact) {
 
         User existingUser = userRepository.findById(id).orElse(null);
@@ -129,7 +114,6 @@ public class AdminService {
             User.Role oldRole = existingUser.getRole();
             User.Role newRole = updatedUser.getRole();
 
-            // 1. Update basic user info
             existingUser.setEmail(updatedUser.getEmail());
             existingUser.setFirstName(updatedUser.getFirstName());
             existingUser.setLastName(updatedUser.getLastName());
@@ -142,31 +126,23 @@ public class AdminService {
 
             User savedUser = userRepository.save(existingUser);
 
-            // 2. Curățare date vechi dacă s-a schimbat rolul
             if (oldRole != newRole) {
-                if (oldRole == User.Role.volunteer) {
-                    volunteerRepository.deleteByUserId(id);
-                } else if (oldRole == User.Role.coordinator) {
-                    coordinatorRepository.deleteByUserId(id);
-                }
+                if (oldRole == User.Role.volunteer) volunteerRepository.deleteByUserId(id);
+                else if (oldRole == User.Role.coordinator) coordinatorRepository.deleteByUserId(id);
             }
 
-            // 3. Salvare date noi în funcție de noul rol
             if (newRole == User.Role.coordinator) {
-                // Dacă avem datele minime necesare
-                if (coordinatorOngId != null) {
+                if (coordinatorOngRegNumber != null && !coordinatorOngRegNumber.isEmpty()) {
                     Coordinator coordinator = new Coordinator();
                     User u = new User(); u.setIdUser(id);
                     coordinator.setUser(u);
-                    Ong o = new Ong(); o.setIdOng(coordinatorOngId);
-                    coordinator.setOng(o);
+                    coordinator.setOngRegistrationNumber(coordinatorOngRegNumber);
                     coordinator.setDepartment(department);
                     coordinator.setExperienceYears(experienceYears);
                     coordinator.setEmploymentType(employmentType);
                     coordinatorRepository.save(coordinator);
                 }
             } else if (newRole == User.Role.volunteer) {
-                // Salvăm datele extra pentru volunteer
                 Volunteer volunteer = new Volunteer(id);
                 volunteer.setBirthDate(birthDate);
                 volunteer.setSkills(skills);
@@ -174,7 +150,6 @@ public class AdminService {
                 volunteer.setEmergencyContact(emergencyContact);
                 volunteerRepository.save(volunteer);
             }
-
             return savedUser;
         }
         return null;
@@ -184,31 +159,25 @@ public class AdminService {
     public boolean deleteUser(Integer id, String currentUserEmail) {
         User userToDelete = userRepository.findById(id).orElse(null);
         if (userToDelete == null) return false;
-
-        if (userToDelete.getRole() == User.Role.admin) {
-            throw new IllegalStateException("Admin accounts cannot be deleted for security reasons!");
-        }
-
-        // Curățăm tabelele dependente
+        if (userToDelete.getRole() == User.Role.admin) throw new IllegalStateException("Admin accounts cannot be deleted!");
         volunteerRepository.deleteByUserId(id);
         coordinatorRepository.deleteByUserId(id);
-
         userRepository.deleteById(id);
         return true;
     }
 
-    // ... (metodele createOng, updateOng, deleteOng rămân neschimbate) ...
     @Transactional
     public Ong createOng(Ong ong) { return ongRepository.save(ong); }
-    public Ong getOngById(Integer id) { return ongRepository.findById(id).orElse(null); }
+    public Ong getOngById(String id) { return ongRepository.findById(id).orElse(null); }
+
     @Transactional
-    public Ong updateOng(Integer id, Ong updatedOng) {
-        Ong existingOng = ongRepository.findById(id).orElse(null);
+    public Ong updateOng(String registrationNumber, Ong updatedOng) {
+        Ong existingOng = ongRepository.findById(registrationNumber).orElse(null);
         if (existingOng != null) {
             existingOng.setName(updatedOng.getName());
             existingOng.setDescription(updatedOng.getDescription());
             existingOng.setAddress(updatedOng.getAddress());
-            existingOng.setRegistrationNumber(updatedOng.getRegistrationNumber());
+            existingOng.setCountry(updatedOng.getCountry());
             existingOng.setPhone(updatedOng.getPhone());
             existingOng.setEmail(updatedOng.getEmail());
             existingOng.setFoundingDate(updatedOng.getFoundingDate());
@@ -216,8 +185,9 @@ public class AdminService {
         }
         return null;
     }
+
     @Transactional
-    public boolean deleteOng(Integer id) {
+    public boolean deleteOng(String id) {
         Ong ongToDelete = ongRepository.findById(id).orElse(null);
         if (ongToDelete == null) return false;
         ongRepository.deleteById(id);

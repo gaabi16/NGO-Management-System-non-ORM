@@ -42,16 +42,12 @@ public class AdminController {
 
         model.addAttribute("currentView", view);
         model.addAttribute("currentUserEmail", authentication.getName());
-
-        // Ongs for dropdown
         model.addAttribute("allOngs", adminService.getAllOngs());
 
         if ("users".equals(view)) {
             AdminService.PageWrapper<User> usersPage;
             if (roles != null && !roles.isEmpty()) {
-                List<User.Role> roleEnums = roles.stream()
-                        .map(User.Role::valueOf)
-                        .collect(Collectors.toList());
+                List<User.Role> roleEnums = roles.stream().map(User.Role::valueOf).collect(Collectors.toList());
                 usersPage = adminService.getUsersPageByRoles(page, 50, roleEnums);
             } else {
                 usersPage = adminService.getUsersPage(page, 50);
@@ -72,15 +68,13 @@ public class AdminController {
         return "admin-dashboard";
     }
 
-    // --- USER ACTIONS ---
-
     @PostMapping("/users/create")
     public String createUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
         try {
             adminService.createUser(user);
             redirectAttributes.addFlashAttribute("successMessage", "User created successfully!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error creating user: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
         }
         return "redirect:/admin/dashboard?view=users";
     }
@@ -91,8 +85,6 @@ public class AdminController {
         Map<String, Object> response = new HashMap<>();
         User user = adminService.getUserById(id);
         response.put("user", user);
-
-        // Verificăm și încărcăm datele specifice rolului
         if (user.getRole() == User.Role.coordinator) {
             Coordinator coord = adminService.getCoordinatorDetailsByUserId(id);
             response.put("coordinator", coord);
@@ -100,19 +92,16 @@ public class AdminController {
             Volunteer vol = adminService.getVolunteerDetailsByUserId(id);
             response.put("volunteer", vol);
         }
-
         return response;
     }
 
     @PostMapping("/users/update/{id}")
     public String updateUser(@PathVariable Integer id,
                              @ModelAttribute User user,
-                             // Coordinator Params
-                             @RequestParam(required = false) Integer coordinatorOngId,
+                             @RequestParam(required = false) String coordinatorOngRegNumber,
                              @RequestParam(required = false) String department,
                              @RequestParam(required = false) Integer experienceYears,
                              @RequestParam(required = false) String employmentType,
-                             // Volunteer Params
                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate birthDate,
                              @RequestParam(required = false) String skills,
                              @RequestParam(required = false) String availability,
@@ -120,12 +109,11 @@ public class AdminController {
                              RedirectAttributes redirectAttributes) {
         try {
             adminService.updateUser(id, user,
-                    coordinatorOngId, department, experienceYears, employmentType,
+                    coordinatorOngRegNumber, department, experienceYears, employmentType,
                     birthDate, skills, availability, emergencyContact);
             redirectAttributes.addFlashAttribute("successMessage", "User updated successfully!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error updating user: " + e.getMessage());
-            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
         }
         return "redirect:/admin/dashboard?view=users";
     }
@@ -133,17 +121,13 @@ public class AdminController {
     @PostMapping("/users/delete/{id}")
     public String deleteUser(@PathVariable Integer id, RedirectAttributes redirectAttributes, Authentication authentication) {
         try {
-            String currentUserEmail = authentication.getName();
-            boolean deleted = adminService.deleteUser(id, currentUserEmail);
-            if (deleted) {
+            if (adminService.deleteUser(id, authentication.getName())) {
                 redirectAttributes.addFlashAttribute("successMessage", "User deleted successfully!");
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "User not found!");
             }
-        } catch (IllegalStateException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting user: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/dashboard?view=users";
     }
@@ -155,39 +139,38 @@ public class AdminController {
             adminService.createOng(ong);
             redirectAttributes.addFlashAttribute("successMessage", "ONG created successfully!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error creating ONG: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
         }
         return "redirect:/admin/dashboard?view=ongs";
     }
 
     @GetMapping("/ongs/edit/{id}")
     @ResponseBody
-    public Ong getOngForEdit(@PathVariable Integer id) {
+    public Ong getOngForEdit(@PathVariable String id) {
         return adminService.getOngById(id);
     }
 
     @PostMapping("/ongs/update/{id}")
-    public String updateOng(@PathVariable Integer id, @ModelAttribute Ong ong, RedirectAttributes redirectAttributes) {
+    public String updateOng(@PathVariable String id, @ModelAttribute Ong ong, RedirectAttributes redirectAttributes) {
         try {
             adminService.updateOng(id, ong);
             redirectAttributes.addFlashAttribute("successMessage", "ONG updated successfully!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error updating ONG: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
         }
         return "redirect:/admin/dashboard?view=ongs";
     }
 
     @PostMapping("/ongs/delete/{id}")
-    public String deleteOng(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String deleteOng(@PathVariable String id, RedirectAttributes redirectAttributes) {
         try {
-            boolean deleted = adminService.deleteOng(id);
-            if (deleted) {
+            if (adminService.deleteOng(id)) {
                 redirectAttributes.addFlashAttribute("successMessage", "ONG deleted successfully!");
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "ONG not found!");
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting ONG: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
         }
         return "redirect:/admin/dashboard?view=ongs";
     }

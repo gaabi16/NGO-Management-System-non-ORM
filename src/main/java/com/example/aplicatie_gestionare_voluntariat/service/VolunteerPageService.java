@@ -34,48 +34,42 @@ public class VolunteerPageService {
         return ongRepository.findAll();
     }
 
-    public Ong getOngById(Integer id) {
-        return ongRepository.findById(id).orElse(null);
+    public Ong getOngById(String registrationNumber) {
+        return ongRepository.findById(registrationNumber).orElse(null);
     }
 
-    public Map<String, Object> getOngStatistics(Integer ongId) {
+    public Map<String, Object> getOngStatistics(String ongRegNumber) {
         Map<String, Object> stats = new HashMap<>();
 
-        // 1. Obținem lista de coordonatori (pentru a-i afișa și pentru a le afla numărul)
         String sqlCoordinators = "SELECT u.first_name, u.last_name FROM coordinators c " +
-                "JOIN users u ON c.id_user = u.id_user WHERE c.id_ong = ?";
+                "JOIN users u ON c.id_user = u.id_user WHERE c.ong_registration_number = ?";
         List<String> coordinators = jdbcTemplate.query(sqlCoordinators, (rs, rowNum) ->
-                rs.getString("first_name") + " " + rs.getString("last_name"), ongId);
+                rs.getString("first_name") + " " + rs.getString("last_name"), ongRegNumber);
         stats.put("coordinators", coordinators);
 
-        // 2. Calculăm numărul total de participanți
-        // LOGICA NOUĂ:
-        // - Numărăm doar voluntarii cu status 'accepted'
-        // - Excludem activitățile care sunt 'completed'
+        // Actualizat JOIN: va.id_activity -> a.id_coordinator -> c.ong_registration_number
         String sqlUniqueVolunteers = "SELECT COUNT(DISTINCT va.id_volunteer) FROM volunteer_activities va " +
                 "JOIN activities a ON va.id_activity = a.id_activity " +
-                "WHERE a.id_ong = ? " +
+                "JOIN coordinators c ON a.id_coordinator = c.id_coordinator " +
+                "WHERE c.ong_registration_number = ? " +
                 "AND va.status = 'accepted' " +
                 "AND a.status != 'completed'";
 
-        Long uniqueVolunteersCount = jdbcTemplate.queryForObject(sqlUniqueVolunteers, Long.class, ongId);
+        Long uniqueVolunteersCount = jdbcTemplate.queryForObject(sqlUniqueVolunteers, Long.class, ongRegNumber);
         if (uniqueVolunteersCount == null) uniqueVolunteersCount = 0L;
 
-        // Adunăm voluntarii filtrați cu numărul de coordonatori
         long totalParticipants = uniqueVolunteersCount + coordinators.size();
-
         stats.put("totalVolunteers", totalParticipants);
 
-        // 3. Total Donații
-        String sqlDonations = "SELECT COALESCE(SUM(amount), 0) FROM donations WHERE id_ong = ?";
-        Double totalDonations = jdbcTemplate.queryForObject(sqlDonations, Double.class, ongId);
+        String sqlDonations = "SELECT COALESCE(SUM(amount), 0) FROM donations WHERE ong_registration_number = ?";
+        Double totalDonations = jdbcTemplate.queryForObject(sqlDonations, Double.class, ongRegNumber);
         stats.put("totalDonations", totalDonations);
 
         return stats;
     }
 
-    public List<Activity> getOngActivities(Integer ongId) {
-        return activityRepository.findByOngId(ongId);
+    public List<Activity> getOngActivities(String ongRegNumber) {
+        return activityRepository.findByOngId(ongRegNumber);
     }
 
     public Integer getVolunteerIdByEmail(String email) {

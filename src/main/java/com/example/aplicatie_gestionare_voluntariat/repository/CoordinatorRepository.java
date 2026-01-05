@@ -27,15 +27,14 @@ public class CoordinatorRepository {
             Coordinator coordinator = new Coordinator();
             coordinator.setIdCoordinator(rs.getInt("id_coordinator"));
 
-            // Mapăm obiectele imbricate (User și Ong) sumar, doar ID-urile sunt critice aici
-            // Într-o implementare completă am face join-uri, dar aici ne interesează datele de coordonator
             User user = new User();
             user.setIdUser(rs.getInt("id_user"));
             coordinator.setUser(user);
 
             Ong ong = new Ong();
-            ong.setIdOng(rs.getInt("id_ong"));
+            ong.setRegistrationNumber(rs.getString("ong_registration_number")); // String FK
             coordinator.setOng(ong);
+            coordinator.setOngRegistrationNumber(rs.getString("ong_registration_number"));
 
             coordinator.setDepartment(rs.getString("department"));
             coordinator.setExperienceYears(rs.getInt("experience_years"));
@@ -46,11 +45,10 @@ public class CoordinatorRepository {
     };
 
     public List<Coordinator> findFirst5() {
-        // Aici facem JOIN pentru a afișa date frumoase în dashboard
-        String sql = "SELECT c.*, u.first_name, u.last_name, o.name as ong_name " +
+        String sql = "SELECT c.*, u.first_name, u.last_name, o.name as ong_name, o.registration_number " +
                 "FROM coordinators c " +
                 "JOIN users u ON c.id_user = u.id_user " +
-                "JOIN ongs o ON c.id_ong = o.id_ong " +
+                "JOIN ongs o ON c.ong_registration_number = o.registration_number " +
                 "ORDER BY c.id_coordinator ASC LIMIT 5";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
@@ -59,6 +57,7 @@ public class CoordinatorRepository {
             c.setDepartment(rs.getString("department"));
             c.setExperienceYears(rs.getInt("experience_years"));
             c.setEmploymentType(rs.getString("employment_type"));
+            c.setOngRegistrationNumber(rs.getString("ong_registration_number"));
 
             User u = new User();
             u.setIdUser(rs.getInt("id_user"));
@@ -67,15 +66,13 @@ public class CoordinatorRepository {
             c.setUser(u);
 
             Ong o = new Ong();
-            o.setIdOng(rs.getInt("id_ong"));
+            o.setRegistrationNumber(rs.getString("registration_number"));
             o.setName(rs.getString("ong_name"));
             c.setOng(o);
 
             return c;
         });
     }
-
-    // --- METODE NOI PENTRU CRUD ---
 
     public Optional<Coordinator> findByUserId(Integer userId) {
         String sql = "SELECT * FROM coordinators WHERE id_user = ?";
@@ -84,25 +81,22 @@ public class CoordinatorRepository {
     }
 
     public void save(Coordinator coordinator) {
-        // Verificăm dacă există deja o intrare pentru acest user
         String checkSql = "SELECT COUNT(*) FROM coordinators WHERE id_user = ?";
         Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, coordinator.getUser().getIdUser());
 
         if (count != null && count > 0) {
-            // UPDATE
-            String sql = "UPDATE coordinators SET id_ong = ?, department = ?, experience_years = ?, employment_type = ? WHERE id_user = ?";
+            String sql = "UPDATE coordinators SET ong_registration_number = ?, department = ?, experience_years = ?, employment_type = ? WHERE id_user = ?";
             jdbcTemplate.update(sql,
-                    coordinator.getOng().getIdOng(),
+                    coordinator.getOngRegistrationNumber(),
                     coordinator.getDepartment(),
                     coordinator.getExperienceYears(),
                     coordinator.getEmploymentType(),
                     coordinator.getUser().getIdUser());
         } else {
-            // INSERT
-            String sql = "INSERT INTO coordinators (id_user, id_ong, department, experience_years, employment_type) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO coordinators (id_user, ong_registration_number, department, experience_years, employment_type) VALUES (?, ?, ?, ?, ?)";
             jdbcTemplate.update(sql,
                     coordinator.getUser().getIdUser(),
-                    coordinator.getOng().getIdOng(),
+                    coordinator.getOngRegistrationNumber(),
                     coordinator.getDepartment(),
                     coordinator.getExperienceYears(),
                     coordinator.getEmploymentType());

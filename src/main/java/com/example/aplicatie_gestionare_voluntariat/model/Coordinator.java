@@ -4,7 +4,7 @@ public class Coordinator {
 
     private Integer idCoordinator;
     private Integer idUser;
-    private Integer idOng;
+    private String ongRegistrationNumber; // FK String
     private String department;
     private Integer experienceYears;
     private String employmentType;
@@ -13,80 +13,29 @@ public class Coordinator {
     private User user;
     private Ong ong;
 
-    // Constructori
     public Coordinator() {}
 
-    public Coordinator(Integer idUser, Integer idOng, String department,
-                       Integer experienceYears, String employmentType) {
-        this.idUser = idUser;
-        this.idOng = idOng;
-        this.department = department;
-        this.experienceYears = experienceYears;
-        this.employmentType = employmentType;
-    }
+    public Integer getIdCoordinator() { return idCoordinator; }
+    public void setIdCoordinator(Integer idCoordinator) { this.idCoordinator = idCoordinator; }
 
-    // Getteri și Setteri
-    public Integer getIdCoordinator() {
-        return idCoordinator;
-    }
+    public Integer getIdUser() { return idUser; }
+    public void setIdUser(Integer idUser) { this.idUser = idUser; }
 
-    public void setIdCoordinator(Integer idCoordinator) {
-        this.idCoordinator = idCoordinator;
-    }
+    public String getOngRegistrationNumber() { return ongRegistrationNumber; }
+    public void setOngRegistrationNumber(String ongRegistrationNumber) { this.ongRegistrationNumber = ongRegistrationNumber; }
 
-    public Integer getIdUser() {
-        return idUser;
-    }
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
 
-    public void setIdUser(Integer idUser) {
-        this.idUser = idUser;
-    }
+    public Integer getExperienceYears() { return experienceYears; }
+    public void setExperienceYears(Integer experienceYears) { this.experienceYears = experienceYears; }
 
-    public Integer getIdOng() {
-        return idOng;
-    }
+    public String getEmploymentType() { return employmentType; }
+    public void setEmploymentType(String employmentType) { this.employmentType = employmentType; }
 
-    public void setIdOng(Integer idOng) {
-        this.idOng = idOng;
-    }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
-    public String getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
-    }
-
-    public Integer getExperienceYears() {
-        return experienceYears;
-    }
-
-    public void setExperienceYears(Integer experienceYears) {
-        this.experienceYears = experienceYears;
-    }
-
-    public String getEmploymentType() {
-        return employmentType;
-    }
-
-    public void setEmploymentType(String employmentType) {
-        this.employmentType = employmentType;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Ong getOng() {
-        return ong;
-    }
-
-    public void setOng(Ong ong) {
-        this.ong = ong;
-    }
+    public Ong getOng() { return ong; }
+    public void setOng(Ong ong) { this.ong = ong; }
 }

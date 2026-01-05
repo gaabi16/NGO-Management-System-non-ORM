@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class Activity {
     private Integer idActivity;
-    private Integer idOng;
+    // ongRegistrationNumber a fost ELIMINAT conform noii structuri DB
     private Integer idCategory;
     private Integer idCoordinator;
     private String name;
@@ -14,18 +14,15 @@ public class Activity {
     private LocalDateTime endDate;
     private Integer maxVolunteers;
     private String status;
+    private Double donationsCollected; // Câmp nou
 
-    // Câmpuri extra pentru afișare (populate prin JOIN-uri)
+    // Câmpuri extra pentru afișare
     private String categoryName;
 
     public Activity() {}
 
-    // Getteri și Setteri
     public Integer getIdActivity() { return idActivity; }
     public void setIdActivity(Integer idActivity) { this.idActivity = idActivity; }
-
-    public Integer getIdOng() { return idOng; }
-    public void setIdOng(Integer idOng) { this.idOng = idOng; }
 
     public Integer getIdCategory() { return idCategory; }
     public void setIdCategory(Integer idCategory) { this.idCategory = idCategory; }
@@ -53,6 +50,9 @@ public class Activity {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public Double getDonationsCollected() { return donationsCollected; }
+    public void setDonationsCollected(Double donationsCollected) { this.donationsCollected = donationsCollected; }
 
     public String getCategoryName() { return categoryName; }
     public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
