@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AdminService {
@@ -34,7 +35,6 @@ public class AdminService {
     public List<Coordinator> getFirst5Coordinators() { return coordinatorRepository.findFirst5(); }
     public List<Ong> getAllOngs() { return ongRepository.findAll(); }
 
-    // PageWrapper existent...
     public static class PageWrapper<T> {
         private List<T> content;
         private int totalPages;
@@ -167,7 +167,15 @@ public class AdminService {
     }
 
     @Transactional
-    public Ong createOng(Ong ong) { return ongRepository.save(ong); }
+    public Ong createOng(Ong ong) {
+        // [NOU] Verificăm dacă există deja un ONG cu acest număr de înregistrare
+        Optional<Ong> existingOng = ongRepository.findById(ong.getRegistrationNumber());
+        if (existingOng.isPresent()) {
+            throw new IllegalArgumentException("An ONG with Registration Number '" + ong.getRegistrationNumber() + "' already exists!");
+        }
+        return ongRepository.save(ong);
+    }
+
     public Ong getOngById(String id) { return ongRepository.findById(id).orElse(null); }
 
     @Transactional
