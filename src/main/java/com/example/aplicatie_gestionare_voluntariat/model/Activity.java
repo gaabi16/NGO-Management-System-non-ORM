@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 public class Activity {
     private Integer idActivity;
-    // ongRegistrationNumber a fost ELIMINAT conform noii structuri DB
     private Integer idCategory;
     private Integer idCoordinator;
     private String name;
@@ -14,10 +13,11 @@ public class Activity {
     private LocalDateTime endDate;
     private Integer maxVolunteers;
     private String status;
-    private Double donationsCollected; // Câmp nou
+    private Double donationsCollected;
 
     // Câmpuri extra pentru afișare
     private String categoryName;
+    private Integer pendingCount = 0; // [NOU] Pentru notificări în dashboard
 
     public Activity() {}
 
@@ -56,4 +56,7 @@ public class Activity {
 
     public String getCategoryName() { return categoryName; }
     public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+
+    public Integer getPendingCount() { return pendingCount; }
+    public void setPendingCount(Integer pendingCount) { this.pendingCount = pendingCount; }
 }
