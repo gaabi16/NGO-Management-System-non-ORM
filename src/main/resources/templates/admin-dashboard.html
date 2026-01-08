@@ -567,7 +567,7 @@
             transform: translateY(-1px);
         }
 
-        #coordinatorFields, #volunteerFields {
+        #coordinatorFields, #volunteerFields, #createCoordinatorFields, #createVolunteerFields {
             padding: 15px;
             border-radius: 8px;
             border: 1px solid #e0e0e0;
@@ -576,17 +576,17 @@
             animation: fadeIn 0.3s ease;
         }
 
-        #coordinatorFields {
+        #coordinatorFields, #createCoordinatorFields {
             background-color: #f3f4fc;
             border-left: 4px solid #667eea;
         }
 
-        #volunteerFields {
+        #volunteerFields, #createVolunteerFields {
             background-color: #e8f5e9;
             border-left: 4px solid #28a745;
         }
 
-        #coordinatorFields h3 {
+        #coordinatorFields h3, #createCoordinatorFields h3 {
             font-size: 16px;
             color: #667eea;
             margin-bottom: 15px;
@@ -594,7 +594,7 @@
             padding-bottom: 8px;
         }
 
-        #volunteerFields h3 {
+        #volunteerFields h3, #createVolunteerFields h3 {
             font-size: 16px;
             color: #28a745;
             margin-bottom: 15px;
@@ -764,11 +764,42 @@
     <div class="modal-content">
         <div class="modal-header"><h2>Create New User</h2><span class="close" onclick="closeCreateModal()">&times;</span></div>
         <form th:action="@{/admin/users/create}" method="post">
-            <div class="form-row"><div class="form-group"><label>First Name</label><input type="text" name="first_name" required/></div><div class="form-group"><label>Last Name</label><input type="text" name="last_name" required/></div></div>
+            <div class="form-row">
+                <div class="form-group"><label>First Name</label><input type="text" name="first_name" required/></div>
+                <div class="form-group"><label>Last Name</label><input type="text" name="last_name" required/></div>
+            </div>
             <div class="form-group"><label>Email</label><input type="email" name="email" required/></div>
             <div class="form-group"><label>Password</label><input type="password" name="password" required/></div>
-            <div class="form-group"><label>Phone</label><input type="text" name="phone_number"/></div>
-            <div class="form-group"><label>Role</label><select name="role" required><option value="volunteer">Volunteer</option><option value="coordinator">Coordinator</option><option value="admin">Admin</option></select></div>
+            <div class="form-group"><label>Phone</label><input type="text" name="phone_number"/></div> <div class="form-group">
+            <label>Role</label>
+            <select name="role" id="create_role" required onchange="toggleCreateRoleFields()">
+                <option value="volunteer">Volunteer</option>
+                <option value="coordinator">Coordinator</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+
+            <div id="createCoordinatorFields" style="display: none;">
+                <h3>Coordinator Details</h3>
+                <div class="form-group">
+                    <label>Select ONG <span style="color:red">*</span></label>
+                    <select name="coordinatorOngRegNumber">
+                        <option value="">-- Select ONG --</option>
+                        <option th:each="ong : ${allOngs}" th:value="${ong.registrationNumber}" th:text="${ong.name} + ' (Reg: ' + ${ong.registrationNumber} + ')'"></option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Department</label><input type="text" name="department"></div>
+                <div class="form-row"><div class="form-group"><label>Experience</label><input type="number" name="experienceYears"></div><div class="form-group"><label>Type</label><select name="employmentType"><option value="">-- Select --</option><option value="Full-time">Full-time</option><option value="Part-time">Part-time</option></select></div></div>
+            </div>
+
+            <div id="createVolunteerFields" style="display: block;">
+                <h3>Volunteer Details</h3>
+                <div class="form-group"><label>Birth Date</label><input type="date" name="birthDate"></div>
+                <div class="form-group"><label>Skills</label><textarea name="skills"></textarea></div>
+                <div class="form-group"><label>Availability</label><input type="text" name="availability"></div>
+                <div class="form-group"><label>Emergency</label><input type="text" name="emergencyContact"></div>
+            </div>
+
             <button type="submit" class="btn-submit">Create User</button>
         </form>
     </div>
@@ -877,8 +908,43 @@
     function clearOngFilters() { window.location.href = '/admin/dashboard?view=ongs'; }
 
     // Modals
-    function openCreateModal() { document.getElementById('createModal').style.display = 'block'; }
+    function openCreateModal() {
+        document.getElementById('createModal').style.display = 'block';
+        toggleCreateRoleFields(); // Ensure fields state is correct on open
+    }
     function closeCreateModal() { document.getElementById('createModal').style.display = 'none'; }
+
+    // [NOU] Functie pentru comutare campuri in modalul de Creare si setare REQUIRED
+    function toggleCreateRoleFields() {
+        const role = document.getElementById('create_role').value;
+        const coordFields = document.getElementById('createCoordinatorFields');
+        const volFields = document.getElementById('createVolunteerFields');
+
+        // Show/Hide
+        coordFields.style.display = role === 'coordinator' ? 'block' : 'none';
+        volFields.style.display = role === 'volunteer' ? 'block' : 'none';
+
+        // Handle Required Attributes for Coordinator
+        const coordInputs = coordFields.querySelectorAll('input, select, textarea');
+        coordInputs.forEach(input => {
+            if (role === 'coordinator') {
+                input.setAttribute('required', '');
+            } else {
+                input.removeAttribute('required');
+            }
+        });
+
+        // Handle Required Attributes for Volunteer
+        const volInputs = volFields.querySelectorAll('input, select, textarea');
+        volInputs.forEach(input => {
+            if (role === 'volunteer') {
+                input.setAttribute('required', '');
+            } else {
+                input.removeAttribute('required');
+            }
+        });
+    }
+
     function toggleRoleSpecificFields() {
         const role = document.getElementById('edit_role').value;
         document.getElementById('coordinatorFields').style.display = role === 'coordinator' ? 'block' : 'none';
@@ -927,7 +993,7 @@
         });
     }
 
-    // [NOU] Interceptare submit form edit
+    // Interceptare submit form edit
     document.getElementById('editForm').addEventListener('submit', function(e) {
         e.preventDefault(); // Oprim trimiterea standard
 
