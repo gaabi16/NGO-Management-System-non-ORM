@@ -178,7 +178,7 @@ public class CoordinatorService {
         return jdbcTemplate.queryForList("SELECT id_category, name FROM activity_categories");
     }
 
-    // --- METHODS FOR PROFILE MANAGEMENT (NEW) ---
+    // --- METHODS FOR PROFILE MANAGEMENT ---
 
     @Transactional
     public void updateCoordinatorProfile(Coordinator updatedCoordinator, String currentUserEmail) {
@@ -206,16 +206,31 @@ public class CoordinatorService {
         coordinatorRepository.save(existingCoordinator);
     }
 
+    // [MODIFICAT] Metoda pentru stergerea completa in cascada
     @Transactional
     public void deleteCoordinatorAccount(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Ștergem profilul de coordonator (baza de date ar trebui să aibă ON DELETE CASCADE,
-        // dar pentru siguranță ștergem explicit)
-        coordinatorRepository.deleteByUserId(user.getIdUser());
+        Coordinator coordinator = coordinatorRepository.findByUserId(user.getIdUser())
+                .orElse(null);
 
-        // Ștergem utilizatorul (login-ul)
+        if (coordinator != null) {
+            // 1. Stergem toate inscrierile voluntarilor la activitatile create de acest coordinator
+            // Altfel primim eroare de Foreign Key daca incercam sa stergem activitatile
+            String sqlDeleteEnrollments = "DELETE FROM volunteer_activities WHERE id_activity IN " +
+                    "(SELECT id_activity FROM activities WHERE id_coordinator = ?)";
+            jdbcTemplate.update(sqlDeleteEnrollments, coordinator.getIdCoordinator());
+
+            // 2. Stergem activitatile create de coordinator
+            String sqlDeleteActivities = "DELETE FROM activities WHERE id_coordinator = ?";
+            jdbcTemplate.update(sqlDeleteActivities, coordinator.getIdCoordinator());
+
+            // 3. Stergem profilul de coordonator
+            coordinatorRepository.deleteByUserId(user.getIdUser());
+        }
+
+        // 4. Stergem utilizatorul (login-ul)
         userRepository.deleteById(user.getIdUser());
     }
 }
