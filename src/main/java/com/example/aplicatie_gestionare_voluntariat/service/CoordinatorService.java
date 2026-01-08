@@ -177,4 +177,45 @@ public class CoordinatorService {
     public List<Map<String, Object>> getAllCategories() {
         return jdbcTemplate.queryForList("SELECT id_category, name FROM activity_categories");
     }
+
+    // --- METHODS FOR PROFILE MANAGEMENT (NEW) ---
+
+    @Transactional
+    public void updateCoordinatorProfile(Coordinator updatedCoordinator, String currentUserEmail) {
+        // 1. Identificare user curent
+        User user = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 2. Identificare profil coordonator curent
+        Coordinator existingCoordinator = coordinatorRepository.findByUserId(user.getIdUser())
+                .orElseThrow(() -> new RuntimeException("Coordinator not found"));
+
+        // 3. Update date Utilizator (User Table) - Nume, Prenume, Telefon
+        if (updatedCoordinator.getUser() != null) {
+            user.setFirstName(updatedCoordinator.getUser().getFirstName());
+            user.setLastName(updatedCoordinator.getUser().getLastName());
+            user.setPhoneNumber(updatedCoordinator.getUser().getPhoneNumber());
+            userRepository.save(user);
+        }
+
+        // 4. Update date Coordonator (Coordinators Table) - Department, Experience, Employment
+        existingCoordinator.setDepartment(updatedCoordinator.getDepartment());
+        existingCoordinator.setExperienceYears(updatedCoordinator.getExperienceYears());
+        existingCoordinator.setEmploymentType(updatedCoordinator.getEmploymentType());
+
+        coordinatorRepository.save(existingCoordinator);
+    }
+
+    @Transactional
+    public void deleteCoordinatorAccount(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Ștergem profilul de coordonator (baza de date ar trebui să aibă ON DELETE CASCADE,
+        // dar pentru siguranță ștergem explicit)
+        coordinatorRepository.deleteByUserId(user.getIdUser());
+
+        // Ștergem utilizatorul (login-ul)
+        userRepository.deleteById(user.getIdUser());
+    }
 }
