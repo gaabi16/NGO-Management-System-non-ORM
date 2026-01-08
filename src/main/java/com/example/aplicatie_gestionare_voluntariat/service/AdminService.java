@@ -9,6 +9,7 @@ import com.example.aplicatie_gestionare_voluntariat.repository.OngRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.UserRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.VolunteerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,9 @@ public class AdminService {
     private VolunteerRepository volunteerRepository;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public List<Ong> getFirst5Ongs() { return ongRepository.findFirst5(); }
     public List<Coordinator> getFirst5Coordinators() { return coordinatorRepository.findFirst5(); }
@@ -87,7 +91,6 @@ public class AdminService {
         return new PageWrapper<>(ongs, totalElements, page, size);
     }
 
-    // [MODIFICAT] Metoda acceptă acum parametrii pentru detalii Volunteer/Coordinator
     @Transactional
     public User createUser(User user,
                            String coordinatorOngRegNumber, String department, Integer experienceYears, String employmentType,
@@ -101,7 +104,6 @@ public class AdminService {
 
         if (savedUser.getRole() == User.Role.volunteer) {
             Volunteer volunteer = new Volunteer(savedUser.getIdUser());
-            // Setăm detaliile
             volunteer.setBirthDate(birthDate);
             volunteer.setSkills(skills);
             volunteer.setAvailability(availability);
@@ -113,7 +115,6 @@ public class AdminService {
             User u = new User(); u.setIdUser(savedUser.getIdUser());
             coordinator.setUser(u);
 
-            // Setăm detaliile
             if (coordinatorOngRegNumber != null && !coordinatorOngRegNumber.isEmpty()) {
                 coordinator.setOngRegistrationNumber(coordinatorOngRegNumber);
             }
@@ -163,6 +164,14 @@ public class AdminService {
                     volunteerRepository.deleteByUserId(id);
                 }
                 else if (oldRole == User.Role.coordinator) {
+                    // Logică de curățare pentru coordonator dacă își schimbă rolul
+                    // Aici ar trebui ideal șterse și activitățile create de el, similar cu deleteOng
+                    Optional<Coordinator> c = coordinatorRepository.findByUserId(id);
+                    if(c.isPresent()) {
+                        Integer coordId = c.get().getIdCoordinator();
+                        jdbcTemplate.update("DELETE FROM volunteer_activities WHERE id_activity IN (SELECT id_activity FROM activities WHERE id_coordinator = ?)", coordId);
+                        jdbcTemplate.update("DELETE FROM activities WHERE id_coordinator = ?", coordId);
+                    }
                     coordinatorRepository.deleteByUserId(id);
                 }
             }
@@ -206,16 +215,17 @@ public class AdminService {
         if (userToDelete.getRole() == User.Role.admin) throw new IllegalStateException("Admin accounts cannot be deleted!");
 
         volunteerRepository.deleteActivitiesByUserId(id);
-
         volunteerRepository.deleteByUserId(id);
 
         // Logica extinsa de stergere pentru coordinator (cascadare activitati)
         Optional<Coordinator> coord = coordinatorRepository.findByUserId(id);
         if (coord.isPresent()) {
-            // Sterge activitati si inscrieri (duplicat logic din CoordinatorService pentru siguranta in Admin)
-            // Nota: Ideal ar fi o metoda comuna, dar aici folosim repository direct
-            // Implementare simplificata: presupunem ca baza de date sau service-ul gestioneaza
-            // Dar pentru consistenta cu CoordinatorService, stergem intai profilul
+            Integer coordId = coord.get().getIdCoordinator();
+            // 1. Sterge inscrierile la activitatile acestui coordonator
+            jdbcTemplate.update("DELETE FROM volunteer_activities WHERE id_activity IN (SELECT id_activity FROM activities WHERE id_coordinator = ?)", coordId);
+            // 2. Sterge activitatile
+            jdbcTemplate.update("DELETE FROM activities WHERE id_coordinator = ?", coordId);
+            // 3. Sterge profilul
             coordinatorRepository.deleteByUserId(id);
         }
 
@@ -250,11 +260,42 @@ public class AdminService {
         return null;
     }
 
+    // [MODIFICAT] Ștergere în cascadă ONG -> Coordonatori -> Activități -> Înscrieri
     @Transactional
-    public boolean deleteOng(String id) {
-        Ong ongToDelete = ongRepository.findById(id).orElse(null);
-        if (ongToDelete == null) return false;
-        ongRepository.deleteById(id);
+    public boolean deleteOng(String registrationNumber) {
+        Ong ong = ongRepository.findById(registrationNumber).orElse(null);
+        if (ong == null) return false;
+
+        // 1. Găsim toți utilizatorii care sunt coordonatori la acest ONG
+        String sqlGetCoordinators = "SELECT id_user FROM coordinators WHERE ong_registration_number = ?";
+        List<Integer> coordinatorUserIds = jdbcTemplate.queryForList(sqlGetCoordinators, Integer.class, registrationNumber);
+
+        // 2. Pentru fiecare coordonator, ștergem tot lanțul de dependențe
+        for (Integer userId : coordinatorUserIds) {
+            // Obținem ID-ul de coordonator pentru a găsi activitățile
+            String sqlGetCoordId = "SELECT id_coordinator FROM coordinators WHERE id_user = ?";
+            Integer coordinatorId = jdbcTemplate.queryForObject(sqlGetCoordId, Integer.class, userId);
+
+            if (coordinatorId != null) {
+                // A. Ștergem înscrierile voluntarilor la activitățile acestui coordonator
+                String sqlDeleteEnrollments = "DELETE FROM volunteer_activities WHERE id_activity IN (SELECT id_activity FROM activities WHERE id_coordinator = ?)";
+                jdbcTemplate.update(sqlDeleteEnrollments, coordinatorId);
+
+                // B. Ștergem activitățile create de coordonator
+                String sqlDeleteActivities = "DELETE FROM activities WHERE id_coordinator = ?";
+                jdbcTemplate.update(sqlDeleteActivities, coordinatorId);
+            }
+
+            // C. Ștergem profilul de coordonator
+            String sqlDeleteCoord = "DELETE FROM coordinators WHERE id_user = ?";
+            jdbcTemplate.update(sqlDeleteCoord, userId);
+
+            // D. Ștergem contul de utilizator al coordonatorului (deoarece rolul lui depinde de ONG)
+            userRepository.deleteById(userId);
+        }
+
+        // 3. În final, ștergem ONG-ul
+        ongRepository.deleteById(registrationNumber);
         return true;
     }
 }
