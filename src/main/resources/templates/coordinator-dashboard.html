@@ -5,177 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coordinator Dashboard</title>
     <style>
+        /* ... (CSS existent) ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            min-height: 100vh;
-        }
-
-        /* Navbar Styles */
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; min-height: 100vh; }
+        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         .nav-brand { font-size: 1.5rem; font-weight: bold; }
         .nav-links { display: flex; align-items: center; gap: 10px; }
-
-        .nav-btn {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-        }
+        .nav-btn { color: white; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; transition: all 0.3s ease; font-size: 0.95rem; }
         .nav-btn:hover { background: rgba(255,255,255,0.2); }
-
-        .nav-btn.active-nav {
-            background: rgba(255,255,255,0.25);
-            font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.4);
-        }
-
-        .logout-btn {
-            background: #dc3545;
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.3s;
-            margin-left: 10px;
-        }
+        .nav-btn.active-nav { background: rgba(255,255,255,0.25); font-weight: 600; border: 1px solid rgba(255,255,255,0.4); }
+        .logout-btn { background: #dc3545; border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.3s; margin-left: 10px; }
         .logout-btn:hover { background: #c82333; }
-
-        /* Container */
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-
-        /* Header */
-        .dashboard-header {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .dashboard-header { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
         .ong-title h1 { font-size: 1.8rem; color: #333; }
         .ong-title p { color: #666; margin-top: 5px; }
-
-        .create-btn {
-            background: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.3s;
-        }
+        .create-btn { background: #28a745; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.3s; }
         .create-btn:hover { background: #218838; }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border-left: 5px solid #667eea;
-            transition: transform 0.2s;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .stat-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #667eea; transition: transform 0.2s; }
         .stat-card:hover { transform: translateY(-2px); }
         .stat-card:nth-child(2) { border-left-color: #f6ad55; }
         .stat-card:nth-child(3) { border-left-color: #68d391; }
         .stat-card:nth-child(4) { border-left-color: #63b3ed; }
-
         .stat-value { font-size: 2.5rem; font-weight: bold; color: #2d3748; }
         .stat-label { color: #718096; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Table & Content Area */
         .section-title { font-size: 1.5rem; margin-bottom: 20px; color: #444; border-left: 5px solid #667eea; padding-left: 15px; }
-
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-
-        /* Placeholder Style */
-        .placeholder-content {
-            padding: 60px 20px;
-            text-align: center;
-            color: #718096;
-        }
-        .placeholder-text {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 10px;
-        }
-
+        .table-container { background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; }
+        .placeholder-content { padding: 60px 20px; text-align: center; color: #718096; }
+        .placeholder-text { font-size: 1.5rem; font-weight: 600; color: #4a5568; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #edf2f7; }
         th { background: #f8fafc; color: #4a5568; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
         tr:hover { background: #f7fafc; }
-
-        .status-badge {
-            padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
-        }
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
         .status-open { background: #c6f6d5; color: #22543d; }
         .status-closed { background: #fed7d7; color: #822727; }
-
-        .btn-view-details {
-            display: inline-block; background: #667eea; color: white; padding: 6px 14px; border-radius: 6px;
-            text-decoration: none; font-size: 0.9rem; transition: background 0.3s;
-        }
+        .btn-view-details { display: inline-block; background: #667eea; color: white; padding: 6px 14px; border-radius: 6px; text-decoration: none; font-size: 0.9rem; transition: background 0.3s; }
         .btn-view-details:hover { background: #5a67d8; }
-
-        .notification-badge {
-            display: inline-flex; align-items: center; background-color: #fff5f5; color: #e53e3e;
-            border: 1px solid #fc8181; padding: 2px 8px; border-radius: 12px;
-            font-size: 0.75rem; font-weight: bold; margin-left: 10px;
-        }
+        .notification-badge { display: inline-flex; align-items: center; background-color: #fff5f5; color: #e53e3e; border: 1px solid #fc8181; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin-left: 10px; }
         .dot { height: 8px; width: 8px; background-color: #e53e3e; border-radius: 50%; display: inline-block; margin-right: 5px; }
-
-        /* Modals */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000;
-        }
-        .modal-content {
-            background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px;
-            max-height: 90vh; overflow-y: auto; position: relative;
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; }
         .close { float: right; font-size: 1.5rem; cursor: pointer; }
-
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: 500; }
-        input, select, textarea {
-            width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 1rem;
-        }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 1rem; }
+
+        /* [NOU] Alert Styles */
+        .alert { padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; animation: slideDown 0.3s; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -183,25 +63,19 @@
 <nav class="navbar">
     <div class="nav-brand">Coordinator Dashboard</div>
     <div class="nav-links">
-        <a th:href="@{/coordinator/dashboard(view='activities')}"
-           th:class="'nav-btn ' + (${currentView == 'activities'} ? 'active-nav' : '')">
-            Manage Activities
-        </a>
-
-        <a th:href="@{/coordinator/dashboard(view='volunteers')}"
-           th:class="'nav-btn ' + (${currentView == 'volunteers'} ? 'active-nav' : '')">
-            Manage Volunteers
-        </a>
-
+        <a th:href="@{/coordinator/dashboard(view='activities')}" th:class="'nav-btn ' + (${currentView == 'activities'} ? 'active-nav' : '')">Manage Activities</a>
+        <a th:href="@{/coordinator/dashboard(view='volunteers')}" th:class="'nav-btn ' + (${currentView == 'volunteers'} ? 'active-nav' : '')">Manage Volunteers</a>
         <a href="/coordinator/profile" class="nav-btn" style="margin-left: 15px;">My Profile</a>
-
-        <form th:action="@{/logout}" method="post" style="display:inline;">
-            <button class="logout-btn">Logout</button>
-        </form>
+        <form th:action="@{/logout}" method="post" style="display:inline;"><button class="logout-btn">Logout</button></form>
     </div>
 </nav>
 
 <div class="container">
+    <div th:if="${param.success}" class="alert alert-success">
+        <span th:if="${#strings.equals(param.success[0], 'ActivityCreated')}">Activity created successfully!</span>
+        <span th:if="${#strings.equals(param.success[0], 'EnrollmentClosed')}">Enrollment closed successfully!</span>
+        <span th:unless="${#strings.equals(param.success[0], 'ActivityCreated') or #strings.equals(param.success[0], 'EnrollmentClosed')}">Action completed successfully!</span>
+    </div>
 
     <div class="dashboard-header">
         <div class="ong-title">
@@ -214,22 +88,10 @@
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-value" th:text="${stats.totalActivities}">0</div>
-            <div class="stat-label">Total Activities</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" th:text="${stats.pendingRequests}">0</div>
-            <div class="stat-label">Pending Requests</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" th:text="${stats.activeVolunteers}">0</div>
-            <div class="stat-label">Active Volunteers</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" th:text="${#numbers.formatCurrency(stats.totalDonations)}">$0</div>
-            <div class="stat-label">Total Donations</div>
-        </div>
+        <div class="stat-card"><div class="stat-value" th:text="${stats.totalActivities}">0</div><div class="stat-label">Total Activities</div></div>
+        <div class="stat-card"><div class="stat-value" th:text="${stats.pendingRequests}">0</div><div class="stat-label">Pending Requests</div></div>
+        <div class="stat-card"><div class="stat-value" th:text="${stats.activeVolunteers}">0</div><div class="stat-label">Active Volunteers</div></div>
+        <div class="stat-card"><div class="stat-value" th:text="${#numbers.formatCurrency(stats.totalDonations)}">$0</div><div class="stat-label">Total Donations</div></div>
     </div>
 
     <div th:if="${currentView == null}" class="table-container placeholder-content">
@@ -241,40 +103,16 @@
         <h2 class="section-title">Manage Activities</h2>
         <div class="table-container">
             <table>
-                <thead>
-                <tr>
-                    <th>Activity Name</th>
-                    <th>Date</th>
-                    <th>Location</th>
-                    <th>Volunteers</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
+                <thead><tr><th>Activity Name</th><th>Date</th><th>Location</th><th>Volunteers</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody>
-                <tr th:if="${activities.empty}">
-                    <td colspan="6" style="text-align:center; color:#999;">No activities created yet.</td>
-                </tr>
+                <tr th:if="${activities.empty}"><td colspan="6" style="text-align:center; color:#999;">No activities created yet.</td></tr>
                 <tr th:each="activity : ${activities}">
-                    <td>
-                        <span th:text="${activity.name}">Tree Planting</span>
-                        <span class="notification-badge" th:if="${activity.pendingCount > 0}">
-                                <span class="dot"></span>
-                                <span th:text="${activity.pendingCount} + ' New'"></span>
-                            </span>
-                    </td>
+                    <td><span th:text="${activity.name}">Tree Planting</span><span class="notification-badge" th:if="${activity.pendingCount > 0}"><span class="dot"></span><span th:text="${activity.pendingCount} + ' New'"></span></span></td>
                     <td th:text="${#temporals.format(activity.startDate, 'dd MMM yyyy')}">Date</td>
                     <td th:text="${activity.location}">Location</td>
                     <td th:text="${activity.maxVolunteers}">50</td>
-                    <td>
-                            <span th:class="'status-badge ' + (${activity.status == 'open'} ? 'status-open' : 'status-closed')"
-                                  th:text="${activity.status}">OPEN</span>
-                    </td>
-                    <td>
-                        <a th:href="@{/coordinator/activities/{id}(id=${activity.idActivity})}" class="btn-view-details">
-                            View Details
-                        </a>
-                    </td>
+                    <td><span th:class="'status-badge ' + (${activity.status == 'open'} ? 'status-open' : 'status-closed')" th:text="${activity.status}">OPEN</span></td>
+                    <td><a th:href="@{/coordinator/activities/{id}(id=${activity.idActivity})}" class="btn-view-details">View Details</a></td>
                 </tr>
                 </tbody>
             </table>
@@ -285,88 +123,33 @@
         <h2 class="section-title">Active Volunteers in Your Activities</h2>
         <div class="table-container">
             <table>
-                <thead>
-                <tr>
-                    <th>Volunteer Name</th>
-                    <th>Contact Info</th>
-                    <th>Skills</th>
-                    <th>Participating In</th>
-                </tr>
-                </thead>
+                <thead><tr><th>Volunteer Name</th><th>Contact Info</th><th>Skills</th><th>Participating In</th></tr></thead>
                 <tbody>
-                <tr th:if="${volunteers.empty}">
-                    <td colspan="4" style="text-align:center; color:#999;">No active volunteers found for your activities.</td>
-                </tr>
+                <tr th:if="${volunteers.empty}"><td colspan="4" style="text-align:center; color:#999;">No active volunteers found for your activities.</td></tr>
                 <tr th:each="vol : ${volunteers}">
                     <td style="font-weight:600;" th:text="${vol.first_name + ' ' + vol.last_name}">John Doe</td>
-                    <td>
-                        <div>📧 <span th:text="${vol.email}">email</span></div>
-                        <div th:if="${vol.phone_number}">📞 <span th:text="${vol.phone_number}">phone</span></div>
-                    </td>
+                    <td><div>📧 <span th:text="${vol.email}">email</span></div><div th:if="${vol.phone_number}">📞 <span th:text="${vol.phone_number}">phone</span></div></td>
                     <td th:text="${vol.skills}">Coding, Cooking</td>
-                    <td>
-                            <span style="background: #ebf4ff; color: #4c51bf; padding: 4px 8px; border-radius: 4px; font-size: 0.9rem;"
-                                  th:text="${vol.activity_list}">
-                                Planting, Teaching
-                            </span>
-                    </td>
+                    <td><span style="background: #ebf4ff; color: #4c51bf; padding: 4px 8px; border-radius: 4px; font-size: 0.9rem;" th:text="${vol.activity_list}">Planting, Teaching</span></td>
                 </tr>
                 </tbody>
             </table>
         </div>
     </div>
-
 </div>
 
 <div th:if="${currentView == 'activities'}" id="createActivityModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal('createActivityModal')">&times;</span>
         <h2 style="margin-bottom: 20px; color: #333;">Create New Activity</h2>
-
         <form th:action="@{/coordinator/activities/create}" th:object="${newActivity}" method="post">
-            <div class="form-group">
-                <label>Activity Name</label>
-                <input type="text" th:field="*{name}" required>
-            </div>
-
-            <div class="form-group">
-                <label>Category</label>
-                <select th:field="*{idCategory}">
-                    <option th:each="cat : ${categories}"
-                            th:value="${cat.id_category}"
-                            th:text="${cat.name}">Category</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Description</label>
-                <textarea th:field="*{description}" rows="3"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Location</label>
-                <input type="text" th:field="*{location}" required>
-            </div>
-
-            <div style="display: flex; gap: 15px;">
-                <div class="form-group" style="flex:1">
-                    <label>Start Date</label>
-                    <input type="datetime-local" th:field="*{startDate}" required>
-                </div>
-                <div class="form-group" style="flex:1">
-                    <label>End Date</label>
-                    <input type="datetime-local" th:field="*{endDate}" required>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Max Volunteers</label>
-                <input type="number" th:field="*{maxVolunteers}" min="1" required>
-            </div>
-
-            <button type="submit" class="create-btn" style="width:100%; justify-content:center; margin-top:10px;">
-                Save Activity
-            </button>
+            <div class="form-group"><label>Activity Name</label><input type="text" th:field="*{name}" required></div>
+            <div class="form-group"><label>Category</label><select th:field="*{idCategory}"><option th:each="cat : ${categories}" th:value="${cat.id_category}" th:text="${cat.name}">Category</option></select></div>
+            <div class="form-group"><label>Description</label><textarea th:field="*{description}" rows="3"></textarea></div>
+            <div class="form-group"><label>Location</label><input type="text" th:field="*{location}" required></div>
+            <div style="display: flex; gap: 15px;"><div class="form-group" style="flex:1"><label>Start Date</label><input type="datetime-local" th:field="*{startDate}" required></div><div class="form-group" style="flex:1"><label>End Date</label><input type="datetime-local" th:field="*{endDate}" required></div></div>
+            <div class="form-group"><label>Max Volunteers</label><input type="number" th:field="*{maxVolunteers}" min="1" required></div>
+            <button type="submit" class="create-btn" style="width:100%; justify-content:center; margin-top:10px;">Save Activity</button>
         </form>
     </div>
 </div>
@@ -375,6 +158,15 @@
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     window.onclick = function(event) { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; }
+
+    // [NOU] Auto-hide alerts script
+    setTimeout(function() {
+        document.querySelectorAll('.alert').forEach(a => {
+            a.style.transition = 'opacity 0.5s ease';
+            a.style.opacity = '0';
+            setTimeout(() => a.remove(), 500);
+        });
+    }, 3000);
 </script>
 
 </body>
