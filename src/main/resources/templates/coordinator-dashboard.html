@@ -121,12 +121,11 @@
             border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             overflow: hidden;
-            /* [MODIFICAT] Sters min-height. Acum se muleaza pe continut */
         }
 
         /* Placeholder Style */
         .placeholder-content {
-            padding: 60px 20px; /* Padding defines size for placeholder only */
+            padding: 60px 20px;
             text-align: center;
             color: #718096;
         }
@@ -194,7 +193,7 @@
             Manage Volunteers
         </a>
 
-        <a href="#" class="nav-btn" style="margin-left: 15px;">My Profile</a>
+        <a href="/coordinator/profile" class="nav-btn" style="margin-left: 15px;">My Profile</a>
 
         <form th:action="@{/logout}" method="post" style="display:inline;">
             <button class="logout-btn">Logout</button>
