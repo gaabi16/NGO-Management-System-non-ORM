@@ -68,10 +68,23 @@ public class AdminController {
         return "admin-dashboard";
     }
 
+    // [MODIFICAT] Endpoint create cu toti parametrii
     @PostMapping("/users/create")
-    public String createUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
+    public String createUser(@ModelAttribute User user,
+                             @RequestParam(required = false) String coordinatorOngRegNumber,
+                             @RequestParam(required = false) String department,
+                             @RequestParam(required = false) Integer experienceYears,
+                             @RequestParam(required = false) String employmentType,
+                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate birthDate,
+                             @RequestParam(required = false) String skills,
+                             @RequestParam(required = false) String availability,
+                             @RequestParam(required = false) String emergencyContact,
+                             RedirectAttributes redirectAttributes) {
         try {
-            adminService.createUser(user);
+            adminService.createUser(user,
+                    coordinatorOngRegNumber, department, experienceYears, employmentType,
+                    birthDate, skills, availability, emergencyContact);
+
             redirectAttributes.addFlashAttribute("successMessage", "User created successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
@@ -95,7 +108,6 @@ public class AdminController {
         return response;
     }
 
-    // [NOU] Endpoint pentru a verifica dacă un voluntar are activități active/pending
     @GetMapping("/users/check-volunteer-status/{id}")
     @ResponseBody
     public boolean checkVolunteerStatus(@PathVariable Integer id) {
