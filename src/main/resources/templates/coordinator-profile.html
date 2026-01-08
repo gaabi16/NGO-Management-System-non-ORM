@@ -241,16 +241,17 @@
             padding: 30px;
             border-radius: 12px;
             width: 90%;
-            max-width: 450px;
+            max-width: 500px;
             text-align: center;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             animation: slideDown 0.3s;
         }
         .warning-icon { font-size: 3rem; margin-bottom: 15px; }
-        .modal-title { font-size: 1.5rem; color: #333; margin-bottom: 10px; }
-        .modal-text { color: #666; margin-bottom: 25px; line-height: 1.5; }
+        .modal-title { font-size: 1.5rem; color: #dc3545; margin-bottom: 15px; font-weight: bold; }
+        .modal-text { color: #555; margin-bottom: 25px; line-height: 1.6; font-size: 1.05rem; }
         .modal-actions { display: flex; gap: 10px; justify-content: center; }
-        .btn-delete-confirm { background: #dc3545; color: white; }
+        .btn-delete-confirm { background: #dc3545; color: white; padding: 12px 20px; }
+        .btn-delete-confirm:hover { background: #c82333; }
         .btn-cancel { background: #e2e6ea; color: #333; }
 
     </style>
@@ -357,13 +358,16 @@
         <div class="warning-icon">⚠️</div>
         <h3 class="modal-title">Delete Account?</h3>
         <p class="modal-text">
-            Are you sure you want to delete your coordinator account?
-            This action is permanent. Your NGO data will remain, but your access will be removed.
+            <strong>WARNING:</strong> This action is permanent!
+            <br><br>
+            Deleting your account will also <strong>DELETE ALL ACTIVITIES</strong> you have created and remove all volunteer enrollments associated with them.
+            <br><br>
+            Are you absolutely sure you want to proceed?
         </p>
         <div class="modal-actions">
             <button class="btn btn-cancel" onclick="closeDeleteModal()">Cancel</button>
             <form th:action="@{/coordinator/profile/delete}" method="post">
-                <button type="submit" class="btn btn-delete-confirm">Yes, Delete My Account</button>
+                <button type="submit" class="btn btn-delete-confirm">Yes, Delete Everything</button>
             </form>
         </div>
     </div>
@@ -371,60 +375,34 @@
 
 <script>
     const form = document.getElementById('profileForm');
-    // Selectam input-urile care nu sunt read-only (user.email si ongRegistrationNumber sunt excluse de la editare)
     const inputs = form.querySelectorAll('input:not([type="hidden"]):not([name="user.email"]):not([name="ongRegistrationNumber"]), select');
     const actionButtons = document.getElementById('actionButtons');
     const menuInfo = document.getElementById('menuInfo');
     const menuEdit = document.getElementById('menuEdit');
 
     function setEditMode() {
-        // UI Updates
         menuInfo.classList.remove('active');
         menuEdit.classList.add('active');
         actionButtons.style.display = 'flex';
-
-        // Enable inputs
-        inputs.forEach(input => {
-            input.disabled = false;
-        });
+        inputs.forEach(input => input.disabled = false);
     }
 
     function setViewMode() {
-        // UI Updates
         menuInfo.classList.add('active');
         menuEdit.classList.remove('active');
         actionButtons.style.display = 'none';
-
-        // Disable inputs
-        inputs.forEach(input => {
-            input.disabled = true;
-        });
+        inputs.forEach(input => input.disabled = true);
     }
 
     function cancelEdit() {
-        // Reload page to reset form data
         window.location.reload();
     }
 
-    // Modal Logic
     const deleteModal = document.getElementById('deleteModal');
+    function openDeleteModal() { deleteModal.style.display = 'flex'; }
+    function closeDeleteModal() { deleteModal.style.display = 'none'; }
+    window.onclick = function(event) { if (event.target == deleteModal) closeDeleteModal(); }
 
-    function openDeleteModal() {
-        deleteModal.style.display = 'flex';
-    }
-
-    function closeDeleteModal() {
-        deleteModal.style.display = 'none';
-    }
-
-    // Close modal if clicking outside
-    window.onclick = function(event) {
-        if (event.target == deleteModal) {
-            closeDeleteModal();
-        }
-    }
-
-    // Auto-hide alerts
     setTimeout(function() {
         document.querySelectorAll('.alert').forEach(a => {
             a.style.transition = 'opacity 0.3s ease';
