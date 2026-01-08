@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Volunteer Management</title>
     <style>
-        /* ... (Stilurile existente rămân neschimbate) ... */
+        /* ... (CSS-ul rămâne neschimbat) ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
         .container { max-width: 1400px; margin: 0 auto; }
@@ -59,15 +59,12 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; background-color: white; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
         .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; margin-top: 10px; }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
-
-        /* Alert Styles */
         .alert { padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; animation: slideDown 0.3s; }
         .alert-success { background-color: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
         .alert-error { background-color: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
-
         .logout-btn { background: #dc3545; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 20px; }
         .logout-btn:hover { background: #c82333; transform: translateY(-2px); }
-        /* ... Filters, Modals styles ... */
+        .optional { color: #999; font-size: 12px; font-weight: normal; }
         .filter-section { margin: 20px 0; position: relative; }
         .btn-filter { padding: 12px 20px; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; }
         .btn-filter:hover { background: #f0f0f0; }
@@ -128,6 +125,7 @@
                 <h2 class="table-title">📊 Users Management</h2>
                 <button class="btn-create" onclick="openCreateModal()">➕ Create User</button>
             </div>
+
             <div class="filter-section">
                 <button class="btn-filter" onclick="toggleFilterMenu()">🔍 Filter Users <span class="filter-arrow">▼</span></button>
                 <div id="filterMenu" class="filter-menu">
@@ -156,6 +154,7 @@
                 </tr>
                 </tbody>
             </table>
+
             <div class="pagination" th:if="${usersPage.totalPages > 1}">
                 <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}" th:class="${currentPage == 0} ? 'disabled' : ''" th:onclick="${currentPage == 0} ? 'return false;' : ''">← Prev</a>
                 <span class="active" th:text="${currentPage + 1}"></span>
@@ -168,6 +167,7 @@
                 <h2 class="table-title">🏢 ONGs Management</h2>
                 <button class="btn-create" onclick="openCreateOngModal()">➕ Create ONG</button>
             </div>
+
             <div class="filter-section">
                 <button class="btn-filter" onclick="toggleOngFilterMenu()">🔍 Filter ONGs <span class="filter-arrow" id="ongFilterArrow">▼</span></button>
                 <div id="ongFilterMenu" class="filter-menu">
@@ -178,15 +178,35 @@
                     <div class="filter-actions"><button class="btn-apply-filter" onclick="applyOngFilters()">Apply Filters</button><button class="btn-clear-filter" onclick="clearOngFilters()">Clear All</button></div>
                 </div>
             </div>
+
             <table th:if="${ongsPage != null && ongsPage.content.size() > 0}">
-                <thead><tr><th>Reg #</th><th>Name</th><th>Country</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
+                <thead>
+                <tr>
+                    <th>Reg #</th>
+                    <th>Name</th>
+                    <th>Country</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
                 <tbody>
                 <tr th:each="ong : ${ongsPage.content}">
-                    <td th:text="${ong.registrationNumber}"></td><td th:text="${ong.name}"></td><td th:text="${ong.country ?: 'N/A'}"></td><td th:text="${ong.email ?: 'N/A'}"></td><td th:text="${ong.phone ?: 'N/A'}"></td>
-                    <td><div class="action-buttons"><button class="btn-edit" th:data-ong-id="${ong.registrationNumber}" onclick="openEditOngModal(this.getAttribute('data-ong-id'))">✏️ Edit</button><button class="btn-delete" th:data-ong-id="${ong.registrationNumber}" onclick="confirmDeleteOng(this.getAttribute('data-ong-id'))">🗑️ Delete</button></div></td>
+                    <td th:text="${ong.registrationNumber}"></td>
+                    <td th:text="${ong.name}"></td>
+                    <td th:text="${ong.country ?: 'N/A'}"></td>
+                    <td th:text="${ong.email ?: 'N/A'}"></td>
+                    <td th:text="${ong.phone ?: 'N/A'}"></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-edit" th:data-ong-id="${ong.registrationNumber}" onclick="openEditOngModal(this.getAttribute('data-ong-id'))">✏️ Edit</button>
+                            <button class="btn-delete" th:data-ong-id="${ong.registrationNumber}" onclick="confirmDeleteOng(this.getAttribute('data-ong-id'))">🗑️ Delete</button>
+                        </div>
+                    </td>
                 </tr>
                 </tbody>
             </table>
+
             <div class="pagination" th:if="${ongsPage.totalPages > 1}">
                 <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 1}, search=${currentSearch})}" th:class="${currentPage == 0} ? 'disabled' : ''" th:onclick="${currentPage == 0} ? 'return false;' : ''">← Prev</a>
                 <span class="active" th:text="${currentPage + 1}"></span>
@@ -198,7 +218,16 @@
             <h2 class="table-title">📋 First 5 Coordinators</h2>
             <table>
                 <thead><tr><th>ID</th><th>User Name</th><th>ONG</th><th>Department</th><th>Experience (Years)</th><th>Employment Type</th></tr></thead>
-                <tbody><tr th:each="coordinator : ${coordinators}"><td th:text="${coordinator.idCoordinator}"></td><td th:text="${coordinator.user != null ? coordinator.user.first_name + ' ' + coordinator.user.last_name : 'N/A'}"></td><td th:text="${coordinator.ong != null ? coordinator.ong.name : 'N/A'}"></td><td th:text="${coordinator.department ?: 'N/A'}"></td><td th:text="${coordinator.experienceYears ?: 'N/A'}"></td><td th:text="${coordinator.employmentType ?: 'N/A'}"></td></tr></tbody>
+                <tbody>
+                <tr th:each="coordinator : ${coordinators}">
+                    <td th:text="${coordinator.idCoordinator}"></td>
+                    <td th:text="${coordinator.user != null ? coordinator.user.first_name + ' ' + coordinator.user.last_name : 'N/A'}"></td>
+                    <td th:text="${coordinator.ong != null ? coordinator.ong.name : 'N/A'}"></td>
+                    <td th:text="${coordinator.department ?: 'N/A'}"></td>
+                    <td th:text="${coordinator.experienceYears ?: 'N/A'}"></td>
+                    <td th:text="${coordinator.employmentType ?: 'N/A'}"></td>
+                </tr>
+                </tbody>
             </table>
         </div>
 
@@ -206,16 +235,126 @@
     </div>
 </div>
 
-<div id="createModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Create New User</h2><span class="close" onclick="closeCreateModal()">&times;</span></div><form th:action="@{/admin/users/create}" method="post"><div class="form-row"><div class="form-group"><label>First Name</label><input type="text" name="first_name" required/></div><div class="form-group"><label>Last Name</label><input type="text" name="last_name" required/></div></div><div class="form-group"><label>Email</label><input type="email" name="email" required/></div><div class="form-group"><label>Password</label><input type="password" name="password" required/></div><div class="form-group"><label>Phone</label><input type="text" name="phone_number"/></div><div class="form-group"><label>Role</label><select name="role" id="create_role" required onchange="toggleCreateRoleFields()"><option value="volunteer">Volunteer</option><option value="coordinator">Coordinator</option><option value="admin">Admin</option></select></div><div id="createCoordinatorFields" style="display: none;"><h3>Coordinator Details</h3><div class="form-group"><label>Select ONG <span style="color:red">*</span></label><select name="coordinatorOngRegNumber"><option value="">-- Select ONG --</option><option th:each="ong : ${allOngs}" th:value="${ong.registrationNumber}" th:text="${ong.name} + ' (Reg: ' + ${ong.registrationNumber} + ')'"></option></select></div><div class="form-group"><label>Department</label><input type="text" name="department"></div><div class="form-row"><div class="form-group"><label>Experience</label><input type="number" name="experienceYears"></div><div class="form-group"><label>Type</label><select name="employmentType"><option value="">-- Select --</option><option value="Full-time">Full-time</option><option value="Part-time">Part-time</option></select></div></div></div><div id="createVolunteerFields" style="display: block;"><h3>Volunteer Details</h3><div class="form-group"><label>Birth Date</label><input type="date" name="birthDate"></div><div class="form-group"><label>Skills</label><textarea name="skills"></textarea></div><div class="form-group"><label>Availability</label><input type="text" name="availability"></div><div class="form-group"><label>Emergency</label><input type="text" name="emergencyContact"></div></div><button type="submit" class="btn-submit">Create User</button></form></div></div>
-<div id="editModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Edit User</h2><span class="close" onclick="closeEditModal()">&times;</span></div><form id="editForm" method="post"><input type="hidden" id="original_role" name="original_role" value=""><input type="hidden" id="editing_user_id" value=""><div class="form-row"><div class="form-group"><label>First Name</label><input type="text" id="edit_first_name" name="first_name" required/></div><div class="form-group"><label>Last Name</label><input type="text" id="edit_last_name" name="last_name" required/></div></div><div class="form-group"><label>Email</label><input type="email" id="edit_email" name="email" required/></div><div class="form-group"><label>Phone</label><input type="text" id="edit_phone" name="phone_number"/></div><div class="form-group"><label>Role</label><select id="edit_role" name="role" required onchange="toggleRoleSpecificFields()"><option value="volunteer">Volunteer</option><option value="coordinator">Coordinator</option><option value="admin">Admin</option></select></div><div id="coordinatorFields" style="display: none;"><h3>Coordinator Details</h3><div class="form-group"><label>Find ONG (Search by Name or Reg. Number):</label><input type="text" id="ongSearchInput" class="search-input-modal" placeholder="Type to filter..."></div><div class="form-group"><label>Select ONG <span style="color:red">*</span></label><select id="coord_ong" name="coordinatorOngRegNumber"><option value="">-- Select ONG --</option><option th:each="ong : ${allOngs}" th:value="${ong.registrationNumber}" th:text="${ong.name} + ' (Reg: ' + ${ong.registrationNumber} + ')'"></option></select></div><div class="form-group"><label>Department</label><input type="text" id="coord_department" name="department"></div><div class="form-row"><div class="form-group"><label>Experience</label><input type="number" id="coord_experience" name="experienceYears"></div><div class="form-group"><label>Type</label><select id="coord_employment" name="employmentType"><option value="">-- Select --</option><option value="Full-time">Full-time</option><option value="Part-time">Part-time</option></select></div></div></div><div id="volunteerFields" style="display: none;"><h3>Volunteer Details</h3><div class="form-group"><label>Birth Date</label><input type="date" id="vol_birth_date" name="birthDate"></div><div class="form-group"><label>Skills</label><textarea id="vol_skills" name="skills"></textarea></div><div class="form-group"><label>Availability</label><input type="text" id="vol_availability" name="availability"></div><div class="form-group"><label>Emergency</label><input type="text" id="vol_emergency" name="emergencyContact"></div></div><button type="submit" class="btn-submit">Update User</button></form></div></div>
-<div id="createOngModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Create New ONG</h2><span class="close" onclick="closeCreateOngModal()">&times;</span></div><form th:action="@{/admin/ongs/create}" method="post"><div class="form-group"><label>Name <span style="color:red">*</span></label><input type="text" name="name" required/></div><div class="form-group"><label>Reg. Number (ID) <span style="color:red">*</span></label><input type="text" name="registrationNumber" required/></div><div class="form-group"><label>Description</label><textarea name="description"></textarea></div><div class="form-row"><div class="form-group"><label>Address <span style="color:red">*</span></label><input type="text" name="address" required/></div><div class="form-group"><label>Country <span style="color:red">*</span></label><input type="text" name="country" required/></div></div><div class="form-row"><div class="form-group"><label>Email <span style="color:red">*</span></label><input type="email" name="email" required/></div><div class="form-group"><label>Phone <span style="color:red">*</span></label><input type="text" name="phone" required/></div></div><div class="form-group"><label>Founding Date</label><input type="date" name="foundingDate"/></div><button type="submit" class="btn-submit">Create ONG</button></form></div></div>
-<div id="editOngModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Edit ONG</h2><span class="close" onclick="closeEditOngModal()">&times;</span></div><form id="editOngForm" method="post"><div class="form-group"><label>Name</label><input type="text" id="edit_ong_name" name="name" required/></div><div class="form-group"><label>Reg. Number (Read-only)</label><input type="text" id="edit_ong_reg" name="registrationNumber" readonly style="background-color: #eee;"/></div><div class="form-group"><label>Description</label><textarea id="edit_ong_description" name="description"></textarea></div><div class="form-row"><div class="form-group"><label>Address</label><input type="text" id="edit_ong_address" name="address"/></div><div class="form-group"><label>Country</label><input type="text" id="edit_ong_country" name="country"/></div></div><div class="form-row"><div class="form-group"><label>Email</label><input type="email" id="edit_ong_email" name="email"/></div><div class="form-group"><label>Phone</label><input type="text" id="edit_ong_phone" name="phone"/></div></div><div class="form-group"><label>Founding Date</label><input type="date" id="edit_ong_founding" name="foundingDate"/></div><button type="submit" class="btn-submit">Update ONG</button></form></div></div>
+<div id="createModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Create New User</h2><span class="close" onclick="closeCreateModal()">&times;</span></div>
+        <form th:action="@{/admin/users/create}" method="post">
+            <div class="form-row">
+                <div class="form-group"><label>First Name</label><input type="text" name="first_name" required/></div>
+                <div class="form-group"><label>Last Name</label><input type="text" name="last_name" required/></div>
+            </div>
+            <div class="form-group"><label>Email</label><input type="email" name="email" required/></div>
+            <div class="form-group"><label>Password</label><input type="password" name="password" required/></div>
+            <div class="form-group"><label>Phone</label><input type="text" name="phone_number"/></div>
+
+            <div class="form-group">
+                <label>Role</label>
+                <select name="role" id="create_role" required onchange="toggleCreateRoleFields()">
+                    <option value="volunteer">Volunteer</option>
+                    <option value="coordinator">Coordinator</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+
+            <div id="createCoordinatorFields" style="display: none;">
+                <h3>Coordinator Details</h3>
+                <div class="form-group">
+                    <label>Select ONG <span style="color:red">*</span></label>
+                    <select name="coordinatorOngRegNumber">
+                        <option value="">-- Select ONG --</option>
+                        <option th:each="ong : ${allOngs}" th:value="${ong.registrationNumber}" th:text="${ong.name} + ' (Reg: ' + ${ong.registrationNumber} + ')'"></option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Department</label><input type="text" name="department"></div>
+                <div class="form-row"><div class="form-group"><label>Experience</label><input type="number" name="experienceYears"></div><div class="form-group"><label>Type</label><select name="employmentType"><option value="">-- Select --</option><option value="Full-time">Full-time</option><option value="Part-time">Part-time</option></select></div></div>
+            </div>
+
+            <div id="createVolunteerFields" style="display: block;">
+                <h3>Volunteer Details</h3>
+                <div class="form-group"><label>Birth Date</label><input type="date" name="birthDate"></div>
+                <div class="form-group"><label>Skills</label><textarea name="skills"></textarea></div>
+                <div class="form-group"><label>Availability</label><input type="text" name="availability"></div>
+                <div class="form-group"><label>Emergency</label><input type="text" name="emergencyContact"></div>
+            </div>
+
+            <button type="submit" class="btn-submit">Create User</button>
+        </form>
+    </div>
+</div>
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Edit User</h2><span class="close" onclick="closeEditModal()">&times;</span></div>
+        <form id="editForm" method="post">
+            <input type="hidden" id="original_role" name="original_role" value="">
+            <input type="hidden" id="editing_user_id" value="">
+
+            <div class="form-row"><div class="form-group"><label>First Name</label><input type="text" id="edit_first_name" name="first_name" required/></div><div class="form-group"><label>Last Name</label><input type="text" id="edit_last_name" name="last_name" required/></div></div>
+            <div class="form-group"><label>Email</label><input type="email" id="edit_email" name="email" required/></div>
+            <div class="form-group"><label>Phone</label><input type="text" id="edit_phone" name="phone_number"/></div>
+            <div class="form-group"><label>Role</label><select id="edit_role" name="role" required onchange="toggleRoleSpecificFields()"><option value="volunteer">Volunteer</option><option value="coordinator">Coordinator</option><option value="admin">Admin</option></select></div>
+
+            <div id="coordinatorFields" style="display: none;">
+                <h3>Coordinator Details</h3>
+                <div class="form-group"><label>Find ONG (Search by Name or Reg. Number):</label><input type="text" id="ongSearchInput" class="search-input-modal" placeholder="Type to filter..."></div>
+                <div class="form-group">
+                    <label>Select ONG <span style="color:red">*</span></label>
+                    <select id="coord_ong" name="coordinatorOngRegNumber">
+                        <option value="">-- Select ONG --</option>
+                        <option th:each="ong : ${allOngs}" th:value="${ong.registrationNumber}" th:text="${ong.name} + ' (Reg: ' + ${ong.registrationNumber} + ')'"></option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Department</label><input type="text" id="coord_department" name="department"></div>
+                <div class="form-row"><div class="form-group"><label>Experience</label><input type="number" id="coord_experience" name="experienceYears"></div><div class="form-group"><label>Type</label><select id="coord_employment" name="employmentType"><option value="">-- Select --</option><option value="Full-time">Full-time</option><option value="Part-time">Part-time</option></select></div></div>
+            </div>
+
+            <div id="volunteerFields" style="display: none;">
+                <h3>Volunteer Details</h3>
+                <div class="form-group"><label>Birth Date</label><input type="date" id="vol_birth_date" name="birthDate"></div>
+                <div class="form-group"><label>Skills</label><textarea id="vol_skills" name="skills"></textarea></div>
+                <div class="form-group"><label>Availability</label><input type="text" id="vol_availability" name="availability"></div>
+                <div class="form-group"><label>Emergency</label><input type="text" id="vol_emergency" name="emergencyContact"></div>
+            </div>
+            <button type="submit" class="btn-submit">Update User</button>
+        </form>
+    </div>
+</div>
+
+<div id="createOngModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Create New ONG</h2><span class="close" onclick="closeCreateOngModal()">&times;</span></div>
+        <form th:action="@{/admin/ongs/create}" method="post">
+            <div class="form-group"><label>Name <span style="color:red">*</span></label><input type="text" name="name" required/></div>
+            <div class="form-group"><label>Reg. Number (ID) <span style="color:red">*</span></label><input type="text" name="registrationNumber" required/></div>
+            <div class="form-group"><label>Description</label><textarea name="description"></textarea></div>
+            <div class="form-row"><div class="form-group"><label>Address <span style="color:red">*</span></label><input type="text" name="address" required/></div><div class="form-group"><label>Country <span style="color:red">*</span></label><input type="text" name="country" required/></div></div>
+            <div class="form-row"><div class="form-group"><label>Email <span style="color:red">*</span></label><input type="email" name="email" required/></div><div class="form-group"><label>Phone <span style="color:red">*</span></label><input type="text" name="phone" required/></div></div>
+            <div class="form-group"><label>Founding Date</label><input type="date" name="foundingDate"/></div>
+            <button type="submit" class="btn-submit">Create ONG</button>
+        </form>
+    </div>
+</div>
+
+<div id="editOngModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h2>Edit ONG</h2><span class="close" onclick="closeEditOngModal()">&times;</span></div>
+        <form id="editOngForm" method="post">
+            <div class="form-group"><label>Name</label><input type="text" id="edit_ong_name" name="name" required/></div>
+            <div class="form-group"><label>Reg. Number (Read-only)</label><input type="text" id="edit_ong_reg" name="registrationNumber" readonly style="background-color: #eee;"/></div>
+            <div class="form-group"><label>Description</label><textarea id="edit_ong_description" name="description"></textarea></div>
+            <div class="form-row"><div class="form-group"><label>Address</label><input type="text" id="edit_ong_address" name="address"/></div><div class="form-group"><label>Country</label><input type="text" id="edit_ong_country" name="country"/></div></div>
+            <div class="form-row"><div class="form-group"><label>Email</label><input type="email" id="edit_ong_email" name="email"/></div><div class="form-group"><label>Phone</label><input type="text" id="edit_ong_phone" name="phone"/></div></div>
+            <div class="form-group"><label>Founding Date</label><input type="date" id="edit_ong_founding" name="foundingDate"/></div>
+            <button type="submit" class="btn-submit">Update ONG</button>
+        </form>
+    </div>
+</div>
 
 <script th:inline="javascript">
     var currentUserEmail = /*[[${currentUserEmail}]]*/ '';
     var selectedRoles = [];
 
-    // [NOU] Auto-hide alerts script
+    // Auto-hide alerts script
     setTimeout(function() {
         document.querySelectorAll('.alert').forEach(a => {
             a.style.transition = 'opacity 0.5s ease';
@@ -354,8 +493,28 @@
         });
     }
     function closeEditOngModal() { document.getElementById('editOngModal').style.display = 'none'; }
-    function confirmDelete(id, email, role) { if(confirm('Delete user?')) { const f = document.createElement('form'); f.method='POST'; f.action='/admin/users/delete/'+id; document.body.appendChild(f); f.submit(); } }
-    function confirmDeleteOng(id) { if(confirm('Delete ONG?')) { const f = document.createElement('form'); f.method='POST'; f.action='/admin/ongs/delete/'+id; document.body.appendChild(f); f.submit(); } }
+
+    function confirmDelete(id, email, role) {
+        if(confirm('Delete user?')) {
+            const f = document.createElement('form');
+            f.method='POST';
+            f.action='/admin/users/delete/'+id;
+            document.body.appendChild(f);
+            f.submit();
+        }
+    }
+
+    // [MODIFICAT] ConfirmDeleteOng cu avertisment extins
+    function confirmDeleteOng(id) {
+        if(confirm('Warning: Deleting this ONG will also delete all associated COORDINATORS and their ACTIVITIES.\n\nThis action cannot be undone.\n\nAre you sure you want to proceed?')) {
+            const f = document.createElement('form');
+            f.method='POST';
+            f.action='/admin/ongs/delete/'+id;
+            document.body.appendChild(f);
+            f.submit();
+        }
+    }
+
     window.onclick = function(e) { if(e.target.className === 'modal') e.target.style.display = 'none'; }
 </script>
 </body>
