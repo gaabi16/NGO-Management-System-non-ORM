@@ -104,6 +104,11 @@ public class AdminService {
     public Coordinator getCoordinatorDetailsByUserId(Integer userId) { return coordinatorRepository.findByUserId(userId).orElse(null); }
     public Volunteer getVolunteerDetailsByUserId(Integer userId) { return volunteerRepository.findByUserId(userId).orElse(null); }
 
+    // [NOU] Metodă pentru verificare conflicte
+    public boolean hasVolunteerConflicts(Integer userId) {
+        return volunteerRepository.hasActiveOrPendingActivities(userId);
+    }
+
     @Transactional
     public User updateUser(Integer id, User updatedUser,
                            String coordinatorOngRegNumber, String department, Integer experienceYears, String employmentType,
@@ -127,8 +132,17 @@ public class AdminService {
             User savedUser = userRepository.save(existingUser);
 
             if (oldRole != newRole) {
-                if (oldRole == User.Role.volunteer) volunteerRepository.deleteByUserId(id);
-                else if (oldRole == User.Role.coordinator) coordinatorRepository.deleteByUserId(id);
+                // Dacă trece de la volunteer la altceva (ex: coordinator)
+                if (oldRole == User.Role.volunteer) {
+                    // [MODIFICAT] Ștergem întâi dependențele din volunteer_activities
+                    // pentru a evita eroarea de Foreign Key
+                    volunteerRepository.deleteActivitiesByUserId(id);
+                    // Apoi ștergem voluntarul
+                    volunteerRepository.deleteByUserId(id);
+                }
+                else if (oldRole == User.Role.coordinator) {
+                    coordinatorRepository.deleteByUserId(id);
+                }
             }
 
             if (newRole == User.Role.coordinator) {
@@ -160,6 +174,10 @@ public class AdminService {
         User userToDelete = userRepository.findById(id).orElse(null);
         if (userToDelete == null) return false;
         if (userToDelete.getRole() == User.Role.admin) throw new IllegalStateException("Admin accounts cannot be deleted!");
+
+        // Asigurăm ștergerea curată și la delete simplu
+        volunteerRepository.deleteActivitiesByUserId(id);
+
         volunteerRepository.deleteByUserId(id);
         coordinatorRepository.deleteByUserId(id);
         userRepository.deleteById(id);
@@ -168,7 +186,6 @@ public class AdminService {
 
     @Transactional
     public Ong createOng(Ong ong) {
-        // [NOU] Verificăm dacă există deja un ONG cu acest număr de înregistrare
         Optional<Ong> existingOng = ongRepository.findById(ong.getRegistrationNumber());
         if (existingOng.isPresent()) {
             throw new IllegalArgumentException("An ONG with Registration Number '" + ong.getRegistrationNumber() + "' already exists!");
