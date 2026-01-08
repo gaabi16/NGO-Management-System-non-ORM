@@ -90,4 +90,27 @@ public class CoordinatorController {
         coordinatorService.updateApplicationStatus(activityId, volunteerId, status);
         return "redirect:/coordinator/activities/" + activityId + "?success=StatusUpdated";
     }
+
+    // --- PROFILE METHODS (NEW) ---
+
+    @GetMapping("/profile")
+    public String viewProfile(Model model, Authentication authentication) {
+        Coordinator coordinator = coordinatorService.getCoordinatorByEmail(authentication.getName());
+        model.addAttribute("profile", coordinator);
+        return "coordinator-profile";
+    }
+
+    @PostMapping("/profile/update")
+    public String updateProfile(@ModelAttribute Coordinator coordinator, Authentication authentication) {
+        String currentUserEmail = authentication.getName();
+        coordinatorService.updateCoordinatorProfile(coordinator, currentUserEmail);
+        return "redirect:/coordinator/profile?updated=true";
+    }
+
+    @PostMapping("/profile/delete")
+    public String deleteAccount(Authentication authentication) {
+        String currentUserEmail = authentication.getName();
+        coordinatorService.deleteCoordinatorAccount(currentUserEmail);
+        return "redirect:/logout";
+    }
 }
