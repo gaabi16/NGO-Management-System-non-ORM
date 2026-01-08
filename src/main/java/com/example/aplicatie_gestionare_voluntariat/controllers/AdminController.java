@@ -95,6 +95,13 @@ public class AdminController {
         return response;
     }
 
+    // [NOU] Endpoint pentru a verifica dacă un voluntar are activități active/pending
+    @GetMapping("/users/check-volunteer-status/{id}")
+    @ResponseBody
+    public boolean checkVolunteerStatus(@PathVariable Integer id) {
+        return adminService.hasVolunteerConflicts(id);
+    }
+
     @PostMapping("/users/update/{id}")
     public String updateUser(@PathVariable Integer id,
                              @ModelAttribute User user,
