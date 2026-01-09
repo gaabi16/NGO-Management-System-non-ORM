@@ -24,31 +24,38 @@ public class UserService {
 
     @Transactional
     public User registerUser(User user) {
-        // Criptează parola din câmpul temporar
         if(user.getPassword() != null) {
             user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
         }
-
-        // Setează rol default
         if(user.getRole() == null) {
             user.setRole(User.Role.volunteer);
         }
-
-        // Salvează utilizatorul
         User savedUser = userRepository.save(user);
 
-        // Dacă rolul este volunteer, creează și înregistrarea în tabelul volunteers
         if(savedUser.getRole() == User.Role.volunteer) {
             Volunteer volunteer = new Volunteer(savedUser.getIdUser());
             volunteerRepository.save(volunteer);
         }
-
         return savedUser;
     }
 
     @Transactional
     public String registerVolunteer(VolunteerRegistrationDto registrationDto) {
-        // Creează user-ul
+        // VALIDARE BACKEND (Conform create_tables.sql)
+        if (registrationDto.getFirstName() == null || registrationDto.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name is required.");
+        if (registrationDto.getLastName() == null || registrationDto.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name is required.");
+        if (registrationDto.getEmail() == null || registrationDto.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email is required.");
+        if (registrationDto.getPassword() == null || registrationDto.getPassword().trim().isEmpty()) throw new IllegalArgumentException("Password is required.");
+
+        // Phone number este NULLABLE in baza de date, deci nu il validam strict.
+
+        if (registrationDto.getBirthDate() == null) throw new IllegalArgumentException("Birth Date is required.");
+        if (registrationDto.getSkills() == null || registrationDto.getSkills().trim().isEmpty()) throw new IllegalArgumentException("Skills are required.");
+        if (registrationDto.getAvailability() == null || registrationDto.getAvailability().trim().isEmpty()) throw new IllegalArgumentException("Availability is required.");
+
+        // Emergency Contact este NULLABLE in baza de date (conform create_tables.sql modificat), deci este optional.
+
+        // Logica de salvare
         User user = new User();
         user.setFirstName(registrationDto.getFirstName());
         user.setLastName(registrationDto.getLastName());
@@ -57,10 +64,8 @@ public class UserService {
         user.setPhoneNumber(registrationDto.getPhoneNumber());
         user.setRole(User.Role.volunteer);
 
-        // Salvează utilizatorul
         User savedUser = userRepository.save(user);
 
-        // Creează înregistrarea de volunteer cu toate detaliile
         Volunteer volunteer = new Volunteer();
         volunteer.setIdUser(savedUser.getIdUser());
         volunteer.setBirthDate(registrationDto.getBirthDate());
@@ -68,13 +73,10 @@ public class UserService {
         volunteer.setAvailability(registrationDto.getAvailability());
         volunteer.setEmergencyContact(registrationDto.getEmergencyContact());
 
-        // Salvează datele de volunteer
         volunteerRepository.save(volunteer);
 
         return savedUser.getEmail();
     }
-
-    // --- METODE NOI PENTRU PROFIL ---
 
     public VolunteerRegistrationDto getVolunteerProfile(String email) {
         User user = userRepository.findByEmail(email)
@@ -84,13 +86,10 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Volunteer details not found"));
 
         VolunteerRegistrationDto dto = new VolunteerRegistrationDto();
-        // Date User
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
         dto.setEmail(user.getEmail());
         dto.setPhoneNumber(user.getPhoneNumber());
-
-        // Date Volunteer
         dto.setBirthDate(volunteer.getBirthDate());
         dto.setSkills(volunteer.getSkills());
         dto.setAvailability(volunteer.getAvailability());
@@ -104,15 +103,11 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Update User info
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setPhoneNumber(dto.getPhoneNumber());
-        // Nu permitem schimbarea email-ului sau parolei în acest flux simplu momentan,
-        // dar am putea adăuga logică dacă e necesar.
         userRepository.save(user);
 
-        // Update Volunteer info
         Volunteer volunteer = volunteerRepository.findByUserId(user.getIdUser())
                 .orElse(new Volunteer(user.getIdUser()));
 
@@ -128,12 +123,7 @@ public class UserService {
     public void deleteVolunteerAccount(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // Stergem intai dependintele (volunteers, activitati - prin constrangeri DB sau manual daca e nevoie)
-        // În implementarea actuală, deleteByUserId din VolunteerRepository e suficient
         volunteerRepository.deleteByUserId(user.getIdUser());
-
-        // Apoi stergem userul
         userRepository.deleteById(user.getIdUser());
     }
 }
