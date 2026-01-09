@@ -10,6 +10,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.regex.Pattern;
+
 @Service
 public class UserService {
 
@@ -20,8 +22,18 @@ public class UserService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+    // Regex pentru validare email: ceva@domeniu.extensie (minim 2 caractere la extensie)
+    private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+
+    private boolean isValidEmail(String email) {
+        return email != null && Pattern.matches(EMAIL_PATTERN, email);
+    }
+
     @Transactional
     public User registerUser(User user) {
+        if (!isValidEmail(user.getEmail())) {
+            throw new IllegalArgumentException("Invalid email format (example: user@domain.com)");
+        }
         if(user.getPassword() != null) user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
         if(user.getRole() == null) user.setRole(User.Role.volunteer);
         User savedUser = userRepository.save(user);
@@ -34,7 +46,11 @@ public class UserService {
         // Validari la inregistrare
         if (registrationDto.getFirstName() == null || registrationDto.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name is required.");
         if (registrationDto.getLastName() == null || registrationDto.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name is required.");
+
+        // Validare Email
         if (registrationDto.getEmail() == null || registrationDto.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email is required.");
+        if (!isValidEmail(registrationDto.getEmail())) throw new IllegalArgumentException("Invalid email format. Must be like: user@domain.com");
+
         if (registrationDto.getPassword() == null || registrationDto.getPassword().trim().isEmpty()) throw new IllegalArgumentException("Password is required.");
         if (registrationDto.getBirthDate() == null) throw new IllegalArgumentException("Birth Date is required.");
         if (registrationDto.getSkills() == null || registrationDto.getSkills().trim().isEmpty()) throw new IllegalArgumentException("Skills are required.");
@@ -82,7 +98,10 @@ public class UserService {
         if (dto.getBirthDate() == null) throw new IllegalArgumentException("Birth Date cannot be empty");
         if (dto.getSkills() == null || dto.getSkills().trim().isEmpty()) throw new IllegalArgumentException("Skills cannot be empty");
         if (dto.getAvailability() == null || dto.getAvailability().trim().isEmpty()) throw new IllegalArgumentException("Availability cannot be empty");
-        // Phone si Emergency Contact sunt optionale
+
+        // Email-ul nu se schimba aici de regula, dar userul il detine
+        // Daca am permite update la email, ar trebui validat si aici.
+        // In acest controller (profile update), emailul vine din sesiune, nu din DTO, deci nu il validam aici.
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         user.setFirstName(dto.getFirstName());
