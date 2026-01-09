@@ -109,7 +109,7 @@ public class AdminService {
         User savedUser = userRepository.save(user);
 
         if (savedUser.getRole() == User.Role.volunteer) {
-            // Validare Volunteer (Phone & Emergency Contact sunt OPTIONALE)
+            // Validare Volunteer
             if (birthDate == null) throw new IllegalArgumentException("Birth Date is required for Volunteers");
             if (skills == null || skills.trim().isEmpty()) throw new IllegalArgumentException("Skills are required for Volunteers");
             if (availability == null || availability.trim().isEmpty()) throw new IllegalArgumentException("Availability is required for Volunteers");
@@ -122,7 +122,7 @@ public class AdminService {
             volunteerRepository.save(volunteer);
 
         } else if (savedUser.getRole() == User.Role.coordinator) {
-            // Validare Coordinator (Toate campurile NOT NULL)
+            // Validare Coordinator
             if (coordinatorOngRegNumber == null || coordinatorOngRegNumber.trim().isEmpty()) throw new IllegalArgumentException("ONG Selection is required for Coordinators");
             if (department == null || department.trim().isEmpty()) throw new IllegalArgumentException("Department is required for Coordinators");
             if (experienceYears == null) throw new IllegalArgumentException("Experience Years is required for Coordinators");
@@ -154,10 +154,12 @@ public class AdminService {
     public User updateUser(Integer id, User updatedUser,
                            String coordinatorOngRegNumber, String department, Integer experienceYears, String employmentType,
                            LocalDate birthDate, String skills, String availability, String emergencyContact) {
-        // Validare User Update (fara parola, care e optionala la update)
+
+        // VALIDARE UPDATE USER (General)
         if (updatedUser.getFirstName() == null || updatedUser.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name cannot be empty");
         if (updatedUser.getLastName() == null || updatedUser.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name cannot be empty");
         if (updatedUser.getEmail() == null || updatedUser.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email cannot be empty");
+        // Phone number este optional, nu il validam strict.
 
         User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser != null) {
@@ -193,8 +195,11 @@ public class AdminService {
             }
 
             if (newRole == User.Role.coordinator) {
-                // Validare Update Coordinator
+                // VALIDARE UPDATE COORDINATOR
                 if (coordinatorOngRegNumber == null || coordinatorOngRegNumber.trim().isEmpty()) throw new IllegalArgumentException("ONG required for Coordinator");
+                if (department == null || department.trim().isEmpty()) throw new IllegalArgumentException("Department required for Coordinator");
+                if (experienceYears == null) throw new IllegalArgumentException("Experience Years required for Coordinator");
+                if (employmentType == null || employmentType.trim().isEmpty()) throw new IllegalArgumentException("Employment Type required for Coordinator");
 
                 Optional<Coordinator> existingCoord = coordinatorRepository.findByUserId(id);
                 Coordinator coordinator = existingCoord.orElse(new Coordinator());
@@ -211,8 +216,11 @@ public class AdminService {
                 coordinatorRepository.save(coordinator);
 
             } else if (newRole == User.Role.volunteer) {
-                // Validare Update Volunteer
-                if (birthDate == null) throw new IllegalArgumentException("Birth Date required");
+                // VALIDARE UPDATE VOLUNTEER
+                if (birthDate == null) throw new IllegalArgumentException("Birth Date required for Volunteer");
+                if (skills == null || skills.trim().isEmpty()) throw new IllegalArgumentException("Skills required for Volunteer");
+                if (availability == null || availability.trim().isEmpty()) throw new IllegalArgumentException("Availability required for Volunteer");
+                // Emergency Contact e optional
 
                 Optional<Volunteer> existingVol = volunteerRepository.findByUserId(id);
                 Volunteer volunteer = existingVol.orElse(new Volunteer(id));
@@ -225,7 +233,7 @@ public class AdminService {
             }
             return savedUser;
         }
-        return null;
+        throw new IllegalArgumentException("User not found");
     }
 
     @Transactional
@@ -251,7 +259,6 @@ public class AdminService {
 
     @Transactional
     public Ong createOng(Ong ong) {
-        // Validare ONG
         if (ong.getRegistrationNumber() == null || ong.getRegistrationNumber().trim().isEmpty()) throw new IllegalArgumentException("Registration Number is required");
         if (ong.getName() == null || ong.getName().trim().isEmpty()) throw new IllegalArgumentException("Name is required");
         if (ong.getDescription() == null || ong.getDescription().trim().isEmpty()) throw new IllegalArgumentException("Description is required");
@@ -259,7 +266,6 @@ public class AdminService {
         if (ong.getCountry() == null || ong.getCountry().trim().isEmpty()) throw new IllegalArgumentException("Country is required");
         if (ong.getPhone() == null || ong.getPhone().trim().isEmpty()) throw new IllegalArgumentException("Phone is required");
         if (ong.getEmail() == null || ong.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email is required");
-        // Founding Date este optionala in SQL
 
         Optional<Ong> existingOng = ongRepository.findById(ong.getRegistrationNumber());
         if (existingOng.isPresent()) {
@@ -272,6 +278,15 @@ public class AdminService {
 
     @Transactional
     public Ong updateOng(String registrationNumber, Ong updatedOng) {
+        // VALIDARE UPDATE ONG
+        if (updatedOng.getName() == null || updatedOng.getName().trim().isEmpty()) throw new IllegalArgumentException("Name cannot be empty");
+        if (updatedOng.getDescription() == null || updatedOng.getDescription().trim().isEmpty()) throw new IllegalArgumentException("Description cannot be empty");
+        if (updatedOng.getAddress() == null || updatedOng.getAddress().trim().isEmpty()) throw new IllegalArgumentException("Address cannot be empty");
+        if (updatedOng.getCountry() == null || updatedOng.getCountry().trim().isEmpty()) throw new IllegalArgumentException("Country cannot be empty");
+        if (updatedOng.getPhone() == null || updatedOng.getPhone().trim().isEmpty()) throw new IllegalArgumentException("Phone cannot be empty");
+        if (updatedOng.getEmail() == null || updatedOng.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email cannot be empty");
+        // Founding Date este optional
+
         Ong existingOng = ongRepository.findById(registrationNumber).orElse(null);
         if (existingOng != null) {
             existingOng.setName(updatedOng.getName());
@@ -283,7 +298,7 @@ public class AdminService {
             existingOng.setFoundingDate(updatedOng.getFoundingDate());
             return ongRepository.save(existingOng);
         }
-        return null;
+        throw new IllegalArgumentException("ONG not found");
     }
 
     @Transactional
