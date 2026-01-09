@@ -45,24 +45,28 @@ public class AdminController {
         model.addAttribute("allOngs", adminService.getAllOngs());
 
         if ("users".equals(view)) {
+            // [MODIFICARE] 50 de useri pe pagină
+            int pageSize = 50;
             AdminService.PageWrapper<User> usersPage;
             if (roles != null && !roles.isEmpty()) {
                 List<User.Role> roleEnums = roles.stream().map(User.Role::valueOf).collect(Collectors.toList());
-                usersPage = adminService.getUsersPageByRoles(page, 50, roleEnums);
+                usersPage = adminService.getUsersPageByRoles(page, pageSize, roleEnums);
             } else {
-                usersPage = adminService.getUsersPage(page, 50);
+                usersPage = adminService.getUsersPage(page, pageSize);
             }
             model.addAttribute("usersPage", usersPage);
             model.addAttribute("currentPage", page);
 
         } else if ("ongs".equals(view)) {
-            AdminService.PageWrapper<Ong> ongsPage = adminService.getOngsPage(page, 50, search);
+            // [MODIFICARE] 20 de ONG-uri pe pagină
+            int pageSize = 20;
+            AdminService.PageWrapper<Ong> ongsPage = adminService.getOngsPage(page, pageSize, search);
             model.addAttribute("ongsPage", ongsPage);
             model.addAttribute("currentPage", page);
             model.addAttribute("currentSearch", search);
 
-        } else if ("coordinators".equals(view)) {
-            model.addAttribute("coordinators", adminService.getFirst5Coordinators());
+        } else if ("statistics".equals(view)) {
+            model.addAttribute("stats", adminService.getSystemStatistics());
         }
 
         return "admin-dashboard";

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Volunteer Management</title>
     <style>
-        /* ... CSS existent pastrat pentru consistenta ... */
+        /* ... Styles Base ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
         .container { max-width: 1400px; margin: 0 auto; }
@@ -38,11 +38,15 @@
         .btn-delete { background: #dc3545; color: white; }
         .btn-delete:hover:not(:disabled) { background: #c82333; transform: translateY(-1px); }
         .btn-delete:disabled { background: #ccc; cursor: not-allowed; opacity: 0.6; }
-        .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
-        .pagination a, .pagination span { padding: 8px 12px; border: 2px solid #667eea; border-radius: 5px; text-decoration: none; color: #667eea; font-weight: 600; transition: all 0.3s ease; }
+
+        /* Pagination Styles */
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
+        .pagination a, .pagination span.current-page { padding: 8px 14px; border: 2px solid #667eea; border-radius: 5px; text-decoration: none; color: #667eea; font-weight: 600; transition: all 0.3s ease; min-width: 40px; text-align: center; }
         .pagination a:hover:not(.disabled) { background: #667eea; color: white; }
-        .pagination .active { background: #667eea; color: white; }
+        .pagination .active, .pagination span.current-page { background: #667eea; color: white; cursor: default; }
         .pagination .disabled { opacity: 0.5; cursor: not-allowed; border-color: #ccc; color: #ccc; }
+        .pagination .dots { color: #666; font-weight: bold; padding: 0 5px; }
+
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .modal-content { background-color: white; margin: 5% auto; padding: 40px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); animation: slideDown 0.3s; max-height: 90vh; overflow-y: auto; }
@@ -94,7 +98,23 @@
         #volunteerFields, #createVolunteerFields { background-color: #e8f5e9; border-left: 4px solid #28a745; }
         #coordinatorFields h3, #createCoordinatorFields h3 { font-size: 16px; color: #667eea; margin-bottom: 15px; border-bottom: 1px solid #dce1f7; padding-bottom: 8px; }
         #volunteerFields h3, #createVolunteerFields h3 { font-size: 16px; color: #28a745; margin-bottom: 15px; border-bottom: 1px solid #c8e6c9; padding-bottom: 8px; }
+
         .search-input-modal { width: 100%; padding: 8px 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: white url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat 98% 50%; }
+
+        /* Statistics Grid Styles */
+        .stats-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px; }
+        .stat-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee; transition: transform 0.3s; position: relative; overflow: hidden; flex: 1 1 300px; max-width: 400px; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: #667eea; }
+        .stat-card.gold::before { background: #FFD700; }
+        .stat-card.green::before { background: #28a745; }
+        .stat-card.blue::before { background: #17a2b8; }
+        .stat-card.purple::before { background: #6f42c1; }
+        .stat-title { font-size: 14px; color: #777; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #333; margin-bottom: 5px; }
+        .stat-subtitle { font-size: 14px; color: #666; }
+        .stat-icon { position: absolute; top: 20px; right: 20px; font-size: 40px; opacity: 0.1; }
+
         @media (max-width: 768px) { .button-group { flex-direction: column; } .btn { width: 100%; } table { font-size: 12px; } th, td { padding: 8px; } .form-row { grid-template-columns: 1fr; } .action-buttons { flex-direction: column; } }
     </style>
 </head>
@@ -108,7 +128,7 @@
     <div class="button-group">
         <a href="/admin/dashboard?view=users" th:classappend="${currentView == 'users'} ? 'active' : ''" class="btn">👥 View Users</a>
         <a href="/admin/dashboard?view=ongs" th:classappend="${currentView == 'ongs'} ? 'active' : ''" class="btn">🏢 View ONGs</a>
-        <a href="/admin/dashboard?view=coordinators" th:classappend="${currentView == 'coordinators'} ? 'active' : ''" class="btn">📋 View Coordinators</a>
+        <a href="/admin/dashboard?view=statistics" th:classappend="${currentView == 'statistics'} ? 'active' : ''" class="btn">📈 View Statistics</a>
     </div>
 
     <div class="content-area">
@@ -157,9 +177,37 @@
             </table>
 
             <div class="pagination" th:if="${usersPage.totalPages > 1}">
-                <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}" th:class="${currentPage == 0} ? 'disabled' : ''" th:onclick="${currentPage == 0} ? 'return false;' : ''">← Prev</a>
-                <span class="active" th:text="${currentPage + 1}"></span>
-                <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}" th:class="${currentPage >= usersPage.totalPages - 1} ? 'disabled' : ''" th:onclick="${currentPage >= usersPage.totalPages - 1} ? 'return false;' : ''">Next →</a>
+                <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}"
+                   th:class="${currentPage == 0} ? 'disabled' : ''"
+                   th:onclick="${currentPage == 0} ? 'return false;' : ''">← Prev</a>
+
+                <th:block th:if="${usersPage.totalPages <= 3}">
+                    <a th:each="i : ${#numbers.sequence(0, usersPage.totalPages - 1)}"
+                       th:href="@{/admin/dashboard(view='users', page=${i}, roles=${param.roles})}"
+                       th:class="${currentPage == i} ? 'active' : ''"
+                       th:text="${i + 1}"></a>
+                </th:block>
+
+                <th:block th:if="${usersPage.totalPages > 3}">
+                    <a th:href="@{/admin/dashboard(view='users', page=0, roles=${param.roles})}"
+                       th:class="${currentPage == 0} ? 'active' : ''">1</a>
+
+                    <span class="dots" th:if="${currentPage > 1}">...</span>
+
+                    <span class="current-page"
+                          th:if="${currentPage > 0 and currentPage < usersPage.totalPages - 1}"
+                          th:text="${currentPage + 1}"></span>
+
+                    <span class="dots" th:if="${currentPage < usersPage.totalPages - 2}">...</span>
+
+                    <a th:href="@{/admin/dashboard(view='users', page=${usersPage.totalPages - 1}, roles=${param.roles})}"
+                       th:class="${currentPage == usersPage.totalPages - 1} ? 'active' : ''"
+                       th:text="${usersPage.totalPages}"></a>
+                </th:block>
+
+                <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}"
+                   th:class="${currentPage >= usersPage.totalPages - 1} ? 'disabled' : ''"
+                   th:onclick="${currentPage >= usersPage.totalPages - 1} ? 'return false;' : ''">Next →</a>
             </div>
         </div>
 
@@ -209,27 +257,86 @@
             </table>
 
             <div class="pagination" th:if="${ongsPage.totalPages > 1}">
-                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 1}, search=${currentSearch})}" th:class="${currentPage == 0} ? 'disabled' : ''" th:onclick="${currentPage == 0} ? 'return false;' : ''">← Prev</a>
-                <span class="active" th:text="${currentPage + 1}"></span>
-                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 1}, search=${currentSearch})}" th:class="${currentPage >= ongsPage.totalPages - 1} ? 'disabled' : ''" th:onclick="${currentPage >= ongsPage.totalPages - 1} ? 'return false;' : ''">Next →</a>
+                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 1}, search=${currentSearch})}"
+                   th:class="${currentPage == 0} ? 'disabled' : ''"
+                   th:onclick="${currentPage == 0} ? 'return false;' : ''">← Prev</a>
+
+                <th:block th:if="${ongsPage.totalPages <= 3}">
+                    <a th:each="i : ${#numbers.sequence(0, ongsPage.totalPages - 1)}"
+                       th:href="@{/admin/dashboard(view='ongs', page=${i}, search=${currentSearch})}"
+                       th:class="${currentPage == i} ? 'active' : ''"
+                       th:text="${i + 1}"></a>
+                </th:block>
+
+                <th:block th:if="${ongsPage.totalPages > 3}">
+                    <a th:href="@{/admin/dashboard(view='ongs', page=0, search=${currentSearch})}"
+                       th:class="${currentPage == 0} ? 'active' : ''">1</a>
+
+                    <span class="dots" th:if="${currentPage > 1}">...</span>
+
+                    <span class="current-page"
+                          th:if="${currentPage > 0 and currentPage < ongsPage.totalPages - 1}"
+                          th:text="${currentPage + 1}"></span>
+
+                    <span class="dots" th:if="${currentPage < ongsPage.totalPages - 2}">...</span>
+
+                    <a th:href="@{/admin/dashboard(view='ongs', page=${ongsPage.totalPages - 1}, search=${currentSearch})}"
+                       th:class="${currentPage == ongsPage.totalPages - 1} ? 'active' : ''"
+                       th:text="${ongsPage.totalPages}"></a>
+                </th:block>
+
+                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 1}, search=${currentSearch})}"
+                   th:class="${currentPage >= ongsPage.totalPages - 1} ? 'disabled' : ''"
+                   th:onclick="${currentPage >= ongsPage.totalPages - 1} ? 'return false;' : ''">Next →</a>
             </div>
         </div>
 
-        <div th:if="${currentView == 'coordinators'}">
-            <h2 class="table-title">📋 First 5 Coordinators</h2>
-            <table>
-                <thead><tr><th>ID</th><th>User Name</th><th>ONG</th><th>Department</th><th>Experience (Years)</th><th>Employment Type</th></tr></thead>
-                <tbody>
-                <tr th:each="coordinator : ${coordinators}">
-                    <td th:text="${coordinator.idCoordinator}"></td>
-                    <td th:text="${coordinator.user != null ? coordinator.user.first_name + ' ' + coordinator.user.last_name : 'N/A'}"></td>
-                    <td th:text="${coordinator.ong != null ? coordinator.ong.name : 'N/A'}"></td>
-                    <td th:text="${coordinator.department ?: 'N/A'}"></td>
-                    <td th:text="${coordinator.experienceYears ?: 'N/A'}"></td>
-                    <td th:text="${coordinator.employmentType ?: 'N/A'}"></td>
-                </tr>
-                </tbody>
-            </table>
+        <div th:if="${currentView == 'statistics'}">
+            <h2 class="table-title">📈 System Statistics & Analytics</h2>
+
+            <div class="stats-grid">
+                <div class="stat-card gold">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-title">Top Volunteer</div>
+                    <div class="stat-value" th:text="${stats.topVolunteerName}"></div>
+                    <div class="stat-subtitle">Participating in <strong th:text="${stats.topVolunteerCount}"></strong> activities</div>
+                </div>
+
+                <div class="stat-card green">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-title">Top Fundraising ONG</div>
+                    <div class="stat-value" th:text="${stats.topOngName}"></div>
+                    <div class="stat-subtitle">Total Donations: <strong th:text="'$' + ${stats.topOngDonations}"></strong></div>
+                </div>
+
+                <div class="stat-card blue">
+                    <div class="stat-icon">👔</div>
+                    <div class="stat-title">Busiest Coordinator</div>
+                    <div class="stat-value" th:text="${stats.topCoordinatorName}"></div>
+                    <div class="stat-subtitle">Managing <strong th:text="${stats.topCoordinatorCount}"></strong> activities</div>
+                </div>
+
+                <div class="stat-card purple">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-title">Most Popular Activity</div>
+                    <div class="stat-value" th:text="${stats.popularActivityName}"></div>
+                    <div class="stat-subtitle">Verified Participants: <strong th:text="${stats.popularActivityCount}"></strong></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🏦</div>
+                    <div class="stat-title">Total System Donations</div>
+                    <div class="stat-value" th:text="'$' + ${stats.totalSystemDonations}"></div>
+                    <div class="stat-subtitle">Accumulated from all activities</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-title">Community Breakdown</div>
+                    <div class="stat-value"><span th:text="${stats.totalVolunteers}"></span> Vols / <span th:text="${stats.totalCoordinators}"></span> Coords</div>
+                    <div class="stat-subtitle">Total registered active members</div>
+                </div>
+            </div>
         </div>
 
         <div style="text-align: center;"><form th:action="@{/logout}" method="post" style="display: inline;"><button type="submit" class="logout-btn">Logout</button></form></div>
@@ -259,9 +366,15 @@
 
             <div id="createCoordinatorFields" style="display: none;">
                 <h3>Coordinator Details</h3>
+
+                <div class="form-group">
+                    <label>Find ONG (Search by Name or Reg. Number):</label>
+                    <input type="text" id="createOngSearchInput" class="search-input-modal" placeholder="Type to filter... (Press Enter to Select)">
+                </div>
+
                 <div class="form-group">
                     <label>Select ONG <span class="required">*</span></label>
-                    <select name="coordinatorOngRegNumber">
+                    <select name="coordinatorOngRegNumber" id="create_coord_ong">
                         <option value="">-- Select ONG --</option>
                         <option th:each="ong : ${allOngs}" th:value="${ong.registrationNumber}" th:text="${ong.name} + ' (Reg: ' + ${ong.registrationNumber} + ')'"></option>
                     </select>
@@ -300,7 +413,7 @@
 
             <div id="coordinatorFields" style="display: none;">
                 <h3>Coordinator Details</h3>
-                <div class="form-group"><label>Find ONG (Search by Name or Reg. Number):</label><input type="text" id="ongSearchInput" class="search-input-modal" placeholder="Type to filter..."></div>
+                <div class="form-group"><label>Find ONG (Search by Name or Reg. Number):</label><input type="text" id="ongSearchInput" class="search-input-modal" placeholder="Type to filter... (Press Enter to Select)"></div>
                 <div class="form-group">
                     <label>Select ONG <span class="required">*</span></label>
                     <select id="coord_ong" name="coordinatorOngRegNumber">
@@ -455,14 +568,48 @@
         });
     }
 
-    document.getElementById('ongSearchInput').addEventListener('input', function() {
-        let filter = this.value.toLowerCase();
-        let options = document.getElementById('coord_ong').options;
-        for (let i = 1; i < options.length; i++) {
-            let txt = options[i].text.toLowerCase();
-            options[i].style.display = txt.includes(filter) ? "" : "none";
-        }
-    });
+    // [MODIFICAT] Search + Enter pentru ONG Dropdown (Reutilizabil)
+    function setupOngSearchBehavior(inputId, selectId) {
+        const searchInput = document.getElementById(inputId);
+        const selectDropdown = document.getElementById(selectId);
+
+        if (!searchInput || !selectDropdown) return;
+
+        // Evenimentul Input: Filtrează vizual lista
+        searchInput.addEventListener('input', function() {
+            let filter = this.value.toLowerCase();
+            let options = selectDropdown.options;
+            for (let i = 1; i < options.length; i++) {
+                let txt = options[i].text.toLowerCase();
+                options[i].style.display = txt.includes(filter) ? "" : "none";
+            }
+        });
+
+        // Evenimentul Keydown: Selectează prima opțiune vizibilă la apăsarea Enter
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Previne submiterea formularului
+
+                let filter = this.value.toLowerCase();
+                let options = selectDropdown.options;
+
+                // Căutăm prima opțiune care se potrivește (ignorând placeholder-ul de la index 0)
+                for (let i = 1; i < options.length; i++) {
+                    let txt = options[i].text.toLowerCase();
+                    if (txt.includes(filter)) {
+                        selectDropdown.selectedIndex = i;
+                        selectDropdown.focus();
+                        break;
+                    }
+                }
+            }
+        });
+    }
+
+    // Initializam cautarea pentru CREATE
+    setupOngSearchBehavior('createOngSearchInput', 'create_coord_ong');
+    // Initializam cautarea pentru EDIT
+    setupOngSearchBehavior('ongSearchInput', 'coord_ong');
 
     function openEditModal(userId) {
         fetch('/admin/users/edit/' + userId).then(r => r.json()).then(data => {

@@ -9,7 +9,9 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -32,7 +34,7 @@ public class CoordinatorRepository {
             coordinator.setUser(user);
 
             Ong ong = new Ong();
-            ong.setRegistrationNumber(rs.getString("ong_registration_number")); // String FK
+            ong.setRegistrationNumber(rs.getString("ong_registration_number"));
             coordinator.setOng(ong);
             coordinator.setOngRegistrationNumber(rs.getString("ong_registration_number"));
 
@@ -106,5 +108,28 @@ public class CoordinatorRepository {
     public void deleteByUserId(Integer userId) {
         String sql = "DELETE FROM coordinators WHERE id_user = ?";
         jdbcTemplate.update(sql, userId);
+    }
+
+    public long count() {
+        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM coordinators", Long.class);
+    }
+
+    // [NOU] Returnează coordonatorul cu cele mai multe activități create
+    public Map<String, Object> findTopCoordinator() {
+        String sql = "SELECT u.first_name, u.last_name, COUNT(a.id_activity) as act_count " +
+                "FROM coordinators c " +
+                "JOIN users u ON c.id_user = u.id_user " +
+                "JOIN activities a ON c.id_coordinator = a.id_coordinator " +
+                "GROUP BY u.first_name, u.last_name " +
+                "ORDER BY act_count DESC LIMIT 1";
+
+        List<Map<String, Object>> result = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", rs.getString("first_name") + " " + rs.getString("last_name"));
+            map.put("count", rs.getInt("act_count"));
+            return map;
+        });
+
+        return result.isEmpty() ? null : result.get(0);
     }
 }

@@ -7,7 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -66,7 +68,6 @@ public class VolunteerRepository {
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
 
-    // [NOU] Verifică dacă există activități pending sau accepted pentru un user
     public boolean hasActiveOrPendingActivities(Integer userId) {
         String sql = "SELECT COUNT(*) FROM volunteer_activities va " +
                 "JOIN volunteers v ON va.id_volunteer = v.id_volunteer " +
@@ -76,7 +77,6 @@ public class VolunteerRepository {
         return count != null && count > 0;
     }
 
-    // [NOU] Șterge toate înscrierile unui voluntar (pentru a permite ștergerea profilului)
     public void deleteActivitiesByUserId(Integer userId) {
         String sql = "DELETE FROM volunteer_activities WHERE id_volunteer = " +
                 "(SELECT id_volunteer FROM volunteers WHERE id_user = ?)";
@@ -86,5 +86,28 @@ public class VolunteerRepository {
     public void deleteByUserId(Integer userId) {
         String sql = "DELETE FROM volunteers WHERE id_user = ?";
         jdbcTemplate.update(sql, userId);
+    }
+
+    // [NOU] Returnează voluntarul cu cele mai multe activități
+    public Map<String, Object> findMostActiveVolunteer() {
+        String sql = "SELECT u.first_name, u.last_name, COUNT(va.id_activity) as act_count " +
+                "FROM volunteers v " +
+                "JOIN users u ON v.id_user = u.id_user " +
+                "JOIN volunteer_activities va ON v.id_volunteer = va.id_volunteer " +
+                "GROUP BY u.first_name, u.last_name " +
+                "ORDER BY act_count DESC LIMIT 1";
+
+        List<Map<String, Object>> result = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", rs.getString("first_name") + " " + rs.getString("last_name"));
+            map.put("count", rs.getInt("act_count"));
+            return map;
+        });
+
+        return result.isEmpty() ? null : result.get(0);
+    }
+
+    public long count() {
+        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM volunteers", Long.class);
     }
 }
