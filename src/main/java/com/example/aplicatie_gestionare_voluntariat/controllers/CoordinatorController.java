@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -31,9 +32,8 @@ public class CoordinatorController {
 
         model.addAttribute("ong", ong);
         model.addAttribute("stats", stats);
-        model.addAttribute("currentView", view); // Poate fi null
+        model.addAttribute("currentView", view);
 
-        // Încărcare condițională. Dacă view e null, nu încărcăm nimic.
         if ("volunteers".equals(view)) {
             List<Map<String, Object>> volunteers = coordinatorService.getVolunteersForCoordinator(coordinator.getIdCoordinator());
             model.addAttribute("volunteers", volunteers);
@@ -49,16 +49,22 @@ public class CoordinatorController {
     }
 
     @PostMapping("/activities/create")
-    public String createActivity(@ModelAttribute Activity activity, Authentication authentication) {
-        Coordinator coordinator = coordinatorService.getCoordinatorByEmail(authentication.getName());
-        coordinatorService.createActivity(activity, coordinator);
-        return "redirect:/coordinator/dashboard?view=activities&success=ActivityCreated";
+    public String createActivity(@ModelAttribute Activity activity, Authentication authentication, RedirectAttributes redirectAttributes) {
+        try {
+            Coordinator coordinator = coordinatorService.getCoordinatorByEmail(authentication.getName());
+            coordinatorService.createActivity(activity, coordinator);
+            redirectAttributes.addAttribute("success", "ActivityCreated");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addAttribute("error", e.getMessage());
+        }
+        return "redirect:/coordinator/dashboard?view=activities";
     }
 
     @PostMapping("/activities/close/{id}")
-    public String closeEnrollment(@PathVariable Integer id) {
+    public String closeEnrollment(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         coordinatorService.closeEnrollment(id);
-        return "redirect:/coordinator/dashboard?view=activities&success=EnrollmentClosed";
+        redirectAttributes.addAttribute("success", "EnrollmentClosed");
+        return "redirect:/coordinator/dashboard?view=activities";
     }
 
     @GetMapping("/activities/{id}")
@@ -91,8 +97,6 @@ public class CoordinatorController {
         return "redirect:/coordinator/activities/" + activityId + "?success=StatusUpdated";
     }
 
-    // --- PROFILE METHODS (NEW) ---
-
     @GetMapping("/profile")
     public String viewProfile(Model model, Authentication authentication) {
         Coordinator coordinator = coordinatorService.getCoordinatorByEmail(authentication.getName());
@@ -101,10 +105,16 @@ public class CoordinatorController {
     }
 
     @PostMapping("/profile/update")
-    public String updateProfile(@ModelAttribute Coordinator coordinator, Authentication authentication) {
-        String currentUserEmail = authentication.getName();
-        coordinatorService.updateCoordinatorProfile(coordinator, currentUserEmail);
-        return "redirect:/coordinator/profile?updated=true";
+    public String updateProfile(@ModelAttribute Coordinator coordinator, Authentication authentication, RedirectAttributes redirectAttributes) {
+        try {
+            String currentUserEmail = authentication.getName();
+            coordinatorService.updateCoordinatorProfile(coordinator, currentUserEmail);
+            redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully!");
+        } catch (Exception e) {
+            // Aici prindem exceptia si trimitem mesajul
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
+        }
+        return "redirect:/coordinator/profile";
     }
 
     @PostMapping("/profile/delete")

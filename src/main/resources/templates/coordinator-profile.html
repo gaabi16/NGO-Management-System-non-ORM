@@ -218,11 +218,12 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 2px solid #c3e6cb;
-        }
+        .alert-success { background-color: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
+
+        /* [NOU] Styles pentru validare */
+        .optional { color: #999; font-size: 12px; font-weight: normal; }
+        .required { color: #dc3545; font-size: 12px; font-weight: bold; }
 
         /* Delete Modal */
         .modal {
@@ -289,9 +290,8 @@
     </div>
 
     <div class="profile-content">
-        <div th:if="${param.updated}" class="alert alert-success">
-            ✅ Profile updated successfully!
-        </div>
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
 
         <div class="content-header">
             <h2 class="content-title">Personal Information</h2>
@@ -302,11 +302,11 @@
             <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.1rem;">User Details</h3>
             <div class="form-grid">
                 <div class="form-group">
-                    <label>First Name</label>
+                    <label>First Name <span class="required">*</span></label>
                     <input type="text" th:field="*{user.first_name}" disabled required>
                 </div>
                 <div class="form-group">
-                    <label>Last Name</label>
+                    <label>Last Name <span class="required">*</span></label>
                     <input type="text" th:field="*{user.last_name}" disabled required>
                 </div>
                 <div class="form-group">
@@ -315,7 +315,7 @@
                     <input type="hidden" th:field="*{user.email}">
                 </div>
                 <div class="form-group">
-                    <label>Phone Number</label>
+                    <label>Phone Number <span class="optional">(optional)</span></label>
                     <input type="text" th:field="*{user.phone_number}" disabled>
                 </div>
             </div>
@@ -328,16 +328,16 @@
                     <input type="hidden" th:field="*{ongRegistrationNumber}">
                 </div>
                 <div class="form-group">
-                    <label>Department</label>
-                    <input type="text" th:field="*{department}" disabled>
+                    <label>Department <span class="required">*</span></label>
+                    <input type="text" th:field="*{department}" disabled required>
                 </div>
                 <div class="form-group">
-                    <label>Experience (Years)</label>
-                    <input type="number" th:field="*{experienceYears}" disabled>
+                    <label>Experience (Years) <span class="required">*</span></label>
+                    <input type="number" th:field="*{experienceYears}" disabled required>
                 </div>
                 <div class="form-group full-width">
-                    <label>Employment Type</label>
-                    <select th:field="*{employmentType}" disabled>
+                    <label>Employment Type <span class="required">*</span></label>
+                    <select th:field="*{employmentType}" disabled required>
                         <option value="Full-time">Full-time</option>
                         <option value="Part-time">Part-time</option>
                         <option value="Volunteer-basis">Volunteer-basis</option>

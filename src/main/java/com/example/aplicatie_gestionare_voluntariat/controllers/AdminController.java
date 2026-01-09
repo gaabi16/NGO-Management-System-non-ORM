@@ -68,7 +68,6 @@ public class AdminController {
         return "admin-dashboard";
     }
 
-    // [MODIFICAT] Endpoint create cu toti parametrii
     @PostMapping("/users/create")
     public String createUser(@ModelAttribute User user,
                              @RequestParam(required = false) String coordinatorOngRegNumber,
@@ -151,7 +150,6 @@ public class AdminController {
         return "redirect:/admin/dashboard?view=users";
     }
 
-    // --- ONG ACTIONS ---
     @PostMapping("/ongs/create")
     public String createOng(@ModelAttribute Ong ong, RedirectAttributes redirectAttributes) {
         try {

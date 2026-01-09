@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -72,9 +73,14 @@ public class VolunteerController {
     }
 
     @PostMapping("/profile/update")
-    public String updateProfile(@ModelAttribute VolunteerRegistrationDto profileDto, Authentication authentication) {
-        userService.updateVolunteerProfile(authentication.getName(), profileDto);
-        return "redirect:/volunteer/profile?updated=true";
+    public String updateProfile(@ModelAttribute VolunteerRegistrationDto profileDto, Authentication authentication, RedirectAttributes redirectAttributes) {
+        try {
+            userService.updateVolunteerProfile(authentication.getName(), profileDto);
+            redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
+        }
+        return "redirect:/volunteer/profile";
     }
 
     @PostMapping("/profile/delete")
