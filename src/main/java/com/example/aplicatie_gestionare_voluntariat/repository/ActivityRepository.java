@@ -8,7 +8,9 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -43,9 +45,8 @@ public class ActivityRepository {
 
             try {
                 activity.setCategoryName(rs.getString("category_name"));
-            } catch (SQLException e) { /* ignore if column missing */ }
+            } catch (SQLException e) { /* ignore */ }
 
-            // [NOU] Încercăm să mapăm pending_count dacă există în query
             try {
                 activity.setPendingCount(rs.getInt("pending_count"));
             } catch (SQLException e) {
@@ -66,7 +67,6 @@ public class ActivityRepository {
         return jdbcTemplate.query(sql, activityRowMapper, ongRegistrationNumber);
     }
 
-    // [MODIFICAT] Include subquery pentru pending_count
     public List<Activity> findByCoordinatorId(Integer coordinatorId) {
         String sql = "SELECT a.*, cat.name as category_name, " +
                 "(SELECT COUNT(*) FROM volunteer_activities va WHERE va.id_activity = a.id_activity AND va.status = 'pending') as pending_count " +
@@ -115,5 +115,29 @@ public class ActivityRepository {
         String sql = "SELECT COUNT(*) FROM volunteer_activities WHERE id_volunteer = ? AND id_activity = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, volunteerId, activityId);
         return count != null && count > 0;
+    }
+
+    // [NOU] Returnează activitatea cu cei mai mulți voluntari
+    public Map<String, Object> findMostPopularActivity() {
+        String sql = "SELECT a.name, COUNT(va.id_volunteer) as vol_count " +
+                "FROM activities a " +
+                "JOIN volunteer_activities va ON a.id_activity = va.id_activity " +
+                "GROUP BY a.name " +
+                "ORDER BY vol_count DESC LIMIT 1";
+
+        List<Map<String, Object>> result = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", rs.getString("name"));
+            map.put("count", rs.getInt("vol_count"));
+            return map;
+        });
+        return result.isEmpty() ? null : result.get(0);
+    }
+
+    // [NOU] Suma totală a donațiilor din sistem
+    public Double getTotalSystemDonations() {
+        String sql = "SELECT SUM(donations_collected) FROM activities";
+        Double total = jdbcTemplate.queryForObject(sql, Double.class);
+        return total != null ? total : 0.0;
     }
 }
