@@ -5,177 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Volunteer Management</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+        .app-title { text-align: center; color: #667eea; font-size: 32px; font-weight: 700; margin-bottom: 10px; letter-spacing: 1px; }
+        h2 { color: #333; margin-bottom: 10px; font-size: 28px; text-align: center; }
+        .subtitle { color: #666; text-align: center; margin-bottom: 30px; font-size: 14px; }
+        .section-title { color: #667eea; font-size: 18px; font-weight: 600; margin: 25px 0 15px 0; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        label { display: block; color: #555; font-weight: 500; margin-bottom: 8px; font-size: 14px; }
+        input[type="text"], input[type="email"], input[type="password"], input[type="date"], textarea { width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; transition: all 0.3s ease; background-color: #f9f9f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        textarea { resize: vertical; min-height: 80px; }
+        input:focus, input:email:focus, textarea:focus { outline: none; border-color: #667eea; background-color: white; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        button { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; margin-top: 10px; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .link-section { text-align: center; margin-top: 25px; padding-top: 25px; border-top: 1px solid #e0e0e0; }
+        .link-section a { color: #667eea; text-decoration: none; font-weight: 500; transition: color 0.3s ease; }
+        .link-section a:hover { color: #764ba2; text-decoration: underline; }
+        .icon { text-align: center; margin-bottom: 20px; font-size: 48px; }
+        .optional { color: #999; font-size: 12px; font-weight: normal; }
+        .required { color: #dc3545; font-size: 12px; font-weight: bold; }
+        .info-text { color: #666; font-size: 13px; margin-top: 5px; font-style: italic; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        h2 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-            text-align: center;
-        }
-
-        .subtitle {
-            color: #666;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-
-        .section-title {
-            color: #667eea;
-            font-size: 18px;
-            font-weight: 600;
-            margin: 25px 0 15px 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        label {
-            display: block;
-            color: #555;
-            font-weight: 500;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="date"],
-        textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            background-color: #f9f9f9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="password"]:focus,
-        input[type="date"]:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            background-color: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .link-section {
-            text-align: center;
-            margin-top: 25px;
-            padding-top: 25px;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .link-section a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .link-section a:hover {
-            color: #764ba2;
-            text-decoration: underline;
-        }
-
-        .icon {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 48px;
-        }
-
-        .optional {
-            color: #999;
-            font-size: 12px;
-            font-weight: normal;
-        }
-
-        .required {
-            color: #dc3545;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .info-text {
-            color: #666;
-            font-size: 13px;
-            margin-top: 5px;
-            font-style: italic;
-        }
-
+        /* UPDATED ALERT STYLES FOR SMOOTH ANIMATION */
         .alert-error {
             background-color: #f8d7da;
             color: #721c24;
@@ -184,28 +38,36 @@
             border-radius: 8px;
             margin-bottom: 20px;
             text-align: center;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease; /* Smooth fade and slide */
+            animation: fadeIn 0.5s ease-out; /* Smooth entry */
         }
 
-        @media (max-width: 600px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .container {
-                padding: 30px 20px;
-            }
+        .alert-error.fade-out {
+            opacity: 0;
+            transform: translateY(-10px); /* Slight slide up when disappearing */
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .container { padding: 30px 20px; } }
     </style>
 </head>
 <body>
 <div class="container">
+    <h1 class="app-title">VolunteerHub</h1>
+
     <div class="icon">🌟</div>
     <h2>Join Us</h2>
     <p class="subtitle">Create your volunteer account</p>
 
     <div th:if="${errorMessage}" class="alert-error" th:text="${errorMessage}"></div>
 
-    <form th:action="@{/signup}" th:object="${volunteerRegistration}" method="post">
+    <form th:action="@{/signup}" th:object="${volunteerRegistration}" method="post" novalidate>
         <div class="section-title">📋 Basic Information</div>
 
         <div class="form-row">
@@ -270,5 +132,25 @@
         <a href="/login">Already have an account? Login</a>
     </div>
 </div>
+
+<script>
+    // Robust Auto-hide alert logic
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert-error');
+        if (alerts.length > 0) {
+            setTimeout(function() {
+                alerts.forEach(function(alert) {
+                    // Add class to trigger CSS transition
+                    alert.classList.add('fade-out');
+
+                    // Remove from DOM after transition completes (500ms matches CSS)
+                    setTimeout(function() {
+                        alert.remove();
+                    }, 500);
+                });
+            }, 3000);
+        }
+    });
+</script>
 </body>
 </html>
