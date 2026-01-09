@@ -38,26 +38,31 @@ public class AuthController {
     @PostMapping("/signup")
     public String signupSubmit(@ModelAttribute("volunteerRegistration") VolunteerRegistrationDto registrationDto,
                                HttpServletRequest request,
-                               HttpServletResponse response) {
-        // Salvează parola înainte de criptare pentru autologin
-        String rawPassword = registrationDto.getPassword();
+                               HttpServletResponse response,
+                               Model model) {
+        try {
+            String rawPassword = registrationDto.getPassword();
+            String registeredEmail = userService.registerVolunteer(registrationDto);
 
-        // Înregistrează utilizatorul cu toate datele de volunteer
-        String registeredEmail = userService.registerVolunteer(registrationDto);
+            // Auto-login
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(registeredEmail, rawPassword);
+            Authentication authentication = authenticationManager.authenticate(authToken);
+            SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+            securityContext.setAuthentication(authentication);
+            SecurityContextHolder.setContext(securityContext);
+            securityContextRepository.saveContext(securityContext, request, response);
 
-        // Autentifică automat utilizatorul după înregistrare
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(registeredEmail, rawPassword);
+            return "redirect:/home";
 
-        Authentication authentication = authenticationManager.authenticate(authToken);
-
-        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-        securityContext.setAuthentication(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        securityContextRepository.saveContext(securityContext, request, response);
-
-        return "redirect:/home";
+        } catch (IllegalArgumentException e) {
+            // Prindem erorile de validare din Service
+            model.addAttribute("errorMessage", e.getMessage());
+            return "signup";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Registration failed: " + e.getMessage());
+            return "signup";
+        }
     }
 
     @GetMapping("/login")

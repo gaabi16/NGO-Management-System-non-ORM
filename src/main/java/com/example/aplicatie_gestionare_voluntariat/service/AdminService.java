@@ -96,6 +96,12 @@ public class AdminService {
                            String coordinatorOngRegNumber, String department, Integer experienceYears, String employmentType,
                            LocalDate birthDate, String skills, String availability, String emergencyContact) {
 
+        // Validare Generală User
+        if (user.getFirstName() == null || user.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name is required");
+        if (user.getLastName() == null || user.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name is required");
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email is required");
+        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) throw new IllegalArgumentException("Password is required");
+
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             user.setPasswordHash(passwordEncoder.encode(user.getPassword()));
         }
@@ -103,6 +109,11 @@ public class AdminService {
         User savedUser = userRepository.save(user);
 
         if (savedUser.getRole() == User.Role.volunteer) {
+            // Validare Volunteer (Phone & Emergency Contact sunt OPTIONALE)
+            if (birthDate == null) throw new IllegalArgumentException("Birth Date is required for Volunteers");
+            if (skills == null || skills.trim().isEmpty()) throw new IllegalArgumentException("Skills are required for Volunteers");
+            if (availability == null || availability.trim().isEmpty()) throw new IllegalArgumentException("Availability is required for Volunteers");
+
             Volunteer volunteer = new Volunteer(savedUser.getIdUser());
             volunteer.setBirthDate(birthDate);
             volunteer.setSkills(skills);
@@ -111,13 +122,16 @@ public class AdminService {
             volunteerRepository.save(volunteer);
 
         } else if (savedUser.getRole() == User.Role.coordinator) {
+            // Validare Coordinator (Toate campurile NOT NULL)
+            if (coordinatorOngRegNumber == null || coordinatorOngRegNumber.trim().isEmpty()) throw new IllegalArgumentException("ONG Selection is required for Coordinators");
+            if (department == null || department.trim().isEmpty()) throw new IllegalArgumentException("Department is required for Coordinators");
+            if (experienceYears == null) throw new IllegalArgumentException("Experience Years is required for Coordinators");
+            if (employmentType == null || employmentType.trim().isEmpty()) throw new IllegalArgumentException("Employment Type is required for Coordinators");
+
             Coordinator coordinator = new Coordinator();
             User u = new User(); u.setIdUser(savedUser.getIdUser());
             coordinator.setUser(u);
-
-            if (coordinatorOngRegNumber != null && !coordinatorOngRegNumber.isEmpty()) {
-                coordinator.setOngRegistrationNumber(coordinatorOngRegNumber);
-            }
+            coordinator.setOngRegistrationNumber(coordinatorOngRegNumber);
             coordinator.setDepartment(department);
             coordinator.setExperienceYears(experienceYears);
             coordinator.setEmploymentType(employmentType);
@@ -140,6 +154,10 @@ public class AdminService {
     public User updateUser(Integer id, User updatedUser,
                            String coordinatorOngRegNumber, String department, Integer experienceYears, String employmentType,
                            LocalDate birthDate, String skills, String availability, String emergencyContact) {
+        // Validare User Update (fara parola, care e optionala la update)
+        if (updatedUser.getFirstName() == null || updatedUser.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name cannot be empty");
+        if (updatedUser.getLastName() == null || updatedUser.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name cannot be empty");
+        if (updatedUser.getEmail() == null || updatedUser.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email cannot be empty");
 
         User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser != null) {
@@ -164,8 +182,6 @@ public class AdminService {
                     volunteerRepository.deleteByUserId(id);
                 }
                 else if (oldRole == User.Role.coordinator) {
-                    // Logică de curățare pentru coordonator dacă își schimbă rolul
-                    // Aici ar trebui ideal șterse și activitățile create de el, similar cu deleteOng
                     Optional<Coordinator> c = coordinatorRepository.findByUserId(id);
                     if(c.isPresent()) {
                         Integer coordId = c.get().getIdCoordinator();
@@ -177,6 +193,9 @@ public class AdminService {
             }
 
             if (newRole == User.Role.coordinator) {
+                // Validare Update Coordinator
+                if (coordinatorOngRegNumber == null || coordinatorOngRegNumber.trim().isEmpty()) throw new IllegalArgumentException("ONG required for Coordinator");
+
                 Optional<Coordinator> existingCoord = coordinatorRepository.findByUserId(id);
                 Coordinator coordinator = existingCoord.orElse(new Coordinator());
 
@@ -185,15 +204,16 @@ public class AdminService {
                     coordinator.setUser(u);
                 }
 
-                if (coordinatorOngRegNumber != null && !coordinatorOngRegNumber.isEmpty()) {
-                    coordinator.setOngRegistrationNumber(coordinatorOngRegNumber);
-                }
+                coordinator.setOngRegistrationNumber(coordinatorOngRegNumber);
                 coordinator.setDepartment(department);
                 coordinator.setExperienceYears(experienceYears);
                 coordinator.setEmploymentType(employmentType);
                 coordinatorRepository.save(coordinator);
 
             } else if (newRole == User.Role.volunteer) {
+                // Validare Update Volunteer
+                if (birthDate == null) throw new IllegalArgumentException("Birth Date required");
+
                 Optional<Volunteer> existingVol = volunteerRepository.findByUserId(id);
                 Volunteer volunteer = existingVol.orElse(new Volunteer(id));
 
@@ -217,15 +237,11 @@ public class AdminService {
         volunteerRepository.deleteActivitiesByUserId(id);
         volunteerRepository.deleteByUserId(id);
 
-        // Logica extinsa de stergere pentru coordinator (cascadare activitati)
         Optional<Coordinator> coord = coordinatorRepository.findByUserId(id);
         if (coord.isPresent()) {
             Integer coordId = coord.get().getIdCoordinator();
-            // 1. Sterge inscrierile la activitatile acestui coordonator
             jdbcTemplate.update("DELETE FROM volunteer_activities WHERE id_activity IN (SELECT id_activity FROM activities WHERE id_coordinator = ?)", coordId);
-            // 2. Sterge activitatile
             jdbcTemplate.update("DELETE FROM activities WHERE id_coordinator = ?", coordId);
-            // 3. Sterge profilul
             coordinatorRepository.deleteByUserId(id);
         }
 
@@ -235,6 +251,16 @@ public class AdminService {
 
     @Transactional
     public Ong createOng(Ong ong) {
+        // Validare ONG
+        if (ong.getRegistrationNumber() == null || ong.getRegistrationNumber().trim().isEmpty()) throw new IllegalArgumentException("Registration Number is required");
+        if (ong.getName() == null || ong.getName().trim().isEmpty()) throw new IllegalArgumentException("Name is required");
+        if (ong.getDescription() == null || ong.getDescription().trim().isEmpty()) throw new IllegalArgumentException("Description is required");
+        if (ong.getAddress() == null || ong.getAddress().trim().isEmpty()) throw new IllegalArgumentException("Address is required");
+        if (ong.getCountry() == null || ong.getCountry().trim().isEmpty()) throw new IllegalArgumentException("Country is required");
+        if (ong.getPhone() == null || ong.getPhone().trim().isEmpty()) throw new IllegalArgumentException("Phone is required");
+        if (ong.getEmail() == null || ong.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email is required");
+        // Founding Date este optionala in SQL
+
         Optional<Ong> existingOng = ongRepository.findById(ong.getRegistrationNumber());
         if (existingOng.isPresent()) {
             throw new IllegalArgumentException("An ONG with Registration Number '" + ong.getRegistrationNumber() + "' already exists!");
@@ -260,41 +286,29 @@ public class AdminService {
         return null;
     }
 
-    // [MODIFICAT] Ștergere în cascadă ONG -> Coordonatori -> Activități -> Înscrieri
     @Transactional
     public boolean deleteOng(String registrationNumber) {
         Ong ong = ongRepository.findById(registrationNumber).orElse(null);
         if (ong == null) return false;
 
-        // 1. Găsim toți utilizatorii care sunt coordonatori la acest ONG
         String sqlGetCoordinators = "SELECT id_user FROM coordinators WHERE ong_registration_number = ?";
         List<Integer> coordinatorUserIds = jdbcTemplate.queryForList(sqlGetCoordinators, Integer.class, registrationNumber);
 
-        // 2. Pentru fiecare coordonator, ștergem tot lanțul de dependențe
         for (Integer userId : coordinatorUserIds) {
-            // Obținem ID-ul de coordonator pentru a găsi activitățile
             String sqlGetCoordId = "SELECT id_coordinator FROM coordinators WHERE id_user = ?";
             Integer coordinatorId = jdbcTemplate.queryForObject(sqlGetCoordId, Integer.class, userId);
 
             if (coordinatorId != null) {
-                // A. Ștergem înscrierile voluntarilor la activitățile acestui coordonator
                 String sqlDeleteEnrollments = "DELETE FROM volunteer_activities WHERE id_activity IN (SELECT id_activity FROM activities WHERE id_coordinator = ?)";
                 jdbcTemplate.update(sqlDeleteEnrollments, coordinatorId);
 
-                // B. Ștergem activitățile create de coordonator
                 String sqlDeleteActivities = "DELETE FROM activities WHERE id_coordinator = ?";
                 jdbcTemplate.update(sqlDeleteActivities, coordinatorId);
             }
-
-            // C. Ștergem profilul de coordonator
             String sqlDeleteCoord = "DELETE FROM coordinators WHERE id_user = ?";
             jdbcTemplate.update(sqlDeleteCoord, userId);
-
-            // D. Ștergem contul de utilizator al coordonatorului (deoarece rolul lui depinde de ONG)
             userRepository.deleteById(userId);
         }
-
-        // 3. În final, ștergem ONG-ul
         ongRepository.deleteById(registrationNumber);
         return true;
     }

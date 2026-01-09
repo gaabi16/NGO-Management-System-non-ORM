@@ -52,7 +52,10 @@
         label { display: block; margin-bottom: 5px; font-weight: 500; }
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 1rem; }
 
-        /* [NOU] Alert Styles */
+        /* [NOU] Styles pentru required/optional */
+        .required { color: #dc3545; font-size: 12px; font-weight: bold; }
+        .optional { color: #999; font-size: 12px; font-weight: normal; }
+
         .alert { padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; animation: slideDown 0.3s; }
         .alert-success { background-color: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -143,12 +146,12 @@
         <span class="close" onclick="closeModal('createActivityModal')">&times;</span>
         <h2 style="margin-bottom: 20px; color: #333;">Create New Activity</h2>
         <form th:action="@{/coordinator/activities/create}" th:object="${newActivity}" method="post">
-            <div class="form-group"><label>Activity Name</label><input type="text" th:field="*{name}" required></div>
-            <div class="form-group"><label>Category</label><select th:field="*{idCategory}"><option th:each="cat : ${categories}" th:value="${cat.id_category}" th:text="${cat.name}">Category</option></select></div>
-            <div class="form-group"><label>Description</label><textarea th:field="*{description}" rows="3"></textarea></div>
-            <div class="form-group"><label>Location</label><input type="text" th:field="*{location}" required></div>
-            <div style="display: flex; gap: 15px;"><div class="form-group" style="flex:1"><label>Start Date</label><input type="datetime-local" th:field="*{startDate}" required></div><div class="form-group" style="flex:1"><label>End Date</label><input type="datetime-local" th:field="*{endDate}" required></div></div>
-            <div class="form-group"><label>Max Volunteers</label><input type="number" th:field="*{maxVolunteers}" min="1" required></div>
+            <div class="form-group"><label>Activity Name <span class="required">*</span></label><input type="text" th:field="*{name}" required></div>
+            <div class="form-group"><label>Category <span class="required">*</span></label><select th:field="*{idCategory}" required><option th:each="cat : ${categories}" th:value="${cat.id_category}" th:text="${cat.name}">Category</option></select></div>
+            <div class="form-group"><label>Description <span class="required">*</span></label><textarea th:field="*{description}" rows="3" required></textarea></div>
+            <div class="form-group"><label>Location <span class="required">*</span></label><input type="text" th:field="*{location}" required></div>
+            <div style="display: flex; gap: 15px;"><div class="form-group" style="flex:1"><label>Start Date <span class="required">*</span></label><input type="datetime-local" th:field="*{startDate}" required></div><div class="form-group" style="flex:1"><label>End Date <span class="required">*</span></label><input type="datetime-local" th:field="*{endDate}" required></div></div>
+            <div class="form-group"><label>Max Volunteers <span class="required">*</span></label><input type="number" th:field="*{maxVolunteers}" min="1" required></div>
             <button type="submit" class="create-btn" style="width:100%; justify-content:center; margin-top:10px;">Save Activity</button>
         </form>
     </div>
@@ -159,7 +162,7 @@
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     window.onclick = function(event) { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; }
 
-    // [NOU] Auto-hide alerts script
+    // Auto-hide alerts script
     setTimeout(function() {
         document.querySelectorAll('.alert').forEach(a => {
             a.style.transition = 'opacity 0.5s ease';

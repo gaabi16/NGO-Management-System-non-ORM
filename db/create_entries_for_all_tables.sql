@@ -1,4 +1,4 @@
--- Stergem datele vechi (optional, pentru siguranta)
+-- Stergem datele vechi pentru a evita duplicatele si erorile de foreign key
 TRUNCATE TABLE volunteer_activities, activities, donations, coordinators, volunteers, activity_categories, ongs, users RESTART IDENTITY CASCADE;
 
 -- 1. Insert USERS (Total: 55 users)
@@ -6,18 +6,18 @@ TRUNCATE TABLE volunteer_activities, activities, donations, coordinators, volunt
 -- ID 3-27: Volunteers (25 volunteers)
 -- ID 28-55: Coordinators (28 coordinators)
 INSERT INTO users (email, password_hash, first_name, last_name, phone_number, role) VALUES
--- Admins
+-- Admins (ID 1, 2)
 ('admin@test.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'System', 'Admin', '+15550101', 'admin'),
 ('sarah.connor@example.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Sarah', 'Connor', '+15550102', 'admin'),
 
--- Volunteers (Originals)
+-- Volunteers - Originals (ID 3-7)
 ('john.doe@example.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'John', 'Doe', '+4477009001', 'volunteer'),
 ('marie.curie@example.fr', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Marie', 'Curie', '+3312345678', 'volunteer'),
 ('hans.mueller@example.de', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Hans', 'Mueller', '+4915123456', 'volunteer'),
 ('yuki.tanaka@example.jp', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Yuki', 'Tanaka', '+8190123456', 'volunteer'),
 ('sofia.rossi@example.it', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Sofia', 'Rossi', '+3933312345', 'volunteer'),
 
--- Volunteers (New - 20 entries)
+-- Volunteers - New (ID 8-27)
 ('alice.wonder@mail.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Alice', 'Wonder', '+1200300400', 'volunteer'),
 ('bob.builder@mail.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Bob', 'Builder', '+1200300401', 'volunteer'),
 ('charlie.brown@mail.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Charlie', 'Brown', '+1200300402', 'volunteer'),
@@ -39,14 +39,14 @@ INSERT INTO users (email, password_hash, first_name, last_name, phone_number, ro
 ('steve.rogers@mail.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Steve', 'Rogers', '+1200300418', 'volunteer'),
 ('tony.stark@mail.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Tony', 'Stark', '+1200300419', 'volunteer'),
 
--- Coordinators (Originals - IDs 28-32)
+-- Coordinators - Originals (ID 28-32)
 ('james.smith@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'James', 'Smith', '+120255501', 'coordinator'),
 ('elena.popescu@ngo.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Elena', 'Popescu', '+40722123456', 'coordinator'),
 ('chen.wei@charity.cn', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Chen', 'Wei', '+8613912345', 'coordinator'),
 ('lucas.silva@ajuda.br', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Lucas', 'Silva', '+5511987654', 'coordinator'),
 ('amara.okeke@hope.ng', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Amara', 'Okeke', '+2348031234', 'coordinator'),
 
--- Coordinators (New - 23 entries - IDs 33-55)
+-- Coordinators - New (ID 33-55)
 ('coord1@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Michael', 'Scott', '+15550001', 'coordinator'),
 ('coord2@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Pam', 'Beesly', '+15550002', 'coordinator'),
 ('coord3@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Jim', 'Halpert', '+15550003', 'coordinator'),
@@ -85,20 +85,20 @@ VALUES
 -- New entries (20)
 ('DE-NGO-1001', 'Kinder Hilfe', 'Support for children in need.', 'Berlin Strasse 1', 'Germany', '+4930123456', 'info@kinderhilfe.de', '2005-05-05'),
 ('IT-ONLUS-2002', 'Cultura Viva', 'Preserving cultural heritage.', 'Via Roma 100, Rome', 'Italy', '+3906123456', 'contact@cultura.it', '2011-02-20'),
-('ES-ONG-3003', 'Vida Animal', 'Animal shelter and adoption.', 'Madrid Plaza 5', 'Spain', '+3491123456', 'hola@vidaanimal.es', NULL), -- FOUNDING_DATE NULL
+('ES-ONG-3003', 'Vida Animal', 'Animal shelter and adoption.', 'Madrid Plaza 5', 'Spain', '+3491123456', 'hola@vidaanimal.es', NULL),
 ('JP-NPO-4004', 'Elderly Care Japan', 'Assisting the elderly.', 'Tokyo Central 1-1', 'Japan', '+81312345678', 'help@elderly.jp', '1998-10-10'),
 ('CA-CHARITY-5005', 'Winter Warmth', 'Providing shelter in winter.', 'Toronto Main St 50', 'Canada', '+14161234567', 'warmth@canada.org', '2015-11-01'),
 ('BR-NGO-6006', 'Amazonia Verde', 'Protecting the rainforest.', 'Manaus Centro', 'Brazil', '+559212345678', 'amazonia@verde.br', '2000-01-01'),
 ('IN-NGO-7007', 'Clean Water India', 'Sanitation and water projects.', 'Mumbai High St', 'India', '+912212345678', 'water@india.org', '2013-03-22'),
 ('ZA-NPO-8008', 'Ubuntu Youth', 'Youth empowerment.', 'Cape Town Loop St', 'South Africa', '+27211234567', 'youth@ubuntu.za', '2016-06-16'),
-('MX-NGO-9009', 'Comida Para Todos', 'Food bank.', 'Mexico City Reforma', 'Mexico', '+525512345678', 'comida@mx.org', NULL), -- FOUNDING_DATE NULL
+('MX-NGO-9009', 'Comida Para Todos', 'Food bank.', 'Mexico City Reforma', 'Mexico', '+525512345678', 'comida@mx.org', NULL),
 ('NL-ANBI-1010', 'Bike City', 'Promoting cycling safety.', 'Amsterdam Canal 5', 'Netherlands', '+31201234567', 'bike@city.nl', '2019-04-30'),
 ('SE-NGO-1111', 'Nordic Nature', 'Conservation of nordic wildlife.', 'Stockholm Gamla Stan', 'Sweden', '+4681234567', 'nature@nordic.se', '2010-08-15'),
 ('NO-NGO-1212', 'Fjord Guardians', 'Marine life protection.', 'Oslo Harbor', 'Norway', '+4722123456', 'guardians@fjord.no', '2018-05-20'),
 ('CH-NGO-1313', 'Alpine Rescue', 'Mountain rescue services.', 'Zurich Mountain Rd', 'Switzerland', '+41441234567', 'rescue@alpine.ch', '1980-12-01'),
 ('PL-NGO-1414', 'Hope Poland', 'Disaster relief.', 'Warsaw Center', 'Poland', '+48221234567', 'hope@poland.pl', '2022-02-24'),
 ('GR-NGO-1515', 'History Keepers', 'Archaeological volunteering.', 'Athens Acropolis Way', 'Greece', '+302101234567', 'history@greece.gr', '1995-07-07'),
-('PT-NGO-1616', 'Ocean Blue', 'Surf therapy for kids.', 'Lisbon Coast', 'Portugal', '+351211234567', 'surf@ocean.pt', NULL), -- FOUNDING_DATE NULL
+('PT-NGO-1616', 'Ocean Blue', 'Surf therapy for kids.', 'Lisbon Coast', 'Portugal', '+351211234567', 'surf@ocean.pt', NULL),
 ('IE-CHARITY-1717', 'Green Isle', 'Reforestation in Ireland.', 'Dublin Park', 'Ireland', '+35311234567', 'trees@green.ie', '2020-03-17'),
 ('NZ-NGO-1818', 'Kiwi Saver', 'Bird conservation.', 'Wellington Forest', 'New Zealand', '+6441234567', 'kiwi@saver.nz', '2008-09-09'),
 ('SG-CHARITY-1919', 'Urban Farm', 'Community gardening.', 'Singapore Garden Bay', 'Singapore', '+6561234567', 'farm@urban.sg', '2021-01-01'),
@@ -106,6 +106,7 @@ VALUES
 
 
 -- 3. Insert VOLUNTEERS (Uses User IDs 3-27)
+-- [CORECTIE] Maparea corecta a ID-urilor utilizatorilor
 INSERT INTO volunteers (ID_user, birth_date, skills, availability, emergency_contact)
 VALUES
 -- Originals (IDs 3-7)
@@ -115,41 +116,41 @@ VALUES
 (6, '1990-07-25', 'Coding, Web Design, Japanese', 'Remote only', 'Sister: +8190123457'),
 (7, '1999-12-05', 'Cooking, Event Planning, Italian', 'Flexible', 'Brother: +3933312346'),
 
--- New Volunteers (IDs 8-27 in the volunteer sequence, but referencing created users 13-32)
-(13, '2000-01-01', 'Gardening, Painting', 'Weekends', NULL), -- EMERGENCY_CONTACT NULL
-(14, '1992-02-14', 'Construction, Carpentry', 'Morning', 'Wife: +111222333'),
-(15, '1988-08-08', 'Accounting, Finance', 'Evenings', 'Husband: +444555666'),
-(16, '1996-04-20', 'Photography, Social Media', 'Flexible', NULL), -- EMERGENCY_CONTACT NULL
-(17, '1994-12-25', 'Writing, Translation', 'Remote', 'Mom: +999888777'),
-(18, '1991-06-15', 'Cooking, Nutrition', 'Weekends', 'Dad: +123123123'),
-(19, '1985-10-30', 'Engineering, Repair', 'Mon-Wed', 'Son: +321321321'),
-(20, '1999-07-31', 'Magic, Entertainment', 'Events', 'Uncle: +555666777'),
-(21, '1997-03-17', 'Running, Coaching', 'Mornings', NULL), -- EMERGENCY_CONTACT NULL
-(22, '1989-11-11', 'Sailing, Navigation', 'Summer', 'Brother: +777888999'),
-(23, '1993-09-09', 'Legal advice, Research', 'Flexible', 'Sister: +000111222'),
-(24, '1995-05-25', 'Archeology, History', 'Full-time', 'Aunt: +333222111'),
-(25, '1987-02-28', 'Plumbing, Mechanics', 'On call', 'Cousin: +666555444'),
-(26, '1990-01-20', 'Hiking, Survival skills', 'Weekends', 'Friend: +999000111'),
-(27, '1998-12-12', 'Advocacy, Public Speaking', 'Evenings', 'Mom: +111000222'),
-(28, '1994-04-04', 'Science, Chemistry', 'Weekdays', 'Lab Partner: +555444333'),
-(29, '1992-06-06', 'Psychology, Counseling', 'Afternoons', 'Dad: +222333444'),
-(30, '1991-08-20', 'Fashion, Sewing', 'Flexible', NULL), -- EMERGENCY_CONTACT NULL
-(31, '1920-07-04', 'Leadership, Strategy', 'Anytime', 'Bucky: +19451945'),
-(32, '1970-05-29', 'Engineering, Robotics', 'Busy', 'Pepper: +1000000');
+-- New Volunteers (IDs 8-27)
+(8, '2000-01-01', 'Gardening, Painting', 'Weekends', NULL),
+(9, '1992-02-14', 'Construction, Carpentry', 'Morning', 'Wife: +111222333'),
+(10, '1988-08-08', 'Accounting, Finance', 'Evenings', 'Husband: +444555666'),
+(11, '1996-04-20', 'Photography, Social Media', 'Flexible', NULL),
+(12, '1994-12-25', 'Writing, Translation', 'Remote', 'Mom: +999888777'),
+(13, '1991-06-15', 'Cooking, Nutrition', 'Weekends', 'Dad: +123123123'),
+(14, '1985-10-30', 'Engineering, Repair', 'Mon-Wed', 'Son: +321321321'),
+(15, '1999-07-31', 'Magic, Entertainment', 'Events', 'Uncle: +555666777'),
+(16, '1997-03-17', 'Running, Coaching', 'Mornings', NULL),
+(17, '1989-11-11', 'Sailing, Navigation', 'Summer', 'Brother: +777888999'),
+(18, '1993-09-09', 'Legal advice, Research', 'Flexible', 'Sister: +000111222'),
+(19, '1995-05-25', 'Archeology, History', 'Full-time', 'Aunt: +333222111'),
+(20, '1987-02-28', 'Plumbing, Mechanics', 'On call', 'Cousin: +666555444'),
+(21, '1990-01-20', 'Hiking, Survival skills', 'Weekends', 'Friend: +999000111'),
+(22, '1998-12-12', 'Advocacy, Public Speaking', 'Evenings', 'Mom: +111000222'),
+(23, '1994-04-04', 'Science, Chemistry', 'Weekdays', 'Lab Partner: +555444333'),
+(24, '1992-06-06', 'Psychology, Counseling', 'Afternoons', 'Dad: +222333444'),
+(25, '1991-08-20', 'Fashion, Sewing', 'Flexible', NULL),
+(26, '1920-07-04', 'Leadership, Strategy', 'Anytime', 'Bucky: +19451945'),
+(27, '1970-05-29', 'Engineering, Robotics', 'Busy', 'Pepper: +1000000');
 
 
--- 4. Insert COORDINATORS (Uses User IDs 8-12 + 33-55)
--- Linking new coordinators to new ONGs (roughly 1-to-1)
+-- 4. Insert COORDINATORS (Uses User IDs 28-55)
+-- [CORECTIE] Maparea corecta a ID-urilor utilizatorilor
 INSERT INTO coordinators (ID_user, ong_registration_number, department, experience_years, employment_type)
 VALUES
--- Originals (IDs 8-12)
-(8, 'UK-REG-2020-001', 'Environmental Projects', 5, 'Full-time'),
-(9, 'RO-NGO-556677', 'Educational Programs', 8, 'Full-time'),
-(10, 'US-501C3-9988', 'IT Support & Training', 3, 'Part-time'),
-(11, 'FR-ASSO-1122', 'Field Operations', 10, 'Contract'),
-(12, 'AU-ABN-778899', 'Community Outreach', 4, 'Full-time'),
+-- Originals (IDs 28-32) - ACEASTA ERA EROAREA (erau mapati 8-12)
+(28, 'UK-REG-2020-001', 'Environmental Projects', 5, 'Full-time'),
+(29, 'RO-NGO-556677', 'Educational Programs', 8, 'Full-time'),
+(30, 'US-501C3-9988', 'IT Support & Training', 3, 'Part-time'),
+(31, 'FR-ASSO-1122', 'Field Operations', 10, 'Contract'),
+(32, 'AU-ABN-778899', 'Community Outreach', 4, 'Full-time'),
 
--- New Coordinators (IDs 33-55) linked to new ONGs
+-- New Coordinators (IDs 33-55)
 (33, 'DE-NGO-1001', 'Child Welfare', 6, 'Full-time'),
 (34, 'IT-ONLUS-2002', 'Events', 2, 'Part-time'),
 (35, 'ES-ONG-3003', 'Veterinary', 9, 'Full-time'),
@@ -209,8 +210,8 @@ VALUES
 
 
 -- 6. Insert ACTIVITIES (Total: 28 Activities)
--- IDs will be auto-generated (1-28)
--- NOTE: status 'open', 'closed', 'completed', 'planning'
+-- IMPORTANT: The IDs for coordinators (1-28) refer to the ID_coordinator column, which is generated sequentially (SERIAL).
+-- Since we inserted 28 coordinators, their IDs will be 1 to 28.
 INSERT INTO activities (ID_category, ID_coordinator, name, description, location, start_date, end_date, max_volunteers, status, donations_collected)
 VALUES
 -- Originals (Coordinators 1-5)
@@ -244,7 +245,8 @@ VALUES
 
 
 -- 7. Insert VOLUNTEER ACTIVITIES (Link Volunteers 1-25 to Activities 1-25)
--- CRITICAL FIX: Replaced NULL feedback with '' or text.
+-- IMPORTANT: The IDs for volunteers (1-25) refer to the ID_volunteer column, which is generated sequentially (SERIAL).
+-- Since we inserted 25 volunteers, their IDs will be 1 to 25.
 INSERT INTO volunteer_activities (ID_volunteer, ID_activity, enrollment_date, status, hours_completed, feedback)
 VALUES
 -- Originals
@@ -284,7 +286,6 @@ VALUES
 
 
 -- 8. Insert DONATIONS (Total: 25 Donations)
--- Ensure 'notes' is NOT NULL
 INSERT INTO donations (ong_registration_number, donor_name, amount, donation_date, type, notes)
 VALUES
 -- Originals
