@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class AdminService {
@@ -39,6 +40,13 @@ public class AdminService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    // Regex Validare
+    private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+
+    private boolean isValidEmail(String email) {
+        return email != null && Pattern.matches(EMAIL_PATTERN, email);
+    }
 
     public List<Ong> getFirst5Ongs() { return ongRepository.findFirst5(); }
     public List<Coordinator> getFirst5Coordinators() { return coordinatorRepository.findFirst5(); }
@@ -96,38 +104,24 @@ public class AdminService {
         return new PageWrapper<>(ongs, totalElements, page, size);
     }
 
-    // [NOU] Metoda pentru statistici
     public Map<String, Object> getSystemStatistics() {
         Map<String, Object> stats = new HashMap<>();
-
-        // 1. Top Volunteer
         Map<String, Object> topVol = volunteerRepository.findMostActiveVolunteer();
         stats.put("topVolunteerName", topVol != null ? topVol.get("name") : "N/A");
         stats.put("topVolunteerCount", topVol != null ? topVol.get("count") : 0);
-
-        // 2. Top ONG
         Map<String, Object> topOng = ongRepository.findTopFundraisingOng();
         stats.put("topOngName", topOng != null ? topOng.get("name") : "N/A");
         stats.put("topOngDonations", topOng != null ? String.format("%.2f", topOng.get("total")) : "0.00");
-
-        // 3. Top Coordinator
         Map<String, Object> topCoord = coordinatorRepository.findTopCoordinator();
         stats.put("topCoordinatorName", topCoord != null ? topCoord.get("name") : "N/A");
         stats.put("topCoordinatorCount", topCoord != null ? topCoord.get("count") : 0);
-
-        // 4. Most Popular Activity
         Map<String, Object> popAct = activityRepository.findMostPopularActivity();
         stats.put("popularActivityName", popAct != null ? popAct.get("name") : "N/A");
         stats.put("popularActivityCount", popAct != null ? popAct.get("count") : 0);
-
-        // 5. Total System Donations
         Double totalDonations = activityRepository.getTotalSystemDonations();
         stats.put("totalSystemDonations", String.format("%.2f", totalDonations));
-
-        // 6. Counts
         stats.put("totalVolunteers", volunteerRepository.count());
         stats.put("totalCoordinators", coordinatorRepository.count());
-
         return stats;
     }
 
@@ -137,7 +131,11 @@ public class AdminService {
                            LocalDate birthDate, String skills, String availability, String emergencyContact) {
         if (user.getFirstName() == null || user.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name is required");
         if (user.getLastName() == null || user.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name is required");
+
+        // VALIDARE EMAIL
         if (user.getEmail() == null || user.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email is required");
+        if (!isValidEmail(user.getEmail())) throw new IllegalArgumentException("Invalid email format (example: user@domain.com)");
+
         if (user.getPassword() == null || user.getPassword().trim().isEmpty()) throw new IllegalArgumentException("Password is required");
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
@@ -192,7 +190,10 @@ public class AdminService {
                            LocalDate birthDate, String skills, String availability, String emergencyContact) {
         if (updatedUser.getFirstName() == null || updatedUser.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name cannot be empty");
         if (updatedUser.getLastName() == null || updatedUser.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name cannot be empty");
+
+        // VALIDARE EMAIL
         if (updatedUser.getEmail() == null || updatedUser.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email cannot be empty");
+        if (!isValidEmail(updatedUser.getEmail())) throw new IllegalArgumentException("Invalid email format (example: user@domain.com)");
 
         User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser != null) {
@@ -295,7 +296,10 @@ public class AdminService {
         if (ong.getAddress() == null || ong.getAddress().trim().isEmpty()) throw new IllegalArgumentException("Address is required");
         if (ong.getCountry() == null || ong.getCountry().trim().isEmpty()) throw new IllegalArgumentException("Country is required");
         if (ong.getPhone() == null || ong.getPhone().trim().isEmpty()) throw new IllegalArgumentException("Phone is required");
+
+        // VALIDARE EMAIL ONG
         if (ong.getEmail() == null || ong.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email is required");
+        if (!isValidEmail(ong.getEmail())) throw new IllegalArgumentException("Invalid email format (example: contact@ong.com)");
 
         Optional<Ong> existingOng = ongRepository.findById(ong.getRegistrationNumber());
         if (existingOng.isPresent()) {
@@ -313,7 +317,10 @@ public class AdminService {
         if (updatedOng.getAddress() == null || updatedOng.getAddress().trim().isEmpty()) throw new IllegalArgumentException("Address cannot be empty");
         if (updatedOng.getCountry() == null || updatedOng.getCountry().trim().isEmpty()) throw new IllegalArgumentException("Country cannot be empty");
         if (updatedOng.getPhone() == null || updatedOng.getPhone().trim().isEmpty()) throw new IllegalArgumentException("Phone cannot be empty");
+
+        // VALIDARE EMAIL ONG UPDATE
         if (updatedOng.getEmail() == null || updatedOng.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email cannot be empty");
+        if (!isValidEmail(updatedOng.getEmail())) throw new IllegalArgumentException("Invalid email format (example: contact@ong.com)");
 
         Ong existingOng = ongRepository.findById(registrationNumber).orElse(null);
         if (existingOng != null) {
