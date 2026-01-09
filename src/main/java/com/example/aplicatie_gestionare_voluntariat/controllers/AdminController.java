@@ -61,8 +61,9 @@ public class AdminController {
             model.addAttribute("currentPage", page);
             model.addAttribute("currentSearch", search);
 
-        } else if ("coordinators".equals(view)) {
-            model.addAttribute("coordinators", adminService.getFirst5Coordinators());
+        } else if ("statistics".equals(view)) {
+            // [MODIFICARE] View Statistics în loc de Coordinators
+            model.addAttribute("stats", adminService.getSystemStatistics());
         }
 
         return "admin-dashboard";
