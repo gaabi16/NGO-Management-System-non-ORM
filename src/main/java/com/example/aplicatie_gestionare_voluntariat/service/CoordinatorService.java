@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Service
 public class CoordinatorService {
@@ -31,6 +32,13 @@ public class CoordinatorService {
     private OngRepository ongRepository;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    // Regex
+    private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+
+    private boolean isValidEmail(String email) {
+        return email != null && Pattern.matches(EMAIL_PATTERN, email);
+    }
 
     public Coordinator getCoordinatorByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
@@ -138,7 +146,9 @@ public class CoordinatorService {
             // Validare date User
             if (updatedCoordinator.getUser().getFirstName() == null || updatedCoordinator.getUser().getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name cannot be empty");
             if (updatedCoordinator.getUser().getLastName() == null || updatedCoordinator.getUser().getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name cannot be empty");
-            // Phone e optional
+
+            // Daca s-ar permite update email, validarea ar fi aici.
+            // In acest moment emailul vine din sesiune, deci nu il validam.
 
             user.setFirstName(updatedCoordinator.getUser().getFirstName());
             user.setLastName(updatedCoordinator.getUser().getLastName());
