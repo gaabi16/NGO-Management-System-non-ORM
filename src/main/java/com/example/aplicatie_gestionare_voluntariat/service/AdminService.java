@@ -4,6 +4,7 @@ import com.example.aplicatie_gestionare_voluntariat.model.Coordinator;
 import com.example.aplicatie_gestionare_voluntariat.model.Ong;
 import com.example.aplicatie_gestionare_voluntariat.model.User;
 import com.example.aplicatie_gestionare_voluntariat.model.Volunteer;
+import com.example.aplicatie_gestionare_voluntariat.repository.ActivityRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.CoordinatorRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.OngRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.UserRepository;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -29,6 +32,8 @@ public class AdminService {
     private CoordinatorRepository coordinatorRepository;
     @Autowired
     private VolunteerRepository volunteerRepository;
+    @Autowired
+    private ActivityRepository activityRepository;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
@@ -91,12 +96,45 @@ public class AdminService {
         return new PageWrapper<>(ongs, totalElements, page, size);
     }
 
+    // [NOU] Metoda pentru statistici
+    public Map<String, Object> getSystemStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+
+        // 1. Top Volunteer
+        Map<String, Object> topVol = volunteerRepository.findMostActiveVolunteer();
+        stats.put("topVolunteerName", topVol != null ? topVol.get("name") : "N/A");
+        stats.put("topVolunteerCount", topVol != null ? topVol.get("count") : 0);
+
+        // 2. Top ONG
+        Map<String, Object> topOng = ongRepository.findTopFundraisingOng();
+        stats.put("topOngName", topOng != null ? topOng.get("name") : "N/A");
+        stats.put("topOngDonations", topOng != null ? String.format("%.2f", topOng.get("total")) : "0.00");
+
+        // 3. Top Coordinator
+        Map<String, Object> topCoord = coordinatorRepository.findTopCoordinator();
+        stats.put("topCoordinatorName", topCoord != null ? topCoord.get("name") : "N/A");
+        stats.put("topCoordinatorCount", topCoord != null ? topCoord.get("count") : 0);
+
+        // 4. Most Popular Activity
+        Map<String, Object> popAct = activityRepository.findMostPopularActivity();
+        stats.put("popularActivityName", popAct != null ? popAct.get("name") : "N/A");
+        stats.put("popularActivityCount", popAct != null ? popAct.get("count") : 0);
+
+        // 5. Total System Donations
+        Double totalDonations = activityRepository.getTotalSystemDonations();
+        stats.put("totalSystemDonations", String.format("%.2f", totalDonations));
+
+        // 6. Counts
+        stats.put("totalVolunteers", volunteerRepository.count());
+        stats.put("totalCoordinators", coordinatorRepository.count());
+
+        return stats;
+    }
+
     @Transactional
     public User createUser(User user,
                            String coordinatorOngRegNumber, String department, Integer experienceYears, String employmentType,
                            LocalDate birthDate, String skills, String availability, String emergencyContact) {
-
-        // Validare Generală User
         if (user.getFirstName() == null || user.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name is required");
         if (user.getLastName() == null || user.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name is required");
         if (user.getEmail() == null || user.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email is required");
@@ -109,7 +147,6 @@ public class AdminService {
         User savedUser = userRepository.save(user);
 
         if (savedUser.getRole() == User.Role.volunteer) {
-            // Validare Volunteer
             if (birthDate == null) throw new IllegalArgumentException("Birth Date is required for Volunteers");
             if (skills == null || skills.trim().isEmpty()) throw new IllegalArgumentException("Skills are required for Volunteers");
             if (availability == null || availability.trim().isEmpty()) throw new IllegalArgumentException("Availability is required for Volunteers");
@@ -122,7 +159,6 @@ public class AdminService {
             volunteerRepository.save(volunteer);
 
         } else if (savedUser.getRole() == User.Role.coordinator) {
-            // Validare Coordinator
             if (coordinatorOngRegNumber == null || coordinatorOngRegNumber.trim().isEmpty()) throw new IllegalArgumentException("ONG Selection is required for Coordinators");
             if (department == null || department.trim().isEmpty()) throw new IllegalArgumentException("Department is required for Coordinators");
             if (experienceYears == null) throw new IllegalArgumentException("Experience Years is required for Coordinators");
@@ -154,12 +190,9 @@ public class AdminService {
     public User updateUser(Integer id, User updatedUser,
                            String coordinatorOngRegNumber, String department, Integer experienceYears, String employmentType,
                            LocalDate birthDate, String skills, String availability, String emergencyContact) {
-
-        // VALIDARE UPDATE USER (General)
         if (updatedUser.getFirstName() == null || updatedUser.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name cannot be empty");
         if (updatedUser.getLastName() == null || updatedUser.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name cannot be empty");
         if (updatedUser.getEmail() == null || updatedUser.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email cannot be empty");
-        // Phone number este optional, nu il validam strict.
 
         User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser != null) {
@@ -195,7 +228,6 @@ public class AdminService {
             }
 
             if (newRole == User.Role.coordinator) {
-                // VALIDARE UPDATE COORDINATOR
                 if (coordinatorOngRegNumber == null || coordinatorOngRegNumber.trim().isEmpty()) throw new IllegalArgumentException("ONG required for Coordinator");
                 if (department == null || department.trim().isEmpty()) throw new IllegalArgumentException("Department required for Coordinator");
                 if (experienceYears == null) throw new IllegalArgumentException("Experience Years required for Coordinator");
@@ -216,11 +248,9 @@ public class AdminService {
                 coordinatorRepository.save(coordinator);
 
             } else if (newRole == User.Role.volunteer) {
-                // VALIDARE UPDATE VOLUNTEER
                 if (birthDate == null) throw new IllegalArgumentException("Birth Date required for Volunteer");
                 if (skills == null || skills.trim().isEmpty()) throw new IllegalArgumentException("Skills required for Volunteer");
                 if (availability == null || availability.trim().isEmpty()) throw new IllegalArgumentException("Availability required for Volunteer");
-                // Emergency Contact e optional
 
                 Optional<Volunteer> existingVol = volunteerRepository.findByUserId(id);
                 Volunteer volunteer = existingVol.orElse(new Volunteer(id));
@@ -278,14 +308,12 @@ public class AdminService {
 
     @Transactional
     public Ong updateOng(String registrationNumber, Ong updatedOng) {
-        // VALIDARE UPDATE ONG
         if (updatedOng.getName() == null || updatedOng.getName().trim().isEmpty()) throw new IllegalArgumentException("Name cannot be empty");
         if (updatedOng.getDescription() == null || updatedOng.getDescription().trim().isEmpty()) throw new IllegalArgumentException("Description cannot be empty");
         if (updatedOng.getAddress() == null || updatedOng.getAddress().trim().isEmpty()) throw new IllegalArgumentException("Address cannot be empty");
         if (updatedOng.getCountry() == null || updatedOng.getCountry().trim().isEmpty()) throw new IllegalArgumentException("Country cannot be empty");
         if (updatedOng.getPhone() == null || updatedOng.getPhone().trim().isEmpty()) throw new IllegalArgumentException("Phone cannot be empty");
         if (updatedOng.getEmail() == null || updatedOng.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email cannot be empty");
-        // Founding Date este optional
 
         Ong existingOng = ongRepository.findById(registrationNumber).orElse(null);
         if (existingOng != null) {
