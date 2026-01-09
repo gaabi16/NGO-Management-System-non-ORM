@@ -83,6 +83,14 @@ public class CoordinatorService {
 
     @Transactional
     public void createActivity(Activity activity, Coordinator coordinator) {
+        // VALIDARE ACTIVITATE (Totul e NOT NULL in baza de date)
+        if (activity.getName() == null || activity.getName().trim().isEmpty()) throw new IllegalArgumentException("Activity Name is required");
+        if (activity.getDescription() == null || activity.getDescription().trim().isEmpty()) throw new IllegalArgumentException("Description is required");
+        if (activity.getLocation() == null || activity.getLocation().trim().isEmpty()) throw new IllegalArgumentException("Location is required");
+        if (activity.getStartDate() == null) throw new IllegalArgumentException("Start Date is required");
+        if (activity.getEndDate() == null) throw new IllegalArgumentException("End Date is required");
+        if (activity.getMaxVolunteers() == null || activity.getMaxVolunteers() < 1) throw new IllegalArgumentException("Max Volunteers must be at least 1");
+
         activity.setIdCoordinator(coordinator.getIdCoordinator());
         if (activity.getIdCategory() == null) activity.setIdCategory(1);
         activityRepository.save(activity);
@@ -133,7 +141,6 @@ public class CoordinatorService {
         return stats;
     }
 
-    // [FIX] PostgreSQL Syntax (STRING_AGG in loc de GROUP_CONCAT)
     public List<Map<String, Object>> getVolunteersForCoordinator(Integer coordinatorId) {
         String sql = "SELECT v.id_volunteer, u.first_name, u.last_name, u.email, u.phone_number, v.skills, " +
                 "STRING_AGG(DISTINCT a.name, ', ') as activity_list " +
@@ -178,19 +185,14 @@ public class CoordinatorService {
         return jdbcTemplate.queryForList("SELECT id_category, name FROM activity_categories");
     }
 
-    // --- METHODS FOR PROFILE MANAGEMENT ---
-
     @Transactional
     public void updateCoordinatorProfile(Coordinator updatedCoordinator, String currentUserEmail) {
-        // 1. Identificare user curent
         User user = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 2. Identificare profil coordonator curent
         Coordinator existingCoordinator = coordinatorRepository.findByUserId(user.getIdUser())
                 .orElseThrow(() -> new RuntimeException("Coordinator not found"));
 
-        // 3. Update date Utilizator (User Table) - Nume, Prenume, Telefon
         if (updatedCoordinator.getUser() != null) {
             user.setFirstName(updatedCoordinator.getUser().getFirstName());
             user.setLastName(updatedCoordinator.getUser().getLastName());
@@ -198,7 +200,6 @@ public class CoordinatorService {
             userRepository.save(user);
         }
 
-        // 4. Update date Coordonator (Coordinators Table) - Department, Experience, Employment
         existingCoordinator.setDepartment(updatedCoordinator.getDepartment());
         existingCoordinator.setExperienceYears(updatedCoordinator.getExperienceYears());
         existingCoordinator.setEmploymentType(updatedCoordinator.getEmploymentType());
@@ -206,7 +207,6 @@ public class CoordinatorService {
         coordinatorRepository.save(existingCoordinator);
     }
 
-    // [MODIFICAT] Metoda pentru stergerea completa in cascada
     @Transactional
     public void deleteCoordinatorAccount(String email) {
         User user = userRepository.findByEmail(email)
@@ -216,21 +216,16 @@ public class CoordinatorService {
                 .orElse(null);
 
         if (coordinator != null) {
-            // 1. Stergem toate inscrierile voluntarilor la activitatile create de acest coordinator
-            // Altfel primim eroare de Foreign Key daca incercam sa stergem activitatile
             String sqlDeleteEnrollments = "DELETE FROM volunteer_activities WHERE id_activity IN " +
                     "(SELECT id_activity FROM activities WHERE id_coordinator = ?)";
             jdbcTemplate.update(sqlDeleteEnrollments, coordinator.getIdCoordinator());
 
-            // 2. Stergem activitatile create de coordinator
             String sqlDeleteActivities = "DELETE FROM activities WHERE id_coordinator = ?";
             jdbcTemplate.update(sqlDeleteActivities, coordinator.getIdCoordinator());
 
-            // 3. Stergem profilul de coordonator
             coordinatorRepository.deleteByUserId(user.getIdUser());
         }
 
-        // 4. Stergem utilizatorul (login-ul)
         userRepository.deleteById(user.getIdUser());
     }
 }
