@@ -69,7 +69,7 @@ public class AdminService {
         public int getNumber() { return currentPage; }
     }
 
-    // [MODIFICAT] Metoda unificata care suporta search + roluri
+    // Metoda unificata care suporta search + roluri
     public PageWrapper<User> getUsersPageFiltered(int page, int size, String search, List<User.Role> roles) {
         int offset = page * size;
         List<User> users = userRepository.findFilteredUsers(search, roles, offset, size);
@@ -77,34 +77,35 @@ public class AdminService {
         return new PageWrapper<>(users, totalElements, page, size);
     }
 
-    public PageWrapper<Ong> getOngsPage(int page, int size, String search) {
+    // Metoda unificata pentru ONG-uri (Search + Country)
+    public PageWrapper<Ong> getOngsPageFiltered(int page, int size, String search, String country) {
         int offset = page * size;
-        List<Ong> ongs;
-        long totalElements;
-        if (search != null && !search.trim().isEmpty()) {
-            ongs = ongRepository.findByRegistrationNumberPaginated(search.trim(), size, offset);
-            totalElements = ongRepository.countByRegistrationNumber(search.trim());
-        } else {
-            ongs = ongRepository.findAll(size, offset);
-            totalElements = ongRepository.count();
-        }
+        List<Ong> ongs = ongRepository.findFilteredOngs(search, country, offset, size);
+        long totalElements = ongRepository.countFilteredOngs(search, country);
         return new PageWrapper<>(ongs, totalElements, page, size);
     }
 
     public Map<String, Object> getSystemStatistics() {
         Map<String, Object> stats = new HashMap<>();
+
+        // Asumăm că celelalte repository-uri returnează Map sau null direct (dacă nu au fost modificate să returneze Optional)
         Map<String, Object> topVol = volunteerRepository.findMostActiveVolunteer();
         stats.put("topVolunteerName", topVol != null ? topVol.get("name") : "N/A");
         stats.put("topVolunteerCount", topVol != null ? topVol.get("count") : 0);
-        Map<String, Object> topOng = ongRepository.findTopFundraisingOng();
+
+        // [CORECȚIE] Aici extragem valoarea din Optional folosind orElse(null)
+        Map<String, Object> topOng = ongRepository.findTopFundraisingOng().orElse(null);
         stats.put("topOngName", topOng != null ? topOng.get("name") : "N/A");
         stats.put("topOngDonations", topOng != null ? String.format("%.2f", topOng.get("total")) : "0.00");
+
         Map<String, Object> topCoord = coordinatorRepository.findTopCoordinator();
         stats.put("topCoordinatorName", topCoord != null ? topCoord.get("name") : "N/A");
         stats.put("topCoordinatorCount", topCoord != null ? topCoord.get("count") : 0);
+
         Map<String, Object> popAct = activityRepository.findMostPopularActivity();
         stats.put("popularActivityName", popAct != null ? popAct.get("name") : "N/A");
         stats.put("popularActivityCount", popAct != null ? popAct.get("count") : 0);
+
         Double totalDonations = activityRepository.getTotalSystemDonations();
         stats.put("totalSystemDonations", String.format("%.2f", totalDonations));
         stats.put("totalVolunteers", volunteerRepository.count());
