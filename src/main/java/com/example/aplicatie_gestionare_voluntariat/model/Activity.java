@@ -25,10 +25,11 @@ public class Activity {
     private boolean enrolled = false;
     private String enrollmentStatus; // 'pending', 'accepted', 'rejected'
 
-    // [NOU] Detalii Coordonator pentru afișare extinsă
+    // [NOU] Detalii Coordonator & ONG pentru afișare extinsă
     private String coordinatorName;
     private String coordinatorEmail;
     private String coordinatorPhone;
+    private String ongName; // [NOU]
 
     public Activity() {}
 
@@ -87,4 +88,7 @@ public class Activity {
 
     public String getCoordinatorPhone() { return coordinatorPhone; }
     public void setCoordinatorPhone(String coordinatorPhone) { this.coordinatorPhone = coordinatorPhone; }
+
+    public String getOngName() { return ongName; } // [NOU]
+    public void setOngName(String ongName) { this.ongName = ongName; } // [NOU]
 }
