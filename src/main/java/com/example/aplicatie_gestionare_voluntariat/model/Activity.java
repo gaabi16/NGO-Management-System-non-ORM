@@ -17,7 +17,10 @@ public class Activity {
 
     // Câmpuri extra pentru afișare
     private String categoryName;
-    private Integer pendingCount = 0; // [NOU] Pentru notificări în dashboard
+    private Integer pendingCount = 0;
+
+    // [NOU] Flag pentru a verifica dacă voluntarul curent a aplicat deja
+    private boolean enrolled = false;
 
     public Activity() {}
 
@@ -59,4 +62,8 @@ public class Activity {
 
     public Integer getPendingCount() { return pendingCount; }
     public void setPendingCount(Integer pendingCount) { this.pendingCount = pendingCount; }
+
+    // [NOU] Getteri și Setteri pentru enrolled
+    public boolean isEnrolled() { return enrolled; }
+    public void setEnrolled(boolean enrolled) { this.enrolled = enrolled; }
 }
