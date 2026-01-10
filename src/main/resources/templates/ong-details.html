@@ -8,7 +8,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; }
 
-        /* [MODIFICAT] Navbar Styles pentru a potrivi cu Homepage-ul */
         .navbar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 1rem 2rem;
@@ -31,7 +30,6 @@
         .nav-btn:hover { background: rgba(255,255,255,0.2); }
         .logout-btn { background: #dc3545; border: none; cursor: pointer; font-size: 1rem; }
 
-        /* Stiluri specifice paginii ONG (Păstrate din codul tău) */
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
         .ong-header { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
         .ong-title { font-size: 2.5rem; margin-bottom: 15px; color: #2d3748; }
@@ -46,7 +44,19 @@
         .activities-section { background: white; padding: 30px; border-radius: 15px; }
         .section-heading { font-size: 1.8rem; margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; }
 
-        .activity-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; transition: all 0.2s; flex-wrap: wrap; gap: 20px; }
+        /* [MODIFICAT] align-items: stretch pentru ca cele doua coloane sa aiba aceeasi inaltime */
+        .activity-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch; /* Important pentru pozitionare jos */
+            transition: all 0.2s;
+            gap: 20px;
+        }
+
         .activity-card:hover { border-color: #667eea; background-color: #f8fafc; }
         .act-main { flex: 1; min-width: 300px; }
         .act-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
@@ -54,16 +64,34 @@
         .act-desc { color: #718096; margin-bottom: 10px; }
         .act-date { font-size: 0.9rem; color: #4a5568; font-weight: 500; }
 
-        /* [MODIFICAT] Stiluri Status */
-        .act-status { padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; }
+        /* [NOU] Container pentru partea dreapta (Status + Buton/Mesaj) */
+        .act-actions {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Impinge status sus si mesaj jos */
+            align-items: flex-end;
+            min-width: 160px;
+            text-align: right;
+        }
 
-        .status-open { background: #c6f6d5; color: #22543d; } /* Verde */
-        .status-closed { background: #fed7d7; color: #822727; } /* Rosu */
-        .status-in-progress { background: #feebc8; color: #c05621; } /* Portocaliu */
-        .status-completed { background: #fff3cd; color: #856404; } /* Cald (Galben/Auriu) */
+        .act-status { padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; display: inline-block; }
+        .status-open { background: #c6f6d5; color: #22543d; }
+        .status-closed { background: #fed7d7; color: #822727; }
+        .status-in-progress { background: #feebc8; color: #c05621; }
+        .status-completed { background: #FFEFBD; color: #FFBC14; }
 
-        .join-btn { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 10px; transition: background 0.2s; }
+        .join-btn { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
         .join-btn:hover { background: #218838; }
+
+        /* [MODIFICAT] Stil minimalist pentru mesajele text */
+        .info-text-neutral {
+            font-size: 0.9rem;
+            color: #8898aa; /* Gri subtil */
+            font-style: italic;
+            margin-top: 10px;
+            display: inline-block;
+            /* Fara background, fara border */
+        }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; position: relative; }
@@ -72,10 +100,6 @@
         .form-group textarea { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; resize: vertical; font-family: inherit; }
         .close { position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 1.5rem; color: #888; }
         .success-msg { background: #c6f6d5; color: #22543d; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
-
-        /* Buton Back discret în container (opțional, pentru navigare ușoară) */
-        .breadcrumb-link { display: inline-block; margin-bottom: 15px; color: #667eea; text-decoration: none; font-weight: 600; }
-        .breadcrumb-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -143,7 +167,8 @@
                     💰 Raised: <span th:text="${activity.donationsCollected != null ? #numbers.formatCurrency(activity.donationsCollected) : '0.00'}">0.00</span>
                 </div>
             </div>
-            <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+
+            <div class="act-actions">
                 <span th:class="'act-status ' +
                       (${activity.status == 'open'} ? 'status-open' :
                       (${activity.status == 'closed'} ? 'status-closed' :
@@ -154,11 +179,34 @@
                                (activity.status == 'closed' ? 'Closed' :
                                (activity.status == 'completed' ? 'Completed' : activity.status)))}">OPEN</span>
 
-                <button th:if="${activity.status == 'open'}"
-                        class="join-btn"
-                        th:onclick="openJoinModal([[${activity.idActivity}]], [[${activity.name}]])">
-                    Request to Join
-                </button>
+                <div>
+                    <th:block th:switch="${activity.status}">
+
+                        <div th:case="'open'">
+                            <button th:unless="${activity.enrolled}"
+                                    class="join-btn"
+                                    th:onclick="openJoinModal([[${activity.idActivity}]], [[${activity.name}]])">
+                                Request to Join
+                            </button>
+                            <span th:if="${activity.enrolled}" class="info-text-neutral">
+                                ✓ Already applied
+                            </span>
+                        </div>
+
+                        <span th:case="'closed'" class="info-text-neutral">
+                            Application period has closed
+                        </span>
+
+                        <span th:case="'in_progress'" class="info-text-neutral">
+                            Activity is currently in progress
+                        </span>
+
+                        <span th:case="'completed'" class="info-text-neutral">
+                            Activity was completed
+                        </span>
+
+                    </th:block>
+                </div>
             </div>
         </div>
     </div>
@@ -197,7 +245,6 @@
         }
     }
 
-    // Auto-hide alerts script
     setTimeout(function() {
         document.querySelectorAll('.success-msg, .alert').forEach(a => {
             a.style.transition = 'opacity 0.5s ease';
