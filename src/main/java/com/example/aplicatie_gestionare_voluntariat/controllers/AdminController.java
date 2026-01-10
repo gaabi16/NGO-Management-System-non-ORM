@@ -32,7 +32,8 @@ public class AdminController {
             @RequestParam(required = false) String view,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) List<String> roles,
-            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String search, // existent pentru ONG-uri
+            @RequestParam(required = false) String userSearch, // [NOU] Search pentru useri
             Model model,
             Authentication authentication) {
 
@@ -45,17 +46,19 @@ public class AdminController {
         model.addAttribute("allOngs", adminService.getAllOngs());
 
         if ("users".equals(view)) {
-            // [MODIFICARE] 50 de useri pe pagină
+            // [MODIFICARE] 50 de useri pe pagină + filtrare combinată (search + roles)
             int pageSize = 50;
-            AdminService.PageWrapper<User> usersPage;
+            List<User.Role> roleEnums = null;
+
             if (roles != null && !roles.isEmpty()) {
-                List<User.Role> roleEnums = roles.stream().map(User.Role::valueOf).collect(Collectors.toList());
-                usersPage = adminService.getUsersPageByRoles(page, pageSize, roleEnums);
-            } else {
-                usersPage = adminService.getUsersPage(page, pageSize);
+                roleEnums = roles.stream().map(User.Role::valueOf).collect(Collectors.toList());
             }
+
+            AdminService.PageWrapper<User> usersPage = adminService.getUsersPageFiltered(page, pageSize, userSearch, roleEnums);
+
             model.addAttribute("usersPage", usersPage);
             model.addAttribute("currentPage", page);
+            model.addAttribute("currentUserSearch", userSearch); // Trimitem search-ul curent inapoi in pagina
 
         } else if ("ongs".equals(view)) {
             // [MODIFICARE] 20 de ONG-uri pe pagină
