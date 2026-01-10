@@ -10,9 +10,11 @@ import com.example.aplicatie_gestionare_voluntariat.repository.OngRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +73,7 @@ public class CoordinatorService {
 
     @Transactional
     public void createActivity(Activity activity, Coordinator coordinator) {
+        // Validări de bază
         if (activity.getName() == null || activity.getName().trim().isEmpty()) throw new IllegalArgumentException("Activity Name is required");
         if (activity.getDescription() == null || activity.getDescription().trim().isEmpty()) throw new IllegalArgumentException("Description is required");
         if (activity.getLocation() == null || activity.getLocation().trim().isEmpty()) throw new IllegalArgumentException("Location is required");
@@ -78,8 +81,23 @@ public class CoordinatorService {
         if (activity.getEndDate() == null) throw new IllegalArgumentException("End Date is required");
         if (activity.getMaxVolunteers() == null || activity.getMaxVolunteers() < 1) throw new IllegalArgumentException("Max Volunteers must be at least 1");
 
+        // Validare logică timp
+        if (activity.getEndDate().isBefore(activity.getStartDate())) {
+            throw new IllegalArgumentException("End Date cannot be before Start Date");
+        }
+        if (activity.getStartDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Cannot schedule activities in the past");
+        }
+
+        // [NOU] Validare suprapunere activități pentru același coordonator
+        if (activityRepository.hasOverlappingActivity(coordinator.getIdCoordinator(), activity.getStartDate(), activity.getEndDate())) {
+            throw new IllegalArgumentException("You already have an activity scheduled during this time interval. Please choose different hours.");
+        }
+
         activity.setIdCoordinator(coordinator.getIdCoordinator());
         if (activity.getIdCategory() == null) activity.setIdCategory(1);
+
+        // Activitatea se salvează implicit cu status 'open' (din repository)
         activityRepository.save(activity);
     }
 
@@ -120,13 +138,24 @@ public class CoordinatorService {
             String currentStatus = jdbcTemplate.queryForObject(checkSql, String.class, activityId, volunteerId);
             if (!"pending".equalsIgnoreCase(currentStatus)) return;
         } catch (Exception e) { return; }
+
         String sql = "UPDATE volunteer_activities SET status = ? WHERE id_activity = ? AND id_volunteer = ?";
         jdbcTemplate.update(sql, newStatus, activityId, volunteerId);
+
+        // Dacă a fost acceptat, verificăm dacă s-a atins capacitatea maximă pentru a închide automat înscrierile
         if ("accepted".equalsIgnoreCase(newStatus)) {
             String countSql = "SELECT COUNT(*) FROM volunteer_activities WHERE id_activity = ? AND status = 'accepted'";
             Integer acceptedCount = jdbcTemplate.queryForObject(countSql, Integer.class, activityId);
             Activity activity = activityRepository.findById(activityId).orElse(null);
-            if (activity != null && acceptedCount != null && acceptedCount >= activity.getMaxVolunteers()) { activityRepository.updateStatus(activityId, "closed"); }
+
+            // Inchidem (closed) doar dacă activitatea nu e deja completed sau in_progress
+            if (activity != null &&
+                    acceptedCount != null &&
+                    acceptedCount >= activity.getMaxVolunteers() &&
+                    "open".equals(activity.getStatus())) {
+
+                activityRepository.updateStatus(activityId, "closed");
+            }
         }
     }
 
@@ -134,7 +163,6 @@ public class CoordinatorService {
 
     @Transactional
     public void updateCoordinatorProfile(Coordinator updatedCoordinator, String currentUserEmail) {
-        // VALIDARE STRICTA
         if (updatedCoordinator.getDepartment() == null || updatedCoordinator.getDepartment().trim().isEmpty()) throw new IllegalArgumentException("Department cannot be empty");
         if (updatedCoordinator.getExperienceYears() == null) throw new IllegalArgumentException("Experience Years cannot be empty");
         if (updatedCoordinator.getEmploymentType() == null || updatedCoordinator.getEmploymentType().trim().isEmpty()) throw new IllegalArgumentException("Employment Type cannot be empty");
@@ -143,12 +171,8 @@ public class CoordinatorService {
         Coordinator existingCoordinator = coordinatorRepository.findByUserId(user.getIdUser()).orElseThrow(() -> new RuntimeException("Coordinator not found"));
 
         if (updatedCoordinator.getUser() != null) {
-            // Validare date User
             if (updatedCoordinator.getUser().getFirstName() == null || updatedCoordinator.getUser().getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name cannot be empty");
             if (updatedCoordinator.getUser().getLastName() == null || updatedCoordinator.getUser().getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name cannot be empty");
-
-            // Daca s-ar permite update email, validarea ar fi aici.
-            // In acest moment emailul vine din sesiune, deci nu il validam.
 
             user.setFirstName(updatedCoordinator.getUser().getFirstName());
             user.setLastName(updatedCoordinator.getUser().getLastName());
@@ -175,5 +199,21 @@ public class CoordinatorService {
             coordinatorRepository.deleteByUserId(user.getIdUser());
         }
         userRepository.deleteById(user.getIdUser());
+    }
+
+    // [NOU] SCHEDULER: Rulează la fiecare minut pentru a actualiza statusurile
+    @Scheduled(fixedRate = 60000) // 60000 ms = 1 minut
+    @Transactional
+    public void updateActivityStatusesAutomatically() {
+        LocalDateTime now = LocalDateTime.now();
+
+        // 1. Trecem la 'in_progress' activitățile care au început și nu sunt încă marcate ca atare sau terminate
+        // Aceasta suprascrie 'open' sau 'closed' (dacă erau închise pentru înscrieri, acum sunt în progres fizic)
+        activityRepository.updateStatusToInProgress(now);
+
+        // 2. Trecem la 'completed' activitățile care s-au terminat
+        activityRepository.updateStatusToCompleted(now);
+
+        // Notă: Folosind @Transactional, aceste update-uri sunt atomice per rulare.
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,8 @@ public class ActivityRepository {
     }
 
     public void save(Activity activity) {
+        // [MODIFICAT] Status default 'open' la creare.
+        // Va deveni 'in_progress' automat prin Scheduler daca data de start e acum.
         String sql = "INSERT INTO activities (id_category, id_coordinator, name, description, location, start_date, end_date, max_volunteers, status, donations_collected) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', 0.0)";
 
@@ -117,7 +120,6 @@ public class ActivityRepository {
         return count != null && count > 0;
     }
 
-    // [NOU] Returnează activitatea cu cei mai mulți voluntari
     public Map<String, Object> findMostPopularActivity() {
         String sql = "SELECT a.name, COUNT(va.id_volunteer) as vol_count " +
                 "FROM activities a " +
@@ -134,10 +136,38 @@ public class ActivityRepository {
         return result.isEmpty() ? null : result.get(0);
     }
 
-    // [NOU] Suma totală a donațiilor din sistem
     public Double getTotalSystemDonations() {
         String sql = "SELECT SUM(donations_collected) FROM activities";
         Double total = jdbcTemplate.queryForObject(sql, Double.class);
         return total != null ? total : 0.0;
+    }
+
+    // [NOU] Verifică dacă există deja o activitate care se suprapune pentru același coordonator
+    public boolean hasOverlappingActivity(Integer coordinatorId, LocalDateTime start, LocalDateTime end) {
+        // Logica de suprapunere: (StartA < EndB) si (EndA > StartB)
+        String sql = "SELECT COUNT(*) FROM activities " +
+                "WHERE id_coordinator = ? " +
+                "AND start_date < ? AND end_date > ? " +
+                "AND status != 'completed'"; // Ignoram cele deja terminate, deși teoretic sunt în trecut
+
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, coordinatorId, end, start);
+        return count != null && count > 0;
+    }
+
+    // [NOU] Update automat la 'in_progress' pentru activitățile care se desfășoară ACUM
+    public void updateStatusToInProgress(LocalDateTime now) {
+        // Trecem la 'in_progress' orice activitate (open sau closed/full) care se află în intervalul de timp
+        // și nu este deja completed sau in_progress.
+        String sql = "UPDATE activities SET status = 'in_progress' " +
+                "WHERE start_date <= ? AND end_date >= ? " +
+                "AND status NOT IN ('in_progress', 'completed')";
+        jdbcTemplate.update(sql, now, now);
+    }
+
+    // [NOU] Update automat la 'completed' pentru activitățile care s-au terminat
+    public void updateStatusToCompleted(LocalDateTime now) {
+        String sql = "UPDATE activities SET status = 'completed' " +
+                "WHERE end_date < ? AND status != 'completed'";
+        jdbcTemplate.update(sql, now);
     }
 }
