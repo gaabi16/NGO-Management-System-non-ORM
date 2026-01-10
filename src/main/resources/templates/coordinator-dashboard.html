@@ -8,14 +8,20 @@
         /* ... (CSS existent) ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; min-height: 100vh; }
+
+        /* [MODIFICAT] Navbar consistent cu volunteer-dashboard */
         .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         .nav-brand { font-size: 1.5rem; font-weight: bold; }
-        .nav-links { display: flex; align-items: center; gap: 10px; }
-        .nav-btn { color: white; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; transition: all 0.3s ease; font-size: 0.95rem; }
+        .nav-links { display: flex; align-items: center; gap: 20px; } /* Gap ajustat la 20px ca la volunteer */
+
+        /* [MODIFICAT] Border radius 20px si eliminat stilurile vechi */
+        .nav-btn { color: white; text-decoration: none; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: background 0.3s; font-size: 0.95rem; }
         .nav-btn:hover { background: rgba(255,255,255,0.2); }
-        .nav-btn.active-nav { background: rgba(255,255,255,0.25); font-weight: 600; border: 1px solid rgba(255,255,255,0.4); }
-        .logout-btn { background: #dc3545; border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.3s; margin-left: 10px; }
+
+        /* [MODIFICAT] Logout button stilizat consistent */
+        .logout-btn { background: #dc3545; border: none; cursor: pointer; color: white; font-weight: 500; }
         .logout-btn:hover { background: #c82333; }
+
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
         .dashboard-header { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
         .ong-title h1 { font-size: 1.8rem; color: #333; }
@@ -51,11 +57,8 @@
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: 500; }
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 1rem; }
-
-        /* [NOU] Styles pentru required/optional */
         .required { color: #dc3545; font-size: 12px; font-weight: bold; }
         .optional { color: #999; font-size: 12px; font-weight: normal; }
-
         .alert { padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; animation: slideDown 0.3s; }
         .alert-success { background-color: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -66,10 +69,19 @@
 <nav class="navbar">
     <div class="nav-brand">Coordinator Dashboard</div>
     <div class="nav-links">
-        <a th:href="@{/coordinator/dashboard(view='activities')}" th:class="'nav-btn ' + (${currentView == 'activities'} ? 'active-nav' : '')">Manage Activities</a>
-        <a th:href="@{/coordinator/dashboard(view='volunteers')}" th:class="'nav-btn ' + (${currentView == 'volunteers'} ? 'active-nav' : '')">Manage Volunteers</a>
-        <a href="/coordinator/profile" class="nav-btn" style="margin-left: 15px;">My Profile</a>
-        <form th:action="@{/logout}" method="post" style="display:inline;"><button class="logout-btn">Logout</button></form>
+        <a th:href="@{/coordinator/dashboard(view='activities')}"
+           class="nav-btn"
+           th:style="${currentView == 'activities'} ? 'background: rgba(255,255,255,0.2);' : ''">Manage Activities</a>
+
+        <a th:href="@{/coordinator/dashboard(view='volunteers')}"
+           class="nav-btn"
+           th:style="${currentView == 'volunteers'} ? 'background: rgba(255,255,255,0.2);' : ''">Manage Volunteers</a>
+
+        <a href="/coordinator/profile" class="nav-btn">Profile</a>
+
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button class="nav-btn logout-btn">Logout</button>
+        </form>
     </div>
 </nav>
 
