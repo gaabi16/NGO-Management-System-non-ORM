@@ -9,16 +9,16 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; min-height: 100vh; }
 
         /* [MODIFICAT] Navbar consistent */
-        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         .nav-brand { font-size: 1.5rem; font-weight: bold; }
         .nav-links { display: flex; align-items: center; gap: 20px; }
 
         /* [MODIFICAT] Border radius 20px */
-        .nav-btn { color: white; text-decoration: none; padding: 8px 16px; border-radius: 20px; font-weight: 500; transition: background 0.3s; }
+        .nav-btn { color: white; text-decoration: none; padding: 8px 16px; border-radius: 20px; font-weight: 500; transition: background 0.3s; font-size: 0.95rem; }
         .nav-btn:hover { background: rgba(255,255,255,0.2); }
 
         /* [MODIFICAT] Logout consistent */
-        .logout-btn { background: #dc3545; border: none; cursor: pointer; color: white; }
+        .logout-btn { background: #dc3545; border: none; cursor: pointer; color: white; font-weight: 500; }
         .logout-btn:hover { background: #c82333; }
 
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
@@ -63,8 +63,15 @@
 <nav class="navbar">
     <div class="nav-brand">Coordinator Dashboard</div>
     <div class="nav-links">
-        <a href="/coordinator/dashboard" class="nav-btn">Dashboard</a>
+        <a th:href="@{/coordinator/dashboard(view='activities')}"
+           class="nav-btn"
+           style="background: rgba(255,255,255,0.2);">Manage Activities</a>
+
+        <a th:href="@{/coordinator/dashboard(view='volunteers')}"
+           class="nav-btn">Manage Volunteers</a>
+
         <a href="/coordinator/profile" class="nav-btn">Profile</a>
+
         <form th:action="@{/logout}" method="post" style="display:inline;">
             <button class="nav-btn logout-btn">Logout</button>
         </form>
@@ -72,7 +79,6 @@
 </nav>
 
 <div class="container">
-    <a href="/coordinator/dashboard" class="back-link">← Back to Dashboard</a>
 
     <div th:if="${param.success}" class="alert alert-success">
         <span th:if="${#strings.equals(param.success[0], 'StatusUpdated')}">Application status updated successfully!</span>
