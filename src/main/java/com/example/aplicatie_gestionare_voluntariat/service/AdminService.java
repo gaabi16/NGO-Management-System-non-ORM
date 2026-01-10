@@ -69,24 +69,11 @@ public class AdminService {
         public int getNumber() { return currentPage; }
     }
 
-    public PageWrapper<User> getUsersPage(int page, int size) {
+    // [MODIFICAT] Metoda unificata care suporta search + roluri
+    public PageWrapper<User> getUsersPageFiltered(int page, int size, String search, List<User.Role> roles) {
         int offset = page * size;
-        List<User> users = userRepository.findAllPaginated(offset, size);
-        long totalElements = userRepository.count();
-        return new PageWrapper<>(users, totalElements, page, size);
-    }
-
-    public PageWrapper<User> getUsersPageByRoles(int page, int size, List<User.Role> roles) {
-        int offset = page * size;
-        List<User> users;
-        long totalElements;
-        if (roles == null || roles.isEmpty()) {
-            users = userRepository.findAllPaginated(offset, size);
-            totalElements = userRepository.count();
-        } else {
-            users = userRepository.findByRoleInPaginated(roles, offset, size);
-            totalElements = userRepository.countByRoleIn(roles);
-        }
+        List<User> users = userRepository.findFilteredUsers(search, roles, offset, size);
+        long totalElements = userRepository.countFilteredUsers(search, roles);
         return new PageWrapper<>(users, totalElements, page, size);
     }
 
