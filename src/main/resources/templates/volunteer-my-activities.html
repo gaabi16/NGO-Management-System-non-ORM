@@ -13,8 +13,6 @@
         .nav-links { display: flex; gap: 20px; align-items: center; }
         .nav-btn { color: white; text-decoration: none; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: background 0.3s; }
         .nav-btn:hover { background: rgba(255,255,255,0.2); }
-
-        /* [MODIFICAT] Stilul butonului de logout aliniat cu profilul */
         .logout-btn { background: #dc3545; border: none; cursor: pointer; }
         .logout-btn:hover { background: #c82333; }
 
@@ -35,18 +33,8 @@
             flex-wrap: wrap;
         }
 
-        .filter-label {
-            font-weight: 700;
-            color: #555;
-            font-size: 1.1rem;
-            margin-right: 10px;
-        }
-
-        .filter-btn-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+        .filter-label { font-weight: 700; color: #555; font-size: 1.1rem; margin-right: 10px; }
+        .filter-btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
 
         .filter-btn {
             text-decoration: none;
@@ -60,47 +48,41 @@
             background: white;
         }
 
-        .filter-btn:hover {
-            border-color: #667eea;
-            color: #667eea;
-            background: #f9f9ff;
-        }
+        .filter-btn:hover { border-color: #667eea; color: #667eea; background: #f9f9ff; }
+        .filter-btn.active { background-color: #667eea; color: white; border-color: #667eea; box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3); }
 
-        .filter-btn.active {
-            background-color: #667eea;
-            color: white;
-            border-color: #667eea;
-            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
-        }
-
-        /* --- LISTĂ ACTIVITĂȚI --- */
-        .activities-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+        /* --- LISTĂ ACTIVITĂȚI (COLLAPSIBLE) --- */
+        .activities-list { display: flex; flex-direction: column; gap: 15px; }
 
         .activity-card-row {
             background: white;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             border-left: 5px solid #667eea;
-            padding: 25px;
-            transition: transform 0.2s;
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
         }
 
-        .activity-card-row:hover { transform: translateX(5px); }
+        .activity-card-row:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
+        /* HEADER - Tot timpul vizibil */
         .card-header-row {
+            padding: 20px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
+            cursor: pointer;
+            background: white;
+            transition: background 0.2s;
         }
 
-        .activity-title { font-size: 1.4rem; color: #333; font-weight: 700; }
+        .card-header-row:hover { background: #fdfdfd; }
+
+        .header-content { display: flex; flex-direction: column; gap: 5px; }
+        .activity-title { font-size: 1.3rem; color: #333; font-weight: 700; margin: 0; }
+        .ong-name { font-size: 0.95rem; color: #666; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+
+        .header-status { display: flex; align-items: center; gap: 20px; }
 
         .status-badge {
             display: inline-block;
@@ -116,6 +98,44 @@
         .status-rejected { background-color: #f8d7da; color: #721c24; }
         .status-completed { background-color: #cce5ff; color: #004085; }
 
+        .toggle-icon {
+            font-size: 1.2rem;
+            color: #667eea;
+            /* Animatie rapida (0.4s) dar dinamica (540 grade) */
+            transition: transform 0.4s ease-in-out;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #f0f2ff;
+        }
+
+        /* Rotire cand e activ: 180 (flip) + 360 (spin) = 540 grade */
+        .toggle-icon.rotated {
+            transform: rotate(540deg);
+            background: #667eea;
+            color: white;
+        }
+
+        /* BODY - Ascuns initial */
+        .card-body-collapsible {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+            opacity: 0;
+            background: #fcfcfc;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .card-body-collapsible.expanded {
+            max-height: 500px; /* Suficient pentru continut */
+            opacity: 1;
+        }
+
+        .body-content { padding: 25px; }
+
         .details-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -127,40 +147,29 @@
         .detail-item strong { color: #333; font-weight: 600; display: inline-block; width: 110px; }
 
         .coordinator-info {
-            background-color: #f9f9f9;
+            background-color: #f0f2f5;
             padding: 15px;
             border-radius: 8px;
             margin-top: 15px;
             font-size: 0.9rem;
+            border-left: 3px solid #6c757d;
         }
 
-        .coordinator-title { font-weight: bold; color: #667eea; margin-bottom: 5px; display: block; }
+        .coordinator-title { font-weight: bold; color: #444; margin-bottom: 5px; display: block; }
+        .activity-desc { color: #666; font-style: italic; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #e0e0e0; }
 
-        .activity-desc { color: #666; font-style: italic; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
-
-        /* --- EMPTY STATE --- */
         .empty-state {
             text-align: center;
             padding: 60px 40px;
             background-color: #ffffff;
-            border: 2px dashed #cbd5e0;
+            border: 2px solid #cbd5e0;
             border-radius: 12px;
             margin-top: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
 
-        .empty-state h3 {
-            font-size: 1.6rem;
-            color: #4a5568;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
-        .empty-state p {
-            font-size: 1.1rem;
-            color: #718096;
-            margin: 0;
-        }
+        .empty-state h3 { font-size: 1.6rem; color: #4a5568; margin-bottom: 15px; font-weight: 700; }
+        .empty-state p { font-size: 1.1rem; color: #718096; margin: 0; }
     </style>
 </head>
 <body>
@@ -182,62 +191,63 @@
 
     <div class="filter-container">
         <span class="filter-label">Filter activities:</span>
-
         <div class="filter-btn-group">
-            <a th:href="@{/volunteer/my-activities(status='all')}"
-               class="filter-btn"
-               th:classappend="${selectedStatus == 'all' or selectedStatus == null} ? 'active'">All</a>
-
-            <a th:href="@{/volunteer/my-activities(status='pending')}"
-               class="filter-btn"
-               th:classappend="${selectedStatus == 'pending'} ? 'active'">Pending</a>
-
-            <a th:href="@{/volunteer/my-activities(status='accepted')}"
-               class="filter-btn"
-               th:classappend="${selectedStatus == 'accepted'} ? 'active'">Accepted</a>
-
-            <a th:href="@{/volunteer/my-activities(status='rejected')}"
-               class="filter-btn"
-               th:classappend="${selectedStatus == 'rejected'} ? 'active'">Rejected</a>
+            <a th:href="@{/volunteer/my-activities(status='all')}" class="filter-btn" th:classappend="${selectedStatus == 'all' or selectedStatus == null} ? 'active'">All</a>
+            <a th:href="@{/volunteer/my-activities(status='pending')}" class="filter-btn" th:classappend="${selectedStatus == 'pending'} ? 'active'">Pending</a>
+            <a th:href="@{/volunteer/my-activities(status='accepted')}" class="filter-btn" th:classappend="${selectedStatus == 'accepted'} ? 'active'">Accepted</a>
+            <a th:href="@{/volunteer/my-activities(status='rejected')}" class="filter-btn" th:classappend="${selectedStatus == 'rejected'} ? 'active'">Rejected</a>
         </div>
     </div>
 
     <div class="activities-list">
         <div th:each="activity : ${activities}" class="activity-card-row">
 
-            <div class="card-header-row">
-                <h3 class="activity-title" th:text="${activity.name}">Activity Name</h3>
-                <span th:class="'status-badge status-' + ${activity.enrollmentStatus}"
-                      th:text="${activity.enrollmentStatus}">PENDING</span>
-            </div>
+            <div class="card-header-row" onclick="toggleCard(this)">
+                <div class="header-content">
+                    <h3 class="activity-title" th:text="${activity.name}">Activity Name</h3>
+                    <div class="ong-name">
+                        🏢 <span th:text="${activity.ongName}">Organization Name</span>
+                    </div>
+                </div>
 
-            <div class="details-grid">
-                <div class="detail-item">
-                    <strong>Start Date:</strong>
-                    <span th:text="${#temporals.format(activity.startDate, 'dd MMM yyyy, HH:mm')}">Date</span>
-                </div>
-                <div class="detail-item">
-                    <strong>End Date:</strong>
-                    <span th:text="${#temporals.format(activity.endDate, 'dd MMM yyyy, HH:mm')}">Date</span>
-                </div>
-                <div class="detail-item">
-                    <strong>Location:</strong>
-                    <span th:text="${activity.location}">Place</span>
-                </div>
-                <div class="detail-item">
-                    <strong>Category:</strong>
-                    <span th:text="${activity.categoryName}">Type</span>
+                <div class="header-status">
+                    <span th:class="'status-badge status-' + ${activity.enrollmentStatus}"
+                          th:text="${activity.enrollmentStatus}">PENDING</span>
+                    <div class="toggle-icon">▼</div>
                 </div>
             </div>
 
-            <div class="coordinator-info">
-                <span class="coordinator-title">Coordinator Details</span>
-                <div>👤 <span th:text="${activity.coordinatorName}">Name</span></div>
-                <div>📧 <span th:text="${activity.coordinatorEmail}">Email</span></div>
-                <div>📞 <span th:text="${activity.coordinatorPhone}">Phone</span></div>
-            </div>
+            <div class="card-body-collapsible">
+                <div class="body-content">
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <strong>Start Date:</strong>
+                            <span th:text="${#temporals.format(activity.startDate, 'dd MMM yyyy, HH:mm')}">Date</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>End Date:</strong>
+                            <span th:text="${#temporals.format(activity.endDate, 'dd MMM yyyy, HH:mm')}">Date</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Location:</strong>
+                            <span th:text="${activity.location}">Place</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Category:</strong>
+                            <span th:text="${activity.categoryName}">Type</span>
+                        </div>
+                    </div>
 
-            <p class="activity-desc" th:text="${activity.description}">Full description here...</p>
+                    <div class="coordinator-info">
+                        <span class="coordinator-title">Coordinator Details</span>
+                        <div>👤 <span th:text="${activity.coordinatorName}">Name</span></div>
+                        <div>📧 <span th:text="${activity.coordinatorEmail}">Email</span></div>
+                        <div>📞 <span th:text="${activity.coordinatorPhone}">Phone</span></div>
+                    </div>
+
+                    <p class="activity-desc" th:text="${activity.description}">Full description here...</p>
+                </div>
+            </div>
         </div>
 
         <div th:if="${#lists.isEmpty(activities)}" class="empty-state">
@@ -246,6 +256,21 @@
         </div>
     </div>
 </div>
+
+<script>
+    function toggleCard(headerElement) {
+        // Găsim elementul body imediat următor (sibling)
+        const bodyContent = headerElement.nextElementSibling;
+        const icon = headerElement.querySelector('.toggle-icon');
+
+        // Toggle la clasa 'expanded' pentru animația de înălțime și opacitate
+        bodyContent.classList.toggle('expanded');
+
+        // Rotim iconița cu 540 de grade (prin CSS).
+        // ▼ rotit 540 grade = ▲, deci nu trebuie să schimbăm textul.
+        icon.classList.toggle('rotated');
+    }
+</script>
 
 </body>
 </html>
