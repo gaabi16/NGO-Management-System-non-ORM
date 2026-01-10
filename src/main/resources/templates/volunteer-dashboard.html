@@ -90,9 +90,11 @@
             padding-left: 15px;
         }
 
+        /* [MODIFICAT] Flexbox Grid pentru centrare */
         .ong-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Centrează cardurile pe rândul incomplet */
             gap: 30px;
         }
 
@@ -107,6 +109,9 @@
             cursor: pointer;
             text-decoration: none;
             color: inherit;
+            /* Dimensiune fixă pentru a garanta 3 pe rând pe ecrane mari (1200px container) */
+            width: 350px;
+            max-width: 100%;
         }
 
         .ong-card:hover {
@@ -154,6 +159,48 @@
             align-items: center;
             gap: 5px;
         }
+
+        /* [NOU] Paginare stilizată (la fel ca în admin) */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .pagination a, .pagination span.current-page {
+            padding: 8px 14px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #667eea;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 40px;
+            text-align: center;
+        }
+        .pagination a:hover:not(.disabled) {
+            background: #667eea;
+            color: white;
+        }
+        .pagination .active, .pagination span.current-page {
+            background: #667eea;
+            color: white;
+            cursor: default;
+        }
+        .pagination .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #ccc;
+            color: #ccc;
+        }
+        .pagination .dots {
+            color: #666;
+            font-weight: bold;
+            padding: 0 5px;
+        }
     </style>
 </head>
 <body>
@@ -197,6 +244,41 @@
             </div>
         </a>
     </div>
+
+    <div class="pagination" th:if="${totalPages > 1}">
+        <a th:href="@{/volunteer/dashboard(page=${currentPage - 1})}"
+           th:class="${currentPage == 0} ? 'disabled' : ''"
+           th:onclick="${currentPage == 0} ? 'return false;' : ''">← Prev</a>
+
+        <th:block th:if="${totalPages <= 3}">
+            <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+               th:href="@{/volunteer/dashboard(page=${i})}"
+               th:class="${currentPage == i} ? 'active' : ''"
+               th:text="${i + 1}"></a>
+        </th:block>
+
+        <th:block th:if="${totalPages > 3}">
+            <a th:href="@{/volunteer/dashboard(page=0)}"
+               th:class="${currentPage == 0} ? 'active' : ''">1</a>
+
+            <span class="dots" th:if="${currentPage > 1}">...</span>
+
+            <span class="current-page"
+                  th:if="${currentPage > 0 and currentPage < totalPages - 1}"
+                  th:text="${currentPage + 1}"></span>
+
+            <span class="dots" th:if="${currentPage < totalPages - 2}">...</span>
+
+            <a th:href="@{/volunteer/dashboard(page=${totalPages - 1})}"
+               th:class="${currentPage == totalPages - 1} ? 'active' : ''"
+               th:text="${totalPages}"></a>
+        </th:block>
+
+        <a th:href="@{/volunteer/dashboard(page=${currentPage + 1})}"
+           th:class="${currentPage >= totalPages - 1} ? 'disabled' : ''"
+           th:onclick="${currentPage >= totalPages - 1} ? 'return false;' : ''">Next →</a>
+    </div>
+
 </div>
 
 </body>
