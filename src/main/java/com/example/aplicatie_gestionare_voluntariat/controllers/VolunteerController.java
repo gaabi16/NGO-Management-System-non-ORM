@@ -33,21 +33,30 @@ public class VolunteerController {
 
     @GetMapping("/dashboard")
     public String dashboard(@RequestParam(defaultValue = "0") int page,
+                            @RequestParam(required = false) String continent,
+                            @RequestParam(required = false) String country,
                             Model model,
                             Authentication authentication) {
         String email = authentication.getName();
         User user = userRepository.findByEmail(email).orElse(new User());
         model.addAttribute("firstName", user.getFirstName());
 
-        // [MODIFICAT] Configurare paginare: 15 ONG-uri pe pagină (5 rânduri x 3 coloane)
+        // Configurare paginare
         int pageSize = 15;
-        List<Ong> paginatedOngs = volunteerPageService.getOngsPaginated(page, pageSize);
-        long totalOngs = volunteerPageService.countOngs();
+
+        // [MODIFICAT] Apelare service cu filtre
+        List<Ong> paginatedOngs = volunteerPageService.getOngsFiltered(page, pageSize, continent, country);
+        long totalOngs = volunteerPageService.countOngsFiltered(continent, country);
         int totalPages = (int) Math.ceil((double) totalOngs / pageSize);
 
         model.addAttribute("ongs", paginatedOngs);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
+
+        // [NOU] Adăugare date pentru filtrare în view
+        model.addAttribute("selectedContinent", continent);
+        model.addAttribute("selectedCountry", country);
+        model.addAttribute("locationData", volunteerPageService.getLocationData());
 
         return "volunteer-dashboard";
     }
