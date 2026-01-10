@@ -90,6 +90,20 @@
         .btn-apply-filter:hover { background: #218838; transform: translateY(-1px); }
         .btn-clear-filter { background: #6c757d; color: white; flex: 1; }
         .btn-clear-filter:hover { background: #5a6268; transform: translateY(-1px); }
+
+        /* [NOU] Stiluri pentru mesajul No Users Found */
+        .no-results-container {
+            text-align: center;
+            padding: 50px 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px dashed #e0e0e0;
+            color: #6c757d;
+        }
+        .no-results-icon { font-size: 48px; margin-bottom: 15px; display: block; }
+        .no-results-text { font-size: 18px; font-weight: 600; }
+        .no-results-subtext { font-size: 14px; margin-top: 5px; }
+
         #coordinatorFields, #volunteerFields, #createCoordinatorFields, #createVolunteerFields { padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0; margin-top: 15px; margin-bottom: 20px; animation: fadeIn 0.3s ease; }
         #coordinatorFields, #createCoordinatorFields { background-color: #f3f4fc; border-left: 4px solid #667eea; }
         #volunteerFields, #createVolunteerFields { background-color: #e8f5e9; border-left: 4px solid #28a745; }
@@ -141,8 +155,15 @@
             </div>
 
             <div class="filter-section">
-                <button class="btn-filter" onclick="toggleFilterMenu()">🔍 Filter Users <span class="filter-arrow">▼</span></button>
+                <button class="btn-filter" onclick="toggleFilterMenu()">🔍 Search & Filter Users <span class="filter-arrow">▼</span></button>
                 <div id="filterMenu" class="filter-menu">
+                    <div class="filter-group">
+                        <label class="filter-label">Search Users:</label>
+                        <input type="text" id="userSearchInput" class="search-input-modal"
+                               placeholder="Search by Name or Email (Press Enter to Apply)"
+                               th:value="${currentUserSearch}">
+                    </div>
+
                     <div class="filter-group">
                         <label class="filter-label">Filter by Role:</label>
                         <div class="filter-options">
@@ -151,8 +172,17 @@
                             <button class="filter-option" data-role="admin" onclick="toggleRoleFilter('admin')"><span class="checkbox"></span> Admin</button>
                         </div>
                     </div>
-                    <div class="filter-actions"><button class="btn-apply-filter" onclick="applyFilters()">Apply Filters</button><button class="btn-clear-filter" onclick="clearFilters()">Clear All</button></div>
+                    <div class="filter-actions">
+                        <button class="btn-apply-filter" onclick="applyFilters()">Apply Filters</button>
+                        <button class="btn-clear-filter" onclick="clearFilters()">Clear All</button>
+                    </div>
                 </div>
+            </div>
+
+            <div th:if="${usersPage != null && usersPage.content.isEmpty()}" class="no-results-container">
+                <span class="no-results-icon">🕵️</span>
+                <div class="no-results-text">No users found!</div>
+                <div class="no-results-subtext">Try adjusting your search criteria or filters.</div>
             </div>
 
             <table th:if="${usersPage != null && usersPage.content.size() > 0}">
@@ -169,20 +199,20 @@
                 </tbody>
             </table>
 
-            <div class="pagination" th:if="${usersPage.totalPages > 1}">
-                <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}"
+            <div class="pagination" th:if="${usersPage != null && usersPage.totalPages > 1}">
+                <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles}, userSearch=${currentUserSearch})}"
                    th:class="${currentPage == 0} ? 'disabled' : ''"
                    th:onclick="${currentPage == 0} ? 'return false;' : ''">← Prev</a>
 
                 <th:block th:if="${usersPage.totalPages <= 3}">
                     <a th:each="i : ${#numbers.sequence(0, usersPage.totalPages - 1)}"
-                       th:href="@{/admin/dashboard(view='users', page=${i}, roles=${param.roles})}"
+                       th:href="@{/admin/dashboard(view='users', page=${i}, roles=${param.roles}, userSearch=${currentUserSearch})}"
                        th:class="${currentPage == i} ? 'active' : ''"
                        th:text="${i + 1}"></a>
                 </th:block>
 
                 <th:block th:if="${usersPage.totalPages > 3}">
-                    <a th:href="@{/admin/dashboard(view='users', page=0, roles=${param.roles})}"
+                    <a th:href="@{/admin/dashboard(view='users', page=0, roles=${param.roles}, userSearch=${currentUserSearch})}"
                        th:class="${currentPage == 0} ? 'active' : ''">1</a>
 
                     <span class="dots" th:if="${currentPage > 1}">...</span>
@@ -193,12 +223,12 @@
 
                     <span class="dots" th:if="${currentPage < usersPage.totalPages - 2}">...</span>
 
-                    <a th:href="@{/admin/dashboard(view='users', page=${usersPage.totalPages - 1}, roles=${param.roles})}"
-                       th:class="${currentPage usersPage.totalPages - 1} ? 'active' : ''"
+                    <a th:href="@{/admin/dashboard(view='users', page=${usersPage.totalPages - 1}, roles=${param.roles}, userSearch=${currentUserSearch})}"
+                       th:class="${currentPage == usersPage.totalPages - 1} ? 'active' : ''"
                        th:text="${usersPage.totalPages}"></a>
                 </th:block>
 
-                <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}"
+                <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles}, userSearch=${currentUserSearch})}"
                    th:class="${currentPage >= usersPage.totalPages - 1} ? 'disabled' : ''"
                    th:onclick="${currentPage >= usersPage.totalPages - 1} ? 'return false;' : ''">Next →</a>
             </div>
@@ -411,6 +441,28 @@
     var currentUserEmail = /*[[${currentUserEmail}]]*/ '';
     var selectedRoles = [];
 
+    // Pre-populare roluri selectate din URL
+    var urlParams = new URLSearchParams(window.location.search);
+    var rolesFromUrl = urlParams.getAll('roles');
+    if(rolesFromUrl && rolesFromUrl.length > 0) {
+        selectedRoles = rolesFromUrl;
+        selectedRoles.forEach(role => {
+            let btn = document.querySelector(`.filter-option[data-role="${role}"]`);
+            if(btn) btn.classList.add('active');
+        });
+    }
+
+    // Event Listener pentru Search pe Enter
+    var searchInput = document.getElementById('userSearchInput');
+    if(searchInput) {
+        searchInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                applyFilters();
+            }
+        });
+    }
+
     setTimeout(function() {
         document.querySelectorAll('.alert').forEach(a => {
             a.style.transition = 'opacity 0.5s ease';
@@ -420,21 +472,45 @@
     }, 3000);
 
     function toggleFilterMenu() { document.getElementById('filterMenu').classList.toggle('active'); document.querySelector('.filter-arrow').classList.toggle('rotate'); }
+
+    // [MODIFICAT] Doar actualizeaza UI-ul, NU reincarca pagina
     function toggleRoleFilter(role) {
         const btn = document.querySelector(`.filter-option[data-role="${role}"]`);
         btn.classList.toggle('active');
+        // Actualizam array-ul local pentru a sti ce trimitem cand se apasa Apply
         if(selectedRoles.includes(role)) selectedRoles = selectedRoles.filter(r => r !== role);
         else selectedRoles.push(role);
     }
+
+    // Functia care se executa doar la apasarea butonului Apply
     function applyFilters() {
         let url = new URL(window.location.href);
         url.searchParams.set('view', 'users');
+
+        // Colectam rolurile ACTIVE vizual in momentul apasarii
+        selectedRoles = [];
+        document.querySelectorAll('.filter-option.active').forEach(btn => {
+            selectedRoles.push(btn.getAttribute('data-role'));
+        });
+
         url.searchParams.delete('roles');
         selectedRoles.forEach(r => url.searchParams.append('roles', r));
+
+        let searchText = document.getElementById('userSearchInput').value;
+        if(searchText && searchText.trim() !== '') {
+            url.searchParams.set('userSearch', searchText.trim());
+        } else {
+            url.searchParams.delete('userSearch');
+        }
+
         url.searchParams.set('page', '0');
         window.location.href = url.toString();
     }
-    function clearFilters() { selectedRoles = []; window.location.href = '/admin/dashboard?view=users'; }
+
+    function clearFilters() {
+        selectedRoles = [];
+        window.location.href = '/admin/dashboard?view=users';
+    }
 
     function toggleOngFilterMenu() { document.getElementById('ongFilterMenu').classList.toggle('active'); document.getElementById('ongFilterArrow').classList.toggle('rotate'); }
     function applyOngFilters() {
