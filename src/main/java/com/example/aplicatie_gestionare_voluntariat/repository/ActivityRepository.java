@@ -55,12 +55,11 @@ public class ActivityRepository {
                 activity.setPendingCount(0);
             }
 
-            // Mapăm statusul voluntarului
             try {
                 activity.setEnrollmentStatus(rs.getString("enrollment_status"));
             } catch (SQLException e) { }
 
-            // [NOU] Mapăm detaliile coordonatorului dacă există în query
+            // Mapăm detaliile coordonatorului și ONG-ului
             try {
                 String first = rs.getString("coord_first");
                 String last = rs.getString("coord_last");
@@ -69,6 +68,9 @@ public class ActivityRepository {
                 }
                 activity.setCoordinatorEmail(rs.getString("coord_email"));
                 activity.setCoordinatorPhone(rs.getString("coord_phone"));
+
+                // Mapare nume ONG
+                activity.setOngName(rs.getString("ong_name"));
             } catch (SQLException e) { }
 
             return activity;
@@ -95,16 +97,18 @@ public class ActivityRepository {
         return jdbcTemplate.query(sql, activityRowMapper, coordinatorId);
     }
 
-    // [MODIFICAT] Metoda pentru activitățile voluntarului (Include JOIN pentru Coordonator)
+    // [CORECȚIE] JOIN ongs o ON c.ong_registration_number = o.registration_number (nu o.ong_registration_number)
     public List<Activity> findActivitiesByVolunteerId(Integer volunteerId, String statusFilter) {
         StringBuilder sql = new StringBuilder(
                 "SELECT a.*, va.status as enrollment_status, cat.name as category_name, " +
-                        "u.first_name as coord_first, u.last_name as coord_last, u.email as coord_email, u.phone_number as coord_phone " +
+                        "u.first_name as coord_first, u.last_name as coord_last, u.email as coord_email, u.phone_number as coord_phone, " +
+                        "o.name as ong_name " +
                         "FROM activities a " +
                         "JOIN volunteer_activities va ON a.id_activity = va.id_activity " +
                         "LEFT JOIN activity_categories cat ON a.id_category = cat.id_category " +
                         "JOIN coordinators c ON a.id_coordinator = c.id_coordinator " +
                         "JOIN users u ON c.id_user = u.id_user " +
+                        "JOIN ongs o ON c.ong_registration_number = o.registration_number " + // Aici a fost eroarea
                         "WHERE va.id_volunteer = ? ");
 
         List<Object> params = new ArrayList<>();
