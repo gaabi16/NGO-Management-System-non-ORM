@@ -30,8 +30,20 @@ public class VolunteerPageService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    // [MODIFICAT] Metoda veche returna tot, acum folosim paginarea în controller
     public List<Ong> getAllOngs() {
         return ongRepository.findAll();
+    }
+
+    // [NOU] Metoda pentru paginare (folosește metoda findAll cu limit/offset din repository)
+    public List<Ong> getOngsPaginated(int page, int size) {
+        int offset = page * size;
+        return ongRepository.findAll(size, offset);
+    }
+
+    // [NOU] Metoda pentru count total (necesar pentru calculul paginilor)
+    public long countOngs() {
+        return ongRepository.count();
     }
 
     public Ong getOngById(String registrationNumber) {
@@ -47,7 +59,6 @@ public class VolunteerPageService {
                 rs.getString("first_name") + " " + rs.getString("last_name"), ongRegNumber);
         stats.put("coordinators", coordinators);
 
-        // Actualizat JOIN: va.id_activity -> a.id_coordinator -> c.ong_registration_number
         String sqlUniqueVolunteers = "SELECT COUNT(DISTINCT va.id_volunteer) FROM volunteer_activities va " +
                 "JOIN activities a ON va.id_activity = a.id_activity " +
                 "JOIN coordinators c ON a.id_coordinator = c.id_coordinator " +

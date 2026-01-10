@@ -32,11 +32,23 @@ public class VolunteerController {
     private UserService userService;
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model, Authentication authentication) {
+    public String dashboard(@RequestParam(defaultValue = "0") int page,
+                            Model model,
+                            Authentication authentication) {
         String email = authentication.getName();
         User user = userRepository.findByEmail(email).orElse(new User());
         model.addAttribute("firstName", user.getFirstName());
-        model.addAttribute("ongs", volunteerPageService.getAllOngs());
+
+        // [MODIFICAT] Configurare paginare: 15 ONG-uri pe pagină (5 rânduri x 3 coloane)
+        int pageSize = 15;
+        List<Ong> paginatedOngs = volunteerPageService.getOngsPaginated(page, pageSize);
+        long totalOngs = volunteerPageService.countOngs();
+        int totalPages = (int) Math.ceil((double) totalOngs / pageSize);
+
+        model.addAttribute("ongs", paginatedOngs);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+
         return "volunteer-dashboard";
     }
 
