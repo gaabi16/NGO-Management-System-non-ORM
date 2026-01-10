@@ -41,10 +41,7 @@ public class VolunteerController {
         User user = userRepository.findByEmail(email).orElse(new User());
         model.addAttribute("firstName", user.getFirstName());
 
-        // Configurare paginare
         int pageSize = 15;
-
-        // [MODIFICAT] Apelare service cu filtre
         List<Ong> paginatedOngs = volunteerPageService.getOngsFiltered(page, pageSize, continent, country);
         long totalOngs = volunteerPageService.countOngsFiltered(continent, country);
         int totalPages = (int) Math.ceil((double) totalOngs / pageSize);
@@ -52,8 +49,6 @@ public class VolunteerController {
         model.addAttribute("ongs", paginatedOngs);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
-
-        // [NOU] Adăugare date pentru filtrare în view
         model.addAttribute("selectedContinent", continent);
         model.addAttribute("selectedCountry", country);
         model.addAttribute("locationData", volunteerPageService.getLocationData());
@@ -67,7 +62,10 @@ public class VolunteerController {
         if (ong == null) return "redirect:/volunteer/dashboard";
 
         Map<String, Object> stats = volunteerPageService.getOngStatistics(id);
-        List<Activity> activities = volunteerPageService.getOngActivities(id);
+
+        // [MODIFICAT] Trimitem email-ul pentru a verifica înscrierile
+        List<Activity> activities = volunteerPageService.getOngActivities(id, authentication.getName());
+
         User user = userRepository.findByEmail(authentication.getName()).orElse(new User());
 
         model.addAttribute("ong", ong);

@@ -31,7 +31,6 @@ public class VolunteerPageService {
     private JdbcTemplate jdbcTemplate;
 
     // Mapare statică pentru demo (Continent -> Lista de țări)
-    // În producție, acestea ar trebui să fie în baza de date
     private static final Map<String, List<String>> CONTINENT_MAP = new HashMap<>();
     static {
         CONTINENT_MAP.put("Europe", Arrays.asList("Romania", "France", "Germany", "Italy", "Spain", "UK", "Poland", "Ukraine", "Netherlands", "Belgium"));
@@ -46,29 +45,24 @@ public class VolunteerPageService {
         return CONTINENT_MAP;
     }
 
-    // [MODIFICAT] Metoda principala de filtrare si paginare
     public List<Ong> getOngsFiltered(int page, int size, String continent, String country) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ongs WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
 
-        // Filtrare logic
         if (country != null && !country.isEmpty()) {
             sql.append("AND country = ? ");
             params.add(country);
         } else if (continent != null && !continent.isEmpty()) {
             List<String> countries = CONTINENT_MAP.getOrDefault(continent, new ArrayList<>());
             if (!countries.isEmpty()) {
-                // Construim clauza IN manual pentru JdbcTemplate
                 String placeholders = String.join(",", Collections.nCopies(countries.size(), "?"));
                 sql.append("AND country IN (").append(placeholders).append(") ");
                 params.addAll(countries);
             } else {
-                // Dacă continentul selectat nu are țări definite, returnăm listă goală
                 sql.append("AND 1=0 ");
             }
         }
 
-        // Sortare și Paginare
         sql.append("ORDER BY name ASC LIMIT ? OFFSET ?");
         params.add(size);
         params.add(page * size);
@@ -76,7 +70,6 @@ public class VolunteerPageService {
         return jdbcTemplate.query(sql.toString(), new BeanPropertyRowMapper<>(Ong.class), params.toArray());
     }
 
-    // [MODIFICAT] Count pentru filtrare (necesar pentru paginare corectă)
     public long countOngsFiltered(String continent, String country) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ongs WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
@@ -132,8 +125,27 @@ public class VolunteerPageService {
         return stats;
     }
 
-    public List<Activity> getOngActivities(String ongRegNumber) {
-        return activityRepository.findByOngId(ongRegNumber);
+    // [MODIFICAT] Acum acceptă emailul userului pentru a verifica dacă a aplicat deja
+    public List<Activity> getOngActivities(String ongRegNumber, String userEmail) {
+        List<Activity> activities = activityRepository.findByOngId(ongRegNumber);
+
+        Integer volunteerId = getVolunteerIdByEmail(userEmail);
+
+        if (volunteerId != null) {
+            // Obținem ID-urile activităților unde voluntarul este înscris (orice status)
+            String sqlCheckEnrollment = "SELECT id_activity FROM volunteer_activities WHERE id_volunteer = ?";
+            List<Integer> enrolledActivityIds = jdbcTemplate.queryForList(sqlCheckEnrollment, Integer.class, volunteerId);
+
+            Set<Integer> enrolledSet = new HashSet<>(enrolledActivityIds);
+
+            for (Activity activity : activities) {
+                if (enrolledSet.contains(activity.getIdActivity())) {
+                    activity.setEnrolled(true);
+                }
+            }
+        }
+
+        return activities;
     }
 
     public Integer getVolunteerIdByEmail(String email) {
