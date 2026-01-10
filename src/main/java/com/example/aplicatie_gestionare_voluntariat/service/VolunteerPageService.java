@@ -30,7 +30,6 @@ public class VolunteerPageService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    // Mapare statică pentru demo (Continent -> Lista de țări)
     private static final Map<String, List<String>> CONTINENT_MAP = new HashMap<>();
     static {
         CONTINENT_MAP.put("Europe", Arrays.asList("Romania", "France", "Germany", "Italy", "Spain", "UK", "Poland", "Ukraine", "Netherlands", "Belgium"));
@@ -125,17 +124,13 @@ public class VolunteerPageService {
         return stats;
     }
 
-    // [MODIFICAT] Acum acceptă emailul userului pentru a verifica dacă a aplicat deja
     public List<Activity> getOngActivities(String ongRegNumber, String userEmail) {
         List<Activity> activities = activityRepository.findByOngId(ongRegNumber);
-
         Integer volunteerId = getVolunteerIdByEmail(userEmail);
 
         if (volunteerId != null) {
-            // Obținem ID-urile activităților unde voluntarul este înscris (orice status)
             String sqlCheckEnrollment = "SELECT id_activity FROM volunteer_activities WHERE id_volunteer = ?";
             List<Integer> enrolledActivityIds = jdbcTemplate.queryForList(sqlCheckEnrollment, Integer.class, volunteerId);
-
             Set<Integer> enrolledSet = new HashSet<>(enrolledActivityIds);
 
             for (Activity activity : activities) {
@@ -144,8 +139,16 @@ public class VolunteerPageService {
                 }
             }
         }
-
         return activities;
+    }
+
+    // [NOU] Metoda pentru preluarea activităților voluntarului logat
+    public List<Activity> getMyActivities(String email, String statusFilter) {
+        Integer volunteerId = getVolunteerIdByEmail(email);
+        if (volunteerId == null) {
+            return new ArrayList<>();
+        }
+        return activityRepository.findActivitiesByVolunteerId(volunteerId, statusFilter);
     }
 
     public Integer getVolunteerIdByEmail(String email) {
