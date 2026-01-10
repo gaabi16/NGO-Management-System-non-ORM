@@ -42,7 +42,12 @@ public class CoordinatorController {
             List<Map<String, Object>> categories = coordinatorService.getAllCategories();
             model.addAttribute("activities", activities);
             model.addAttribute("categories", categories);
-            model.addAttribute("newActivity", new Activity());
+
+            // [MODIFICAT] Verificăm dacă există deja un 'newActivity' (din FlashAttribute in caz de eroare)
+            // Dacă nu există, creăm unul gol. Dacă există, îl folosim pe cel cu datele completate de user.
+            if (!model.containsAttribute("newActivity")) {
+                model.addAttribute("newActivity", new Activity());
+            }
         }
 
         return "coordinator-dashboard";
@@ -53,9 +58,19 @@ public class CoordinatorController {
         try {
             Coordinator coordinator = coordinatorService.getCoordinatorByEmail(authentication.getName());
             coordinatorService.createActivity(activity, coordinator);
-            redirectAttributes.addAttribute("success", "ActivityCreated");
+            redirectAttributes.addFlashAttribute("successMessage", "Activity created successfully!");
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addAttribute("error", e.getMessage());
+            // [MODIFICAT] În loc de parametru în URL, folosim FlashAttribute
+            // 1. Trimitem mesajul de eroare specific (cu animația roșie)
+            redirectAttributes.addFlashAttribute("createActivityError", e.getMessage());
+
+            // 2. Trimitem obiectul activity înapoi ca 'newActivity' pentru a popula câmpurile cu ce a scris userul
+            redirectAttributes.addFlashAttribute("newActivity", activity);
+
+            // 3. Setăm view-ul corect pentru redirect
+            redirectAttributes.addAttribute("view", "activities");
+
+            return "redirect:/coordinator/dashboard";
         }
         return "redirect:/coordinator/dashboard?view=activities";
     }
@@ -111,7 +126,6 @@ public class CoordinatorController {
             coordinatorService.updateCoordinatorProfile(coordinator, currentUserEmail);
             redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully!");
         } catch (Exception e) {
-            // Aici prindem exceptia si trimitem mesajul
             redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
         }
         return "redirect:/coordinator/profile";
