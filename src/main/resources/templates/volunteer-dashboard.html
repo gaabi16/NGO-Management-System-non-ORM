@@ -55,6 +55,7 @@
             background: #dc3545;
             border: none;
             cursor: pointer;
+            font-size: 1rem;
         }
 
         .hero {
@@ -90,11 +91,10 @@
             padding-left: 15px;
         }
 
-        /* [MODIFICAT] Flexbox Grid pentru centrare */
         .ong-grid {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center; /* Centrează cardurile pe rândul incomplet */
+            justify-content: center;
             gap: 30px;
         }
 
@@ -106,10 +106,6 @@
             transition: transform 0.3s, box-shadow 0.3s;
             display: flex;
             flex-direction: column;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            /* Dimensiune fixă pentru a garanta 3 pe rând pe ecrane mari (1200px container) */
             width: 350px;
             max-width: 100%;
         }
@@ -129,11 +125,14 @@
             font-size: 3rem;
         }
 
+        /* [MODIFICAT] Align items center și text-align center pentru simetrie */
         .card-body {
             padding: 25px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
 
         .card-title {
@@ -153,14 +152,33 @@
 
         .card-footer {
             margin-top: auto;
-            color: #667eea;
-            font-weight: 600;
             display: flex;
-            align-items: center;
-            gap: 5px;
+            justify-content: center;
+            width: 100%;
         }
 
-        /* [NOU] Paginare stilizată (la fel ca în admin) */
+        /* [MODIFICAT] Stil 'Outline' - mai discret, doar contur */
+        .view-btn {
+            background-color: transparent; /* Fundal transparent */
+            border: 2px solid #667eea;     /* Doar bordură */
+            color: #667eea;                /* Text colorat */
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 24px;             /* Padding puțin mai mic */
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            font-size: 0.9rem;             /* Font puțin mai mic */
+        }
+
+        /* La hover devine solid */
+        .view-btn:hover {
+            background-color: #667eea;
+            color: white;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Paginare */
         .pagination {
             display: flex;
             justify-content: center;
@@ -226,9 +244,7 @@
     <h2 class="section-title">Partner Organizations</h2>
 
     <div class="ong-grid">
-        <a th:each="ong : ${ongs}"
-           th:href="@{/volunteer/ong/{id}(id=${ong.registrationNumber})}"
-           class="ong-card">
+        <div th:each="ong : ${ongs}" class="ong-card">
             <div class="card-header">
                 <span th:text="${#strings.substring(ong.name, 0, 1)}">L</span>
             </div>
@@ -239,10 +255,12 @@
                     Description goes here...
                 </p>
                 <div class="card-footer">
-                    View Details &rarr;
+                    <a th:href="@{/volunteer/ong/{id}(id=${ong.registrationNumber})}" class="view-btn">
+                        View Details
+                    </a>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
     <div class="pagination" th:if="${totalPages > 1}">
