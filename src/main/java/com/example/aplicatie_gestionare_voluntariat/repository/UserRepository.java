@@ -1,7 +1,6 @@
 package com.example.aplicatie_gestionare_voluntariat.repository;
 
 import com.example.aplicatie_gestionare_voluntariat.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -12,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,12 +47,9 @@ public class UserRepository {
 
     public User save(User user) {
         if (user.getIdUser() == null) {
-            // INSERT
             String sql = "INSERT INTO users (email, password_hash, first_name, last_name, phone_number, role) " +
                     "VALUES (?, ?, ?, ?, ?, ?::VARCHAR)";
-
             KeyHolder keyHolder = new GeneratedKeyHolder();
-
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, user.getEmail());
@@ -63,10 +60,8 @@ public class UserRepository {
                 ps.setString(6, user.getRole().name());
                 return ps;
             }, keyHolder);
-
             user.setIdUser(((Number) keyHolder.getKeys().get("id_user")).intValue());
         } else {
-            // UPDATE
             String sql = "UPDATE users SET email = ?, password_hash = ?, first_name = ?, " +
                     "last_name = ?, phone_number = ?, role = ?::VARCHAR WHERE id_user = ?";
             jdbcTemplate.update(sql,
@@ -93,53 +88,74 @@ public class UserRepository {
         jdbcTemplate.update(sql, id);
     }
 
+    // [MODIFICAT] Logica de cautare pentru a include concatenarea numelui
+    public List<User> findFilteredUsers(String search, List<User.Role> roles, int offset, int limit) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if (search != null && !search.trim().isEmpty()) {
+            // Cautam in Prenume SAU Nume SAU "Prenume Nume" (concatenat) SAU Email
+            sql.append("AND (LOWER(first_name) LIKE LOWER(?) OR LOWER(last_name) LIKE LOWER(?) OR LOWER(first_name || ' ' || last_name) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?)) ");
+            String searchPattern = "%" + search.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern); // pentru concatenare
+            params.add(searchPattern); // pentru email
+        }
+
+        if (roles != null && !roles.isEmpty()) {
+            sql.append("AND role IN (");
+            for (int i = 0; i < roles.size(); i++) {
+                sql.append(i > 0 ? ",?" : "?");
+                params.add(roles.get(i).name());
+            }
+            sql.append(") ");
+        }
+
+        sql.append("ORDER BY id_user ASC LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+
+        return jdbcTemplate.query(sql.toString(), userRowMapper, params.toArray());
+    }
+
+    // [MODIFICAT] Acelasi fix si pentru count (necesar pentru paginare)
+    public long countFilteredUsers(String search, List<User.Role> roles) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append("AND (LOWER(first_name) LIKE LOWER(?) OR LOWER(last_name) LIKE LOWER(?) OR LOWER(first_name || ' ' || last_name) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?)) ");
+            String searchPattern = "%" + search.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+
+        if (roles != null && !roles.isEmpty()) {
+            sql.append("AND role IN (");
+            for (int i = 0; i < roles.size(); i++) {
+                sql.append(i > 0 ? ",?" : "?");
+                params.add(roles.get(i).name());
+            }
+            sql.append(") ");
+        }
+
+        return jdbcTemplate.queryForObject(sql.toString(), Long.class, params.toArray());
+    }
+
+    // Metode legacy
     public List<User> findAllPaginated(int offset, int limit) {
-        String sql = "SELECT * FROM users ORDER BY id_user ASC LIMIT ? OFFSET ?";
-        return jdbcTemplate.query(sql, userRowMapper, limit, offset);
+        return findFilteredUsers(null, null, offset, limit);
     }
-
-    public List<User> findByRoleInPaginated(List<User.Role> roles, int offset, int limit) {
-        if (roles == null || roles.isEmpty()) {
-            return findAllPaginated(offset, limit);
-        }
-
-        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE role IN (");
-        for (int i = 0; i < roles.size(); i++) {
-            sql.append(i > 0 ? ",?" : "?");
-        }
-        sql.append(") ORDER BY id_user ASC LIMIT ? OFFSET ?");
-
-        Object[] params = new Object[roles.size() + 2];
-        for (int i = 0; i < roles.size(); i++) {
-            params[i] = roles.get(i).name();
-        }
-        params[roles.size()] = limit;
-        params[roles.size() + 1] = offset;
-
-        return jdbcTemplate.query(sql.toString(), userRowMapper, params);
-    }
-
     public long count() {
-        String sql = "SELECT COUNT(*) FROM users";
-        return jdbcTemplate.queryForObject(sql, Long.class);
+        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Long.class);
     }
-
     public long countByRoleIn(List<User.Role> roles) {
-        if (roles == null || roles.isEmpty()) {
-            return count();
-        }
-
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE role IN (");
-        for (int i = 0; i < roles.size(); i++) {
-            sql.append(i > 0 ? ",?" : "?");
-        }
-        sql.append(")");
-
-        Object[] params = new Object[roles.size()];
-        for (int i = 0; i < roles.size(); i++) {
-            params[i] = roles.get(i).name();
-        }
-
-        return jdbcTemplate.queryForObject(sql.toString(), Long.class, params);
+        return countFilteredUsers(null, roles);
+    }
+    public List<User> findByRoleInPaginated(List<User.Role> roles, int offset, int limit) {
+        return findFilteredUsers(null, roles, offset, limit);
     }
 }
