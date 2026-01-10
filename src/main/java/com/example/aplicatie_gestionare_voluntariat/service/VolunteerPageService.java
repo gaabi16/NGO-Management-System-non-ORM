@@ -9,12 +9,12 @@ import com.example.aplicatie_gestionare_voluntariat.repository.OngRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.UserRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.VolunteerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class VolunteerPageService {
@@ -30,8 +30,73 @@ public class VolunteerPageService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public List<Ong> getAllOngs() {
-        return ongRepository.findAll();
+    // Mapare statică pentru demo (Continent -> Lista de țări)
+    // În producție, acestea ar trebui să fie în baza de date
+    private static final Map<String, List<String>> CONTINENT_MAP = new HashMap<>();
+    static {
+        CONTINENT_MAP.put("Europe", Arrays.asList("Romania", "France", "Germany", "Italy", "Spain", "UK", "Poland", "Ukraine", "Netherlands", "Belgium"));
+        CONTINENT_MAP.put("North America", Arrays.asList("USA", "Canada", "Mexico"));
+        CONTINENT_MAP.put("Asia", Arrays.asList("China", "Japan", "India", "South Korea", "Vietnam"));
+        CONTINENT_MAP.put("Africa", Arrays.asList("Egypt", "South Africa", "Nigeria", "Kenya"));
+        CONTINENT_MAP.put("South America", Arrays.asList("Brazil", "Argentina", "Chile", "Colombia"));
+        CONTINENT_MAP.put("Australia", Arrays.asList("Australia", "New Zealand"));
+    }
+
+    public Map<String, List<String>> getLocationData() {
+        return CONTINENT_MAP;
+    }
+
+    // [MODIFICAT] Metoda principala de filtrare si paginare
+    public List<Ong> getOngsFiltered(int page, int size, String continent, String country) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM ongs WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        // Filtrare logic
+        if (country != null && !country.isEmpty()) {
+            sql.append("AND country = ? ");
+            params.add(country);
+        } else if (continent != null && !continent.isEmpty()) {
+            List<String> countries = CONTINENT_MAP.getOrDefault(continent, new ArrayList<>());
+            if (!countries.isEmpty()) {
+                // Construim clauza IN manual pentru JdbcTemplate
+                String placeholders = String.join(",", Collections.nCopies(countries.size(), "?"));
+                sql.append("AND country IN (").append(placeholders).append(") ");
+                params.addAll(countries);
+            } else {
+                // Dacă continentul selectat nu are țări definite, returnăm listă goală
+                sql.append("AND 1=0 ");
+            }
+        }
+
+        // Sortare și Paginare
+        sql.append("ORDER BY name ASC LIMIT ? OFFSET ?");
+        params.add(size);
+        params.add(page * size);
+
+        return jdbcTemplate.query(sql.toString(), new BeanPropertyRowMapper<>(Ong.class), params.toArray());
+    }
+
+    // [MODIFICAT] Count pentru filtrare (necesar pentru paginare corectă)
+    public long countOngsFiltered(String continent, String country) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ongs WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if (country != null && !country.isEmpty()) {
+            sql.append("AND country = ? ");
+            params.add(country);
+        } else if (continent != null && !continent.isEmpty()) {
+            List<String> countries = CONTINENT_MAP.getOrDefault(continent, new ArrayList<>());
+            if (!countries.isEmpty()) {
+                String placeholders = String.join(",", Collections.nCopies(countries.size(), "?"));
+                sql.append("AND country IN (").append(placeholders).append(") ");
+                params.addAll(countries);
+            } else {
+                sql.append("AND 1=0 ");
+            }
+        }
+
+        Long count = jdbcTemplate.queryForObject(sql.toString(), Long.class, params.toArray());
+        return count != null ? count : 0;
     }
 
     public Ong getOngById(String registrationNumber) {
@@ -47,7 +112,6 @@ public class VolunteerPageService {
                 rs.getString("first_name") + " " + rs.getString("last_name"), ongRegNumber);
         stats.put("coordinators", coordinators);
 
-        // Actualizat JOIN: va.id_activity -> a.id_coordinator -> c.ong_registration_number
         String sqlUniqueVolunteers = "SELECT COUNT(DISTINCT va.id_volunteer) FROM volunteer_activities va " +
                 "JOIN activities a ON va.id_activity = a.id_activity " +
                 "JOIN coordinators c ON a.id_coordinator = c.id_coordinator " +
