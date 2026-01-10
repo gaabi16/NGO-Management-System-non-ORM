@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +55,24 @@ public class ActivityRepository {
                 activity.setPendingCount(0);
             }
 
+            try {
+                activity.setEnrollmentStatus(rs.getString("enrollment_status"));
+            } catch (SQLException e) { }
+
+            // Mapăm detaliile coordonatorului și ONG-ului
+            try {
+                String first = rs.getString("coord_first");
+                String last = rs.getString("coord_last");
+                if (first != null && last != null) {
+                    activity.setCoordinatorName(first + " " + last);
+                }
+                activity.setCoordinatorEmail(rs.getString("coord_email"));
+                activity.setCoordinatorPhone(rs.getString("coord_phone"));
+
+                // Mapare nume ONG
+                activity.setOngName(rs.getString("ong_name"));
+            } catch (SQLException e) { }
+
             return activity;
         }
     };
@@ -75,6 +95,33 @@ public class ActivityRepository {
                 "WHERE a.id_coordinator = ? " +
                 "ORDER BY a.start_date DESC";
         return jdbcTemplate.query(sql, activityRowMapper, coordinatorId);
+    }
+
+    // [CORECȚIE] JOIN ongs o ON c.ong_registration_number = o.registration_number (nu o.ong_registration_number)
+    public List<Activity> findActivitiesByVolunteerId(Integer volunteerId, String statusFilter) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT a.*, va.status as enrollment_status, cat.name as category_name, " +
+                        "u.first_name as coord_first, u.last_name as coord_last, u.email as coord_email, u.phone_number as coord_phone, " +
+                        "o.name as ong_name " +
+                        "FROM activities a " +
+                        "JOIN volunteer_activities va ON a.id_activity = va.id_activity " +
+                        "LEFT JOIN activity_categories cat ON a.id_category = cat.id_category " +
+                        "JOIN coordinators c ON a.id_coordinator = c.id_coordinator " +
+                        "JOIN users u ON c.id_user = u.id_user " +
+                        "JOIN ongs o ON c.ong_registration_number = o.registration_number " + // Aici a fost eroarea
+                        "WHERE va.id_volunteer = ? ");
+
+        List<Object> params = new ArrayList<>();
+        params.add(volunteerId);
+
+        if (statusFilter != null && !statusFilter.isEmpty() && !statusFilter.equals("all")) {
+            sql.append("AND va.status = ? ");
+            params.add(statusFilter);
+        }
+
+        sql.append("ORDER BY a.start_date DESC");
+
+        return jdbcTemplate.query(sql.toString(), activityRowMapper, params.toArray());
     }
 
     public void save(Activity activity) {
@@ -117,7 +164,6 @@ public class ActivityRepository {
         return count != null && count > 0;
     }
 
-    // [NOU] Returnează activitatea cu cei mai mulți voluntari
     public Map<String, Object> findMostPopularActivity() {
         String sql = "SELECT a.name, COUNT(va.id_volunteer) as vol_count " +
                 "FROM activities a " +
@@ -134,10 +180,32 @@ public class ActivityRepository {
         return result.isEmpty() ? null : result.get(0);
     }
 
-    // [NOU] Suma totală a donațiilor din sistem
     public Double getTotalSystemDonations() {
         String sql = "SELECT SUM(donations_collected) FROM activities";
         Double total = jdbcTemplate.queryForObject(sql, Double.class);
         return total != null ? total : 0.0;
+    }
+
+    public boolean hasOverlappingActivity(Integer coordinatorId, LocalDateTime start, LocalDateTime end) {
+        String sql = "SELECT COUNT(*) FROM activities " +
+                "WHERE id_coordinator = ? " +
+                "AND start_date < ? AND end_date > ? " +
+                "AND status != 'completed'";
+
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, coordinatorId, end, start);
+        return count != null && count > 0;
+    }
+
+    public void updateStatusToInProgress(LocalDateTime now) {
+        String sql = "UPDATE activities SET status = 'in_progress' " +
+                "WHERE start_date <= ? AND end_date >= ? " +
+                "AND status NOT IN ('in_progress', 'completed')";
+        jdbcTemplate.update(sql, now, now);
+    }
+
+    public void updateStatusToCompleted(LocalDateTime now) {
+        String sql = "UPDATE activities SET status = 'completed' " +
+                "WHERE end_date < ? AND status != 'completed'";
+        jdbcTemplate.update(sql, now);
     }
 }

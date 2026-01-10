@@ -41,10 +41,7 @@ public class VolunteerController {
         User user = userRepository.findByEmail(email).orElse(new User());
         model.addAttribute("firstName", user.getFirstName());
 
-        // Configurare paginare
         int pageSize = 15;
-
-        // [MODIFICAT] Apelare service cu filtre
         List<Ong> paginatedOngs = volunteerPageService.getOngsFiltered(page, pageSize, continent, country);
         long totalOngs = volunteerPageService.countOngsFiltered(continent, country);
         int totalPages = (int) Math.ceil((double) totalOngs / pageSize);
@@ -52,8 +49,6 @@ public class VolunteerController {
         model.addAttribute("ongs", paginatedOngs);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
-
-        // [NOU] Adăugare date pentru filtrare în view
         model.addAttribute("selectedContinent", continent);
         model.addAttribute("selectedCountry", country);
         model.addAttribute("locationData", volunteerPageService.getLocationData());
@@ -67,7 +62,7 @@ public class VolunteerController {
         if (ong == null) return "redirect:/volunteer/dashboard";
 
         Map<String, Object> stats = volunteerPageService.getOngStatistics(id);
-        List<Activity> activities = volunteerPageService.getOngActivities(id);
+        List<Activity> activities = volunteerPageService.getOngActivities(id, authentication.getName());
         User user = userRepository.findByEmail(authentication.getName()).orElse(new User());
 
         model.addAttribute("ong", ong);
@@ -84,6 +79,23 @@ public class VolunteerController {
                                Authentication authentication) {
         volunteerPageService.enrollInActivity(authentication.getName(), id, motivation);
         return "redirect:/volunteer/ong/" + ongId + "?success=true";
+    }
+
+    // [NOU] Endpoint pentru pagina My Activities
+    @GetMapping("/my-activities")
+    public String myActivities(@RequestParam(required = false, defaultValue = "all") String status,
+                               Model model,
+                               Authentication authentication) {
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email).orElse(new User());
+
+        List<Activity> activities = volunteerPageService.getMyActivities(email, status);
+
+        model.addAttribute("activities", activities);
+        model.addAttribute("selectedStatus", status);
+        model.addAttribute("firstName", user.getFirstName());
+
+        return "volunteer-my-activities";
     }
 
     @GetMapping("/profile")

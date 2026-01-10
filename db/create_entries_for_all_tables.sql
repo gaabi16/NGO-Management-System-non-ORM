@@ -1,23 +1,17 @@
--- Stergem datele vechi pentru a evita duplicatele si erorile de foreign key
-TRUNCATE TABLE volunteer_activities, activities, donations, coordinators, volunteers, activity_categories, ongs, users RESTART IDENTITY CASCADE;
-
--- 1. Insert USERS (Total: 55 users)
--- ID 1-2: Admins
--- ID 3-27: Volunteers (25 volunteers)
--- ID 28-55: Coordinators (28 coordinators)
+-- ==========================================
+-- 1. INSERT USERS (Total: 107 users)
+-- ==========================================
 INSERT INTO users (email, password_hash, first_name, last_name, phone_number, role) VALUES
 -- Admins (ID 1, 2)
 ('admin@test.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'System', 'Admin', '+15550101', 'admin'),
 ('sarah.connor@example.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Sarah', 'Connor', '+15550102', 'admin'),
 
--- Volunteers - Originals (ID 3-7)
+-- Volunteers - Originals (ID 3-27)
 ('john.doe@example.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'John', 'Doe', '+4477009001', 'volunteer'),
 ('marie.curie@example.fr', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Marie', 'Curie', '+3312345678', 'volunteer'),
 ('hans.mueller@example.de', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Hans', 'Mueller', '+4915123456', 'volunteer'),
 ('yuki.tanaka@example.jp', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Yuki', 'Tanaka', '+8190123456', 'volunteer'),
 ('sofia.rossi@example.it', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Sofia', 'Rossi', '+3933312345', 'volunteer'),
-
--- Volunteers - New (ID 8-27)
 ('alice.wonder@mail.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Alice', 'Wonder', '+1200300400', 'volunteer'),
 ('bob.builder@mail.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Bob', 'Builder', '+1200300401', 'volunteer'),
 ('charlie.brown@mail.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Charlie', 'Brown', '+1200300402', 'volunteer'),
@@ -39,40 +33,94 @@ INSERT INTO users (email, password_hash, first_name, last_name, phone_number, ro
 ('steve.rogers@mail.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Steve', 'Rogers', '+1200300418', 'volunteer'),
 ('tony.stark@mail.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Tony', 'Stark', '+1200300419', 'volunteer'),
 
--- Coordinators - Originals (ID 28-32)
+-- Coordinators (ID 28-57)
 ('james.smith@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'James', 'Smith', '+120255501', 'coordinator'),
 ('elena.popescu@ngo.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Elena', 'Popescu', '+40722123456', 'coordinator'),
 ('chen.wei@charity.cn', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Chen', 'Wei', '+8613912345', 'coordinator'),
 ('lucas.silva@ajuda.br', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Lucas', 'Silva', '+5511987654', 'coordinator'),
 ('amara.okeke@hope.ng', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Amara', 'Okeke', '+2348031234', 'coordinator'),
+('michael.scott@dunder.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Michael', 'Scott', '+15550001', 'coordinator'),
+('pam.beesly@dunder.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Pam', 'Beesly', '+15550002', 'coordinator'),
+('jim.halpert@dunder.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Jim', 'Halpert', '+15550003', 'coordinator'),
+('dwight.schrute@dunder.com', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Dwight', 'Schrute', '+15550004', 'coordinator'),
+('leslie.knope@pawnee.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Leslie', 'Knope', '+15550005', 'coordinator'),
+('ron.swanson@pawnee.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Ron', 'Swanson', '+15550006', 'coordinator'),
+('april.ludgate@pawnee.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'April', 'Ludgate', '+15550007', 'coordinator'),
+('andy.dwyer@pawnee.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Andy', 'Dwyer', '+15550008', 'coordinator'),
+('tom.haverford@pawnee.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Tom', 'Haverford', '+15550009', 'coordinator'),
+('ann.perkins@pawnee.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Ann', 'Perkins', '+15550010', 'coordinator'),
+('chris.traeger@pawnee.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Chris', 'Traeger', '+15550011', 'coordinator'),
+('ben.wyatt@pawnee.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Ben', 'Wyatt', '+15550012', 'coordinator'),
+('jerry.gergich@pawnee.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Jerry', 'Gergich', '+15550013', 'coordinator'),
+('donna.meagle@pawnee.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Donna', 'Meagle', '+15550014', 'coordinator'),
+('jake.peralta@nypd.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Jake', 'Peralta', '+15550015', 'coordinator'),
+('amy.santiago@nypd.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Amy', 'Santiago', '+15550016', 'coordinator'),
+('rosa.diaz@nypd.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Rosa', 'Diaz', '+15550017', 'coordinator'),
+('terry.jeffords@nypd.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Terry', 'Jeffords', '+15550018', 'coordinator'),
+('charles.boyle@nypd.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Charles', 'Boyle', '+15550019', 'coordinator'),
+('raymond.holt@nypd.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Raymond', 'Holt', '+15550020', 'coordinator'),
+('gina.linetti@nypd.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Gina', 'Linetti', '+15550021', 'coordinator'),
+('michael.hitchcock@nypd.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Michael', 'Hitchcock', '+15550022', 'coordinator'),
+('norm.scully@nypd.gov', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Norm', 'Scully', '+15550023', 'coordinator'),
+('ahmed.hassan@egypt.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Ahmed', 'Hassan', '+201012345678', 'coordinator'),
+('bjorn.sson@iceland.is', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Bjorn', 'Sson', '+3541234567', 'coordinator'),
 
--- Coordinators - New (ID 33-55)
-('coord1@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Michael', 'Scott', '+15550001', 'coordinator'),
-('coord2@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Pam', 'Beesly', '+15550002', 'coordinator'),
-('coord3@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Jim', 'Halpert', '+15550003', 'coordinator'),
-('coord4@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Dwight', 'Schrute', '+15550004', 'coordinator'),
-('coord5@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Leslie', 'Knope', '+15550005', 'coordinator'),
-('coord6@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Ron', 'Swanson', '+15550006', 'coordinator'),
-('coord7@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'April', 'Ludgate', '+15550007', 'coordinator'),
-('coord8@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Andy', 'Dwyer', '+15550008', 'coordinator'),
-('coord9@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Tom', 'Haverford', '+15550009', 'coordinator'),
-('coord10@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Ann', 'Perkins', '+15550010', 'coordinator'),
-('coord11@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Chris', 'Traeger', '+15550011', 'coordinator'),
-('coord12@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Ben', 'Wyatt', '+15550012', 'coordinator'),
-('coord13@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Jerry', 'Gergich', '+15550013', 'coordinator'),
-('coord14@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Donna', 'Meagle', '+15550014', 'coordinator'),
-('coord15@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Jake', 'Peralta', '+15550015', 'coordinator'),
-('coord16@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Amy', 'Santiago', '+15550016', 'coordinator'),
-('coord17@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Rosa', 'Diaz', '+15550017', 'coordinator'),
-('coord18@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Terry', 'Jeffords', '+15550018', 'coordinator'),
-('coord19@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Charles', 'Boyle', '+15550019', 'coordinator'),
-('coord20@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Raymond', 'Holt', '+15550020', 'coordinator'),
-('coord21@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Gina', 'Linetti', '+15550021', 'coordinator'),
-('coord22@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Michael', 'Hitchcock', '+15550022', 'coordinator'),
-('coord23@ong.org', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Norm', 'Scully', '+15550023', 'coordinator');
+-- NEW VOLUNTEERS (ID 58-107) - 50 Users
+('andrei.popa@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Andrei', 'Popa', '+40722000001', 'volunteer'),
+('ioana.radu@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Ioana', 'Radu', '+40722000002', 'volunteer'),
+('mihai.ionescu@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Mihai', 'Ionescu', '+40722000003', 'volunteer'),
+('elena.dumitru@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Elena', 'Dumitru', '+40722000004', 'volunteer'),
+('alexandru.stan@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Alexandru', 'Stan', '+40722000005', 'volunteer'),
+('maria.stoica@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Maria', 'Stoica', '+40722000006', 'volunteer'),
+('gabriel.matei@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Gabriel', 'Matei', '+40722000007', 'volunteer'),
+('cristina.gheorghe@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Cristina', 'Gheorghe', '+40722000008', 'volunteer'),
+('florin.toma@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Florin', 'Toma', '+40722000009', 'volunteer'),
+('ana.diaconu@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Ana', 'Diaconu', '+40722000010', 'volunteer'),
+('vlad.constantin@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Vlad', 'Constantin', '+40722000011', 'volunteer'),
+('roxana.stanciu@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Roxana', 'Stanciu', '+40722000012', 'volunteer'),
+('cosmin.dobre@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Cosmin', 'Dobre', '+40722000013', 'volunteer'),
+('laura.nistor@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Laura', 'Nistor', '+40722000014', 'volunteer'),
+('adrian.marin@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Adrian', 'Marin', '+40722000015', 'volunteer'),
+('andreea.petrescu@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Andreea', 'Petrescu', '+40722000016', 'volunteer'),
+('george.florea@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'George', 'Florea', '+40722000017', 'volunteer'),
+('simona.iliescu@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Simona', 'Iliescu', '+40722000018', 'volunteer'),
+('razvan.barbu@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Razvan', 'Barbu', '+40722000019', 'volunteer'),
+('catalina.voinea@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Catalina', 'Voinea', '+40722000020', 'volunteer'),
+('sergiu.moldovan@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Sergiu', 'Moldovan', '+40722000021', 'volunteer'),
+('diana.neagu@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Diana', 'Neagu', '+40722000022', 'volunteer'),
+('stefan.preda@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Stefan', 'Preda', '+40722000023', 'volunteer'),
+('monica.lazar@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Monica', 'Lazar', '+40722000024', 'volunteer'),
+('lucian.munteanu@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Lucian', 'Munteanu', '+40722000025', 'volunteer'),
+('daniela.rotaru@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Daniela', 'Rotaru', '+40722000026', 'volunteer'),
+('marius.sandu@email.ro', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Marius', 'Sandu', '+40722000027', 'volunteer'),
+('aline.dubois@email.fr', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Aline', 'Dubois', '+3360000001', 'volunteer'),
+('pierre.martin@email.fr', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Pierre', 'Martin', '+3360000002', 'volunteer'),
+('lucas.petit@email.fr', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Lucas', 'Petit', '+3360000003', 'volunteer'),
+('camille.roux@email.fr', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Camille', 'Roux', '+3360000004', 'volunteer'),
+('thomas.moreau@email.fr', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Thomas', 'Moreau', '+3360000005', 'volunteer'),
+('sophie.blanc@email.fr', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Sophie', 'Blanc', '+3360000006', 'volunteer'),
+('nicolas.garcia@email.fr', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Nicolas', 'Garcia', '+3360000007', 'volunteer'),
+('emma.michel@email.fr', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Emma', 'Michel', '+3360000008', 'volunteer'),
+('julien.david@email.fr', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Julien', 'David', '+3360000009', 'volunteer'),
+('chloe.bertrand@email.fr', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Chloe', 'Bertrand', '+3360000010', 'volunteer'),
+('liam.smith@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Liam', 'Smith', '+4470000001', 'volunteer'),
+('noah.jones@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Noah', 'Jones', '+4470000002', 'volunteer'),
+('oliver.taylor@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Oliver', 'Taylor', '+4470000003', 'volunteer'),
+('elijah.brown@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Elijah', 'Brown', '+4470000004', 'volunteer'),
+('william.wilson@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'William', 'Wilson', '+4470000005', 'volunteer'),
+('james.johnson@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'James', 'Johnson', '+4470000006', 'volunteer'),
+('benjamin.davies@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Benjamin', 'Davies', '+4470000007', 'volunteer'),
+('lucas.evans@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Lucas', 'Evans', '+4470000008', 'volunteer'),
+('henry.thomas@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Henry', 'Thomas', '+4470000009', 'volunteer'),
+('alexander.roberts@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Alexander', 'Roberts', '+4470000010', 'volunteer'),
+('daniel.craig@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Daniel', 'Craig', '+4470000011', 'volunteer'),
+('emma.watson@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Emma', 'Watson', '+4470000012', 'volunteer'),
+('rupert.grint@email.uk', '$2a$10$mYvrSeHifPkY3VnAw5beAuuhx7DKc8jzSImJzNQ2Fk6iF5jBCquMK', 'Rupert', 'Grint', '+4470000013', 'volunteer');
 
 
--- 2. Insert ONGS (Total: 25 ONGs)
+-- ==========================================
+-- 2. INSERT ONGS (Total: 30 ONGs)
+-- ==========================================
 INSERT INTO ongs (registration_number, name, description, address, country, phone, email, founding_date)
 VALUES
 -- Originals
@@ -81,10 +129,8 @@ VALUES
 ('FR-ASSO-1122', 'Health Without Borders', 'Medical aid for remote villages.', '789 Rue de la Paix, Paris', 'France', '+33140001122', 'support@hwb.fr', '2010-01-15'),
 ('RO-NGO-556677', 'Education First Romania', 'After-school programs.', 'Bulevardul Unirii 10, Bucharest', 'Romania', '+40213334455', 'contact@edufirst.ro', '2012-06-01'),
 ('AU-ABN-778899', 'Ocean Cleanup Squad', 'Removing plastic waste.', '88 Beach Road, Sydney', 'Australia', '+61298765432', 'volunteer@oceancleanup.com', '2019-11-30'),
-
--- New entries (20)
 ('DE-NGO-1001', 'Kinder Hilfe', 'Support for children in need.', 'Berlin Strasse 1', 'Germany', '+4930123456', 'info@kinderhilfe.de', '2005-05-05'),
-('IT-ONLUS-2002', 'Cultura Viva', 'Preserving cultural heritage.', 'Via Roma 100, Rome', 'Italy', '+3906123456', 'contact@cultura.it', '2011-02-20'),
+('RO-NGO-2002', 'Traditii Romanesti', 'Pastrarea traditiilor culturale din Marginimea Sibiului.', 'Strada Cetatii 5, Sibiu', 'Romania', '+40269123456', 'contact@traditii.ro', '2011-02-20'),
 ('ES-ONG-3003', 'Vida Animal', 'Animal shelter and adoption.', 'Madrid Plaza 5', 'Spain', '+3491123456', 'hola@vidaanimal.es', NULL),
 ('JP-NPO-4004', 'Elderly Care Japan', 'Assisting the elderly.', 'Tokyo Central 1-1', 'Japan', '+81312345678', 'help@elderly.jp', '1998-10-10'),
 ('CA-CHARITY-5005', 'Winter Warmth', 'Providing shelter in winter.', 'Toronto Main St 50', 'Canada', '+14161234567', 'warmth@canada.org', '2015-11-01'),
@@ -96,27 +142,31 @@ VALUES
 ('SE-NGO-1111', 'Nordic Nature', 'Conservation of nordic wildlife.', 'Stockholm Gamla Stan', 'Sweden', '+4681234567', 'nature@nordic.se', '2010-08-15'),
 ('NO-NGO-1212', 'Fjord Guardians', 'Marine life protection.', 'Oslo Harbor', 'Norway', '+4722123456', 'guardians@fjord.no', '2018-05-20'),
 ('CH-NGO-1313', 'Alpine Rescue', 'Mountain rescue services.', 'Zurich Mountain Rd', 'Switzerland', '+41441234567', 'rescue@alpine.ch', '1980-12-01'),
-('PL-NGO-1414', 'Hope Poland', 'Disaster relief.', 'Warsaw Center', 'Poland', '+48221234567', 'hope@poland.pl', '2022-02-24'),
-('GR-NGO-1515', 'History Keepers', 'Archaeological volunteering.', 'Athens Acropolis Way', 'Greece', '+302101234567', 'history@greece.gr', '1995-07-07'),
-('PT-NGO-1616', 'Ocean Blue', 'Surf therapy for kids.', 'Lisbon Coast', 'Portugal', '+351211234567', 'surf@ocean.pt', NULL),
+('RO-NGO-1414', 'Speranta Romania', 'Ajutor pentru sinistrati si situatii de urgenta.', 'Calea Victoriei 100, Bucharest', 'Romania', '+40213123456', 'ajutor@speranta.ro', '2022-02-24'),
+('RO-NGO-1515', 'Dacian Heritage', 'Promovarea siturilor arheologice dacice.', 'Piata Unirii 1, Cluj-Napoca', 'Romania', '+40264123456', 'dacii@heritage.ro', '1995-07-07'),
+('RO-NGO-1616', 'Marea Neagra Clean', 'Curatarea plajelor si protectia delfinilor.', 'Bulevardul Mamaia 20, Constanta', 'Romania', '+40241123456', 'mare@neagra.ro', NULL),
 ('IE-CHARITY-1717', 'Green Isle', 'Reforestation in Ireland.', 'Dublin Park', 'Ireland', '+35311234567', 'trees@green.ie', '2020-03-17'),
 ('NZ-NGO-1818', 'Kiwi Saver', 'Bird conservation.', 'Wellington Forest', 'New Zealand', '+6441234567', 'kiwi@saver.nz', '2008-09-09'),
 ('SG-CHARITY-1919', 'Urban Farm', 'Community gardening.', 'Singapore Garden Bay', 'Singapore', '+6561234567', 'farm@urban.sg', '2021-01-01'),
-('KR-NGO-2020', 'Tech Mentors', 'Teaching coding to seniors.', 'Seoul Gangnam', 'South Korea', '+82212345678', 'tech@mentors.kr', '2017-11-11');
+('KR-NGO-2020', 'Tech Mentors', 'Teaching coding to seniors.', 'Seoul Gangnam', 'South Korea', '+82212345678', 'tech@mentors.kr', '2017-11-11'),
+('RO-NGO-2121', 'Delta Dunarii Eco', 'Agricultura sustenabila in Delta Dunarii.', 'Strada Portului 2, Tulcea', 'Romania', '+40240123456', 'delta@eco.ro', '2014-04-14'),
+('IS-NGO-2222', 'Polar Bears Int', 'Arctic wildlife protection.', 'Reykjavik Ice Rd', 'Iceland', '+3545123456', 'bears@iceland.is', '2009-09-09'),
+('VN-NGO-2323', 'Vietnam Vet Help', 'Helping veterans.', 'Hanoi Old Quarter', 'Vietnam', '+842412345678', 'vets@vietnam.org', '2000-05-30'),
+('KE-NGO-2424', 'Kenya Wildlife', 'Savanna conservation.', 'Nairobi Park', 'Kenya', '+254712345678', 'lions@kenya.ke', '1990-12-12'),
+('PE-NGO-2525', 'Peru Heritage', 'Inca trail preservation.', 'Cusco Plaza', 'Peru', '+5184123456', 'inca@peru.pe', '2003-03-03');
 
 
--- 3. Insert VOLUNTEERS (Uses User IDs 3-27)
--- [CORECTIE] Maparea corecta a ID-urilor utilizatorilor
+-- ==========================================
+-- 3. INSERT VOLUNTEERS (Uses User IDs 3-27 & 58-107)
+-- ==========================================
 INSERT INTO volunteers (ID_user, birth_date, skills, availability, emergency_contact)
 VALUES
--- Originals (IDs 3-7)
+-- Existing 25
 (3, '1995-05-15', 'Teaching, English, Math', 'Weekends', 'Mother: +4477009002'),
 (4, '1998-11-20', 'Medical Aid, First Aid, French', 'Mon-Fri Afternoons', 'Husband: +3312345679'),
 (5, '2001-03-10', 'Driver, Logistics, German', 'Full-time Summer', 'Father: +4915123457'),
 (6, '1990-07-25', 'Coding, Web Design, Japanese', 'Remote only', 'Sister: +8190123457'),
 (7, '1999-12-05', 'Cooking, Event Planning, Italian', 'Flexible', 'Brother: +3933312346'),
-
--- New Volunteers (IDs 8-27)
 (8, '2000-01-01', 'Gardening, Painting', 'Weekends', NULL),
 (9, '1992-02-14', 'Construction, Carpentry', 'Morning', 'Wife: +111222333'),
 (10, '1988-08-08', 'Accounting, Finance', 'Evenings', 'Husband: +444555666'),
@@ -136,23 +186,72 @@ VALUES
 (24, '1992-06-06', 'Psychology, Counseling', 'Afternoons', 'Dad: +222333444'),
 (25, '1991-08-20', 'Fashion, Sewing', 'Flexible', NULL),
 (26, '1920-07-04', 'Leadership, Strategy', 'Anytime', 'Bucky: +19451945'),
-(27, '1970-05-29', 'Engineering, Robotics', 'Busy', 'Pepper: +1000000');
+(27, '1970-05-29', 'Engineering, Robotics', 'Busy', 'Pepper: +1000000'),
+-- New 50 Volunteers (IDs 58-107)
+(58, '1995-01-01', 'IT, Networking', 'Weekends', 'Brother: +40700000001'),
+(59, '1996-02-02', 'Teaching, English', 'Evenings', NULL),
+(60, '1997-03-03', 'Driving, B', 'Flexible', 'Father: +40700000003'),
+(61, '1998-04-04', 'Cooking, Baking', 'Mornings', NULL),
+(62, '1999-05-05', 'Photography', 'Events', 'Sister: +40700000005'),
+(63, '2000-06-06', 'Music, Guitar', 'Weekends', NULL),
+(64, '2001-07-07', 'Painting, Art', 'Afternoons', NULL),
+(65, '1990-08-08', 'Accounting', 'Remote', 'Husband: +40700000008'),
+(66, '1991-09-09', 'Legal, Contracts', 'Flexible', NULL),
+(67, '1992-10-10', 'Management', 'Weekdays', 'Wife: +40700000010'),
+(68, '1993-11-11', 'Construction', 'Full-time', NULL),
+(69, '1994-12-12', 'Gardening', 'Weekends', NULL),
+(70, '1995-01-13', 'Mechanics', 'On call', NULL),
+(71, '1996-02-14', 'First Aid', 'Evenings', NULL),
+(72, '1997-03-15', 'Translation', 'Remote', NULL),
+(73, '1998-04-16', 'Web Design', 'Flexible', NULL),
+(74, '1999-05-17', 'Social Media', 'Events', NULL),
+(75, '2000-06-18', 'Marketing', 'Weekdays', NULL),
+(76, '2001-07-19', 'Sales', 'Mornings', NULL),
+(77, '1990-08-20', 'HR, Recruiting', 'Remote', NULL),
+(78, '1991-09-21', 'Psychology', 'Afternoons', NULL),
+(79, '1992-10-22', 'Sociology', 'Flexible', NULL),
+(80, '1993-11-23', 'History', 'Weekends', NULL),
+(81, '1994-12-24', 'Geography', 'Events', NULL),
+(82, '1995-01-25', 'Math, Physics', 'Remote', NULL),
+(83, '1996-02-26', 'Chemistry', 'Weekdays', NULL),
+(84, '1997-03-27', 'Biology', 'Mornings', NULL),
+(85, '1998-04-28', 'Sports, Running', 'Weekends', NULL),
+(86, '1999-05-29', 'Swimming', 'Evenings', NULL),
+(87, '2000-06-30', 'Cycling', 'Flexible', NULL),
+(88, '2001-07-01', 'Hiking', 'Weekends', NULL),
+(89, '1990-08-02', 'Camping', 'Summer', NULL),
+(90, '1991-09-03', 'Fishing', 'Mornings', NULL),
+(91, '1992-10-04', 'Writing', 'Remote', NULL),
+(92, '1993-11-05', 'Editing', 'Flexible', NULL),
+(93, '1994-12-06', 'Video Editing', 'Projects', NULL),
+(94, '1995-01-07', 'Sound Engineering', 'Events', NULL),
+(95, '1996-02-08', 'Lighting', 'Events', NULL),
+(96, '1997-03-09', 'Stage Management', 'Events', NULL),
+(97, '1998-04-10', 'Event Planning', 'Full-time', NULL),
+(98, '1999-05-11', 'Logistics', 'Weekdays', NULL),
+(99, '2000-06-12', 'Driving C+E', 'Flexible', NULL),
+(100, '2001-07-13', 'Warehouse', 'Mornings', NULL),
+(101, '1990-08-14', 'Forklift', 'Evenings', NULL),
+(102, '1991-09-15', 'Retail', 'Weekends', NULL),
+(103, '1992-10-16', 'Customer Service', 'Remote', NULL),
+(104, '1993-11-17', 'IT Support', 'On call', NULL),
+(105, '1994-12-18', 'Programming', 'Remote', NULL),
+(106, '1995-01-19', 'Data Analysis', 'Weekdays', NULL),
+(107, '1996-02-20', 'AI Training', 'Projects', NULL);
 
 
--- 4. Insert COORDINATORS (Uses User IDs 28-55)
--- [CORECTIE] Maparea corecta a ID-urilor utilizatorilor
+-- ==========================================
+-- 4. INSERT COORDINATORS (Uses User IDs 28-57)
+-- ==========================================
 INSERT INTO coordinators (ID_user, ong_registration_number, department, experience_years, employment_type)
 VALUES
--- Originals (IDs 28-32) - ACEASTA ERA EROAREA (erau mapati 8-12)
 (28, 'UK-REG-2020-001', 'Environmental Projects', 5, 'Full-time'),
 (29, 'RO-NGO-556677', 'Educational Programs', 8, 'Full-time'),
 (30, 'US-501C3-9988', 'IT Support & Training', 3, 'Part-time'),
 (31, 'FR-ASSO-1122', 'Field Operations', 10, 'Contract'),
 (32, 'AU-ABN-778899', 'Community Outreach', 4, 'Full-time'),
-
--- New Coordinators (IDs 33-55)
 (33, 'DE-NGO-1001', 'Child Welfare', 6, 'Full-time'),
-(34, 'IT-ONLUS-2002', 'Events', 2, 'Part-time'),
+(34, 'RO-NGO-2002', 'Events', 2, 'Part-time'),
 (35, 'ES-ONG-3003', 'Veterinary', 9, 'Full-time'),
 (36, 'JP-NPO-4004', 'Home Care', 15, 'Full-time'),
 (37, 'CA-CHARITY-5005', 'Shelter Mgmt', 4, 'Contract'),
@@ -164,29 +263,30 @@ VALUES
 (43, 'SE-NGO-1111', 'Research', 6, 'Contract'),
 (44, 'NO-NGO-1212', 'Marine Bio', 10, 'Full-time'),
 (45, 'CH-NGO-1313', 'Emergency', 12, 'Full-time'),
-(46, 'PL-NGO-1414', 'Crisis Mgmt', 3, 'Volunteer-basis'),
-(47, 'GR-NGO-1515', 'Excavation', 20, 'Contract'),
-(48, 'PT-NGO-1616', 'Therapy', 5, 'Part-time'),
+(46, 'RO-NGO-1414', 'Crisis Mgmt', 3, 'Volunteer-basis'),
+(47, 'RO-NGO-1515', 'Excavation', 20, 'Contract'),
+(48, 'RO-NGO-1616', 'Therapy', 5, 'Part-time'),
 (49, 'IE-CHARITY-1717', 'Forestry', 2, 'Full-time'),
 (50, 'NZ-NGO-1818', 'Zoology', 7, 'Full-time'),
 (51, 'SG-CHARITY-1919', 'Horticulture', 4, 'Part-time'),
 (52, 'KR-NGO-2020', 'IT Education', 6, 'Full-time'),
-(53, 'UK-REG-2020-001', 'Fundraising', 2, 'Intern'),
-(54, 'US-501C3-9988', 'HR', 10, 'Full-time'),
-(55, 'RO-NGO-556677', 'Marketing', 3, 'Part-time');
+(53, 'RO-NGO-2121', 'Sustainable Farming', 5, 'Full-time'),
+(54, 'IS-NGO-2222', 'Wildlife Tracking', 8, 'Contract'),
+(55, 'VN-NGO-2323', 'Veteran Support', 4, 'Part-time'),
+(56, 'KE-NGO-2424', 'Park Ranger', 10, 'Full-time'),
+(57, 'PE-NGO-2525', 'Cultural Heritage', 6, 'Full-time');
 
 
--- 5. Insert ACTIVITY CATEGORIES (Total: 25 categories)
+-- ==========================================
+-- 5. INSERT ACTIVITY CATEGORIES
+-- ==========================================
 INSERT INTO activity_categories (name, description)
 VALUES
--- Originals
 ('Environment', 'Tree planting, cleanup'),
 ('Education', 'Tutoring, mentoring'),
 ('Healthcare', 'Medical camps'),
 ('Technology', 'Coding bootcamps'),
 ('Social Welfare', 'Food banks'),
-
--- New entries (20)
 ('Animal Rights', 'Shelter help, adoption events'),
 ('Arts & Culture', 'Museum guides, painting workshops'),
 ('Sports', 'Coaching, event organization'),
@@ -209,95 +309,171 @@ VALUES
 ('Wildlife', 'Tracking and protection');
 
 
--- 6. Insert ACTIVITIES (Total: 28 Activities)
--- IMPORTANT: The IDs for coordinators (1-28) refer to the ID_coordinator column, which is generated sequentially (SERIAL).
--- Since we inserted 28 coordinators, their IDs will be 1 to 28.
+-- ==========================================
+-- 6. INSERT ACTIVITIES (Total: 60 Activities)
+-- DATE CONTEXT: Current Date is 2026-01-10
+-- * Status 'completed': End Date < 2026-01-10
+-- * Status 'in_progress': Start <= 2026-01-10 AND End >= 2026-01-10
+-- * Status 'open': Start > 2026-01-10
+-- ==========================================
+
 INSERT INTO activities (ID_category, ID_coordinator, name, description, location, start_date, end_date, max_volunteers, status, donations_collected)
 VALUES
--- Originals (Coordinators 1-5)
-(1, 1, 'London Park Re-wilding', 'Planting native species.', 'Hyde Park, London', '2026-03-15 09:00:00', '2026-03-15 16:00:00', 50, 'open', 1500.00),
-(4, 3, 'Coding for Kids Workshop', 'Intro to Python.', 'Online via Zoom', '2026-04-01 14:00:00', '2026-04-01 18:00:00', 10, 'open', 300.50),
-(3, 4, 'Rural Health Checkup', 'Mobile clinic.', 'Village Square, Lyon', '2026-05-10 08:00:00', '2026-05-12 18:00:00', 20, 'planning', 5000.00),
-(2, 2, 'Bucharest Homework Club', 'Math homework help.', 'School No. 1, Bucharest', '2026-02-20 15:00:00', '2026-06-20 17:00:00', 5, 'open', 100.00),
-(1, 5, 'Bondi Beach Cleanup', 'Removing microplastics.', 'Bondi Beach, Sydney', '2026-01-20 07:00:00', '2026-01-20 12:00:00', 100, 'completed', 0.00),
+-- 1. PAST / COMPLETED (Before Jan 10, 2026)
+(5, 1, 'Xmas Food Drive', 'Collecting food for holidays.', 'London Community Center', '2025-12-20 09:00:00', '2025-12-24 17:00:00', 50, 'completed', 5000.00),
+(1, 2, 'New Year Cleanup', 'Cleaning the city after NYE.', 'Bucharest Old Town', '2026-01-01 08:00:00', '2026-01-01 14:00:00', 100, 'completed', 200.00),
+(9, 6, 'Winter Emergency Shelter', 'Setting up beds.', 'Berlin Shelter', '2026-01-02 18:00:00', '2026-01-05 06:00:00', 10, 'completed', 1000.00),
+(4, 3, 'Hour of Code', 'Intro to CS.', 'San Fran Library', '2025-12-10 10:00:00', '2025-12-10 12:00:00', 20, 'completed', 500.00),
+(6, 4, 'Stray Cat Rescue', 'Winter insulation for cats.', 'Paris Suburbs', '2025-11-15 09:00:00', '2025-11-20 18:00:00', 15, 'completed', 300.00),
+(7, 7, 'Sibiu Christmas Market', 'Helping tourists.', 'Piata Mare Sibiu', '2025-12-01 10:00:00', '2025-12-26 22:00:00', 40, 'completed', 1500.00),
+(1, 19, 'Bucuresti Emergency Snow Removal', 'Clearing elderly driveways.', 'Bucharest Sector 1', '2026-01-03 06:00:00', '2026-01-04 18:00:00', 100, 'completed', 0.00),
+(5, 20, 'Dacian Winter Solstice', 'Cultural event.', 'Sarmizegetusa', '2025-12-21 16:00:00', '2025-12-22 08:00:00', 15, 'completed', 500.00),
+(16, 21, 'Black Sea Winter Patrol', 'Monitoring storm damage.', 'Mamaia Beach', '2026-01-02 08:00:00', '2026-01-05 16:00:00', 10, 'completed', 100.00),
+(25, 29, 'Kenya Lion Census', 'Annual count.', 'Nairobi Park', '2025-11-10 06:00:00', '2025-11-15 18:00:00', 8, 'completed', 5000.00),
 
--- New Activities (Linked to new coordinators 6-28)
-(6, 6, 'Berlin Animal Adoption', 'Help finding homes for pets.', 'Berlin Central Park', '2026-06-01 10:00:00', '2026-06-01 18:00:00', 15, 'open', 200.00),
-(7, 7, 'Rome Art Festival', 'Guide for tourists.', 'Colosseum Area', '2026-07-10 09:00:00', '2026-07-12 20:00:00', 30, 'planning', 1000.00),
-(6, 8, 'Madrid Dog Walk', 'Walking shelter dogs.', 'Retiro Park', '2026-04-05 08:00:00', '2026-04-05 12:00:00', 20, 'open', 50.00),
-(11, 9, 'Tokyo Elderly Visit', 'Tea time with seniors.', 'Shibuya Community Center', '2026-03-20 14:00:00', '2026-03-20 16:00:00', 5, 'closed', 0.00),
-(5, 10, 'Toronto Winter Shelter', 'Serving soup.', 'Downtown Shelter', '2026-01-15 18:00:00', '2026-01-15 22:00:00', 10, 'completed', 500.00),
-(1, 11, 'Amazon Reforestation', 'Planting trees.', 'Manaus Reserve', '2026-09-01 08:00:00', '2026-09-10 17:00:00', 100, 'planning', 10000.00),
-(3, 12, 'Mumbai Clean Water', 'Distributing filters.', 'Dharavi', '2026-05-05 09:00:00', '2026-05-05 15:00:00', 25, 'open', 1200.00),
-(2, 13, 'Cape Town Math Tutoring', 'High school math help.', 'Public Library', '2026-02-28 15:00:00', '2026-02-28 17:00:00', 8, 'open', 0.00),
-(5, 14, 'Mexico City Food Drive', 'Packing food boxes.', 'Central Warehouse', '2026-04-10 09:00:00', '2026-04-10 13:00:00', 50, 'open', 3000.00),
-(19, 15, 'Amsterdam Bike Repair', 'Fixing bikes for kids.', 'Vondelpark', '2026-05-20 10:00:00', '2026-05-20 14:00:00', 5, 'open', 150.00),
-(20, 16, 'Stockholm Wolf Tracking', 'Counting population.', 'North Forests', '2026-10-01 06:00:00', '2026-10-05 18:00:00', 5, 'planning', 2000.00),
-(16, 17, 'Oslo Fjord Clean', 'Diving for trash.', 'Oslo Bay', '2026-08-15 10:00:00', '2026-08-15 14:00:00', 12, 'open', 500.00),
-(9, 18, 'Zurich Rescue Training', 'Avalanche drill.', 'Alps Base Camp', '2026-12-10 08:00:00', '2026-12-12 16:00:00', 20, 'planning', 0.00),
-(9, 19, 'Warsaw Relief', 'Packing supplies.', 'City Hall', '2026-03-01 09:00:00', '2026-03-01 17:00:00', 100, 'completed', 5000.00),
-(18, 20, 'Athens Restoration', 'Cleaning marble statues.', 'Museum', '2026-06-15 09:00:00', '2026-06-20 14:00:00', 10, 'open', 800.00),
-(16, 21, 'Lisbon Surf Day', 'Teaching kids to surf.', 'Cascais Beach', '2026-07-20 10:00:00', '2026-07-20 16:00:00', 15, 'open', 200.00),
-(1, 22, 'Dublin Tree Planting', 'Urban greening.', 'Phoenix Park', '2026-03-17 10:00:00', '2026-03-17 14:00:00', 40, 'open', 1000.00),
-(20, 23, 'Kiwi Bird Count', 'Night observation.', 'Zealandia', '2026-04-20 20:00:00', '2026-04-21 02:00:00', 8, 'open', 400.00),
-(17, 24, 'Singapore Garden City', 'Planting flowers.', 'Botanic Gardens', '2026-02-14 09:00:00', '2026-02-14 11:00:00', 30, 'closed', 100.00),
-(4, 25, 'Seoul AI Bootcamp', 'Basic AI for students.', 'Tech Hub', '2026-08-01 09:00:00', '2026-08-05 17:00:00', 20, 'planning', 1500.00);
+-- 2. IN PROGRESS (Overlapping Jan 10, 2026)
+(10, 5, 'Legal Aid Week', 'Free legal advice.', 'Sydney Town Hall', '2026-01-07 09:00:00', '2026-01-14 17:00:00', 5, 'in_progress', 0.00),
+(5, 7, 'Soup Kitchen Rotation', 'Serving daily meals.', 'Sibiu Gara', '2026-01-01 11:00:00', '2026-01-31 14:00:00', 30, 'in_progress', 1500.00),
+(17, 26, 'Delta Dunarii Reed Harvest', 'Traditional harvesting.', 'Tulcea Wetlands', '2026-01-05 08:00:00', '2026-01-20 16:00:00', 50, 'in_progress', 8000.00),
+(25, 27, 'Arctic Survey', 'Counting bear population.', 'Reykjavik North', '2026-01-08 06:00:00', '2026-01-15 18:00:00', 8, 'in_progress', 2000.00),
+(11, 8, 'Senior Tech Support', 'Helping seniors with phones.', 'Madrid Community Center', '2026-01-09 10:00:00', '2026-01-11 12:00:00', 10, 'in_progress', 100.00),
+(9, 19, 'Speranta Fire Watch', 'Monitoring heating in slums.', 'Bucharest Outskirts', '2026-01-01 18:00:00', '2026-01-31 06:00:00', 20, 'in_progress', 2000.00),
+(4, 2, 'Winter Homework Club', 'Tutoring.', 'Bucharest School 10', '2026-01-08 14:00:00', '2026-01-30 17:00:00', 15, 'in_progress', 300.00),
+(1, 14, 'Amsterdam Canal Ice Check', 'Safety monitoring.', 'Amsterdam', '2026-01-05 08:00:00', '2026-01-15 18:00:00', 12, 'in_progress', 50.00),
+(3, 3, 'Mobile Clinic', 'Checkups.', 'San Francisco Downtown', '2026-01-09 09:00:00', '2026-01-12 17:00:00', 8, 'in_progress', 4000.00),
+(2, 25, 'Seoul Coding Boot Camp', 'Intensive week.', 'Gangnam Hub', '2026-01-05 09:00:00', '2026-01-12 18:00:00', 25, 'in_progress', 1200.00),
+
+-- 3. FUTURE / OPEN (Starting After Jan 10, 2026)
+(2, 9, 'Tokyo Language Exchange', 'Teaching English to kids.', 'Shibuya School', '2026-02-01 14:00:00', '2026-02-01 16:00:00', 20, 'open', 0.00),
+(12, 10, 'Youth Leadership Camp', 'Weekend retreat.', 'Toronto Lake Camp', '2026-03-15 08:00:00', '2026-03-17 18:00:00', 15, 'open', 1200.00),
+(1, 11, 'Amazon Rain Forest Run', 'Fundraiser marathon.', 'Manaus', '2026-04-22 07:00:00', '2026-04-22 13:00:00', 200, 'open', 5000.00),
+(3, 12, 'Mumbai Hygiene Drive', 'Distributing soap kits.', 'Dharavi Slums', '2026-02-10 09:00:00', '2026-02-12 17:00:00', 40, 'open', 2500.00),
+(2, 13, 'Cape Town Math Tutoring', 'Exam prep.', 'Public Library', '2026-05-01 15:00:00', '2026-06-01 17:00:00', 5, 'open', 0.00),
+(5, 14, 'Mexico City Food Bank', 'Sorting donations.', 'Central Warehouse', '2026-02-28 08:00:00', '2026-02-28 14:00:00', 25, 'open', 300.00),
+(19, 15, 'Amsterdam Bike Fix', 'Repairing bikes for refugees.', 'Vondelpark', '2026-03-20 10:00:00', '2026-03-20 16:00:00', 10, 'open', 150.00),
+(1, 16, 'Stockholm Park Clean', 'Spring cleaning.', 'Royal Park', '2026-04-10 09:00:00', '2026-04-10 13:00:00', 50, 'open', 0.00),
+(16, 17, 'Oslo Harbor Dive', 'Removing trash from sea.', 'Oslo Fjord', '2026-06-15 10:00:00', '2026-06-15 14:00:00', 12, 'open', 400.00),
+(9, 18, 'Zurich Avalanche Drill', 'Safety training.', 'Alps Base Camp', '2026-12-01 08:00:00', '2026-12-03 16:00:00', 20, 'open', 1000.00),
+(21, 19, 'Speranta Refugee Aid', 'Language classes.', 'Bucharest Center', '2026-02-15 18:00:00', '2026-02-15 20:00:00', 15, 'open', 200.00),
+(18, 20, 'Dacian Temple Restoration', 'Cleaning ancient stones.', 'Sarmizegetusa Regia', '2026-05-10 08:00:00', '2026-05-20 16:00:00', 8, 'open', 5000.00),
+(8, 21, 'Black Sea Dolphin Watch', 'Boat patrol.', 'Constanta Port', '2026-07-20 10:00:00', '2026-07-20 14:00:00', 10, 'open', 300.00),
+(1, 22, 'Dublin Tree Planting', 'St Patricks Green Project.', 'Phoenix Park', '2026-03-17 09:00:00', '2026-03-17 15:00:00', 100, 'open', 2000.00),
+(25, 23, 'Kiwi Bird Protection', 'Night patrol.', 'Zealandia Reserve', '2026-04-01 20:00:00', '2026-04-02 04:00:00', 6, 'open', 600.00),
+(17, 24, 'Singapore Urban Garden', 'Vertical farming.', 'Marina Bay', '2026-02-14 09:00:00', '2026-02-14 12:00:00', 20, 'closed', 100.00),
+(4, 25, 'Seoul AI Workshop', 'Python for seniors.', 'Gangnam Hub', '2026-08-01 10:00:00', '2026-08-01 16:00:00', 15, 'open', 1500.00),
+(24, 28, 'Hanoi Vet Assistance', 'Medical checkups.', 'Rural Village', '2026-03-05 08:00:00', '2026-03-08 18:00:00', 10, 'open', 1000.00),
+(25, 29, 'Kenya Lion Tracking', 'Savanna patrol.', 'Nairobi National Park', '2026-09-10 06:00:00', '2026-09-15 18:00:00', 5, 'open', 3000.00),
+(18, 30, 'Inca Trail Clean', 'Preserving heritage.', 'Cusco Trail', '2026-05-20 07:00:00', '2026-05-25 17:00:00', 20, 'open', 1200.00),
+(1, 2, 'Bucharest Green Week', 'Planting trees in parks.', 'Herastrau Park', '2026-04-01 09:00:00', '2026-04-07 17:00:00', 200, 'open', 5000.00),
+(17, 26, 'Tulcea Bird Watching Guide', 'Guiding tourists.', 'Danube Delta', '2026-05-15 08:00:00', '2026-05-17 18:00:00', 10, 'open', 500.00),
+(7, 7, 'Sibiu Jazz Fest Volunteers', 'Event coordination.', 'Piata Mica Sibiu', '2026-05-20 12:00:00', '2026-05-24 02:00:00', 50, 'open', 0.00),
+(16, 21, 'Constanta Beach Cleanup', 'Preparing for summer.', 'Mamaia Nord', '2026-04-15 09:00:00', '2026-04-15 14:00:00', 100, 'open', 200.00),
+(18, 20, 'Cluj History Tour', 'Guiding students.', 'Cluj Center', '2026-03-10 10:00:00', '2026-03-10 14:00:00', 5, 'open', 0.00),
+(9, 19, 'Speranta First Aid Course', 'Teaching locals.', 'Bucharest Sector 3', '2026-02-20 18:00:00', '2026-02-20 21:00:00', 20, 'open', 100.00),
+(5, 1, 'London Marathon Water Handout', 'Support runners.', 'London Streets', '2026-04-20 08:00:00', '2026-04-20 16:00:00', 50, 'open', 1000.00),
+(2, 6, 'Berlin Refugee Coding', 'Java basics.', 'Kreuzberg Center', '2026-03-01 18:00:00', '2026-03-31 20:00:00', 15, 'open', 500.00),
+(6, 4, 'Paris Cat Sterilization', 'Vet assistance.', 'Paris Vet Clinic', '2026-02-14 09:00:00', '2026-02-15 18:00:00', 10, 'open', 2000.00),
+(25, 27, 'Iceland Puffin Rescue', 'Helping lost chicks.', 'Westman Islands', '2026-08-01 22:00:00', '2026-08-10 03:00:00', 30, 'open', 500.00),
+(19, 15, 'Amsterdam King Day Clean', 'Post-party cleanup.', 'City Center', '2026-04-28 06:00:00', '2026-04-28 12:00:00', 100, 'open', 100.00),
+(20, 5, 'Sydney Opera House Guide', 'Accessibility support.', 'Opera House', '2026-03-05 10:00:00', '2026-03-05 15:00:00', 10, 'open', 0.00),
+(1, 11, 'Manaus Tree Nursery', 'Preparing seedlings.', 'Rainforest Base', '2026-02-01 08:00:00', '2026-02-28 16:00:00', 20, 'open', 8000.00),
+(3, 28, 'Vietnam Rural Vax Drive', 'Logistics support.', 'Sapa Region', '2026-04-10 08:00:00', '2026-04-15 18:00:00', 15, 'open', 1500.00),
+(1, 30, 'Peru Plastic Free', 'Awareness campaign.', 'Lima', '2026-03-22 10:00:00', '2026-03-22 18:00:00', 50, 'open', 300.00),
+(4, 25, 'Seoul E-Sports Charity', 'Event management.', 'Olympic Stadium', '2026-09-01 10:00:00', '2026-09-03 22:00:00', 100, 'open', 50000.00),
+(2, 13, 'Cape Town Library Renov', 'Painting walls.', 'Khayelitsha', '2026-02-15 09:00:00', '2026-02-20 17:00:00', 20, 'open', 1000.00),
+(5, 14, 'Mexico City Earthq Drill', 'Simulation.', 'Zocalo', '2026-09-19 11:00:00', '2026-09-19 13:00:00', 200, 'open', 0.00),
+(1, 22, 'Cork Beach Clean', 'Weekend cleanup.', 'Cork Coast', '2026-06-01 10:00:00', '2026-06-01 14:00:00', 30, 'open', 200.00),
+(16, 21, 'Danube Delta Boat Patrol', 'Anti-poaching.', 'Tulcea', '2026-05-01 06:00:00', '2026-05-30 20:00:00', 5, 'open', 5000.00);
 
 
--- 7. Insert VOLUNTEER ACTIVITIES (Link Volunteers 1-25 to Activities 1-25)
--- IMPORTANT: The IDs for volunteers (1-25) refer to the ID_volunteer column, which is generated sequentially (SERIAL).
--- Since we inserted 25 volunteers, their IDs will be 1 to 25.
+-- ==========================================
+-- 7. INSERT VOLUNTEER ACTIVITIES
+-- ==========================================
 INSERT INTO volunteer_activities (ID_volunteer, ID_activity, enrollment_date, status, hours_completed, feedback)
 VALUES
--- Originals
-(1, 1, '2026-03-01', 'accepted', 0, 'Looking forward to it'),
-(1, 2, '2026-03-10', 'pending', 0, ''),
-(2, 3, '2026-04-05', 'accepted', 0, ''),
-(3, 1, '2026-03-02', 'rejected', 0, 'Unavailable'),
-(4, 2, '2026-03-12', 'accepted', 4, 'Great event!'),
-(5, 5, '2026-01-10', 'completed', 5, 'Very hot day'),
+-- Past Activities (Completed)
+(1, 1, '2025-12-01', 'completed', 8, 'It was amazing to help so many families.'),
+(2, 1, '2025-12-05', 'completed', 8, 'Very well organized event.'),
+(3, 2, '2025-12-28', 'completed', 6, 'A great way to start the year, cleaning the city.'),
+(4, 3, '2025-12-30', 'completed', 12, 'Heartbreaking but necessary work. Will come again.'),
+(5, 4, '2025-11-20', 'completed', 2, 'The kids were so smart! Loved teaching code.'),
+(58, 6, '2025-11-25', 'completed', 5, 'Beautiful market, cold weather.'),
+(59, 7, '2026-01-02', 'completed', 8, 'Hard work shoveling snow.'),
+(60, 10, '2025-11-01', 'completed', 10, 'Saw 3 lions!'),
 
--- New entries (20+)
-(6, 6, '2026-05-20', 'accepted', 0, ''),
-(7, 7, '2026-06-01', 'pending', 0, ''),
-(8, 8, '2026-03-30', 'accepted', 0, 'I love dogs'),
-(9, 9, '2026-02-15', 'rejected', 0, 'Full capacity'),
-(10, 10, '2026-01-01', 'completed', 4, 'Heartwarming'),
-(11, 11, '2026-08-01', 'pending', 0, 'Always wanted to go to Amazon'),
-(12, 12, '2026-04-20', 'accepted', 0, ''),
-(13, 13, '2026-02-10', 'accepted', 0, 'Math is fun'),
-(14, 14, '2026-04-01', 'pending', 0, ''),
-(15, 15, '2026-05-15', 'accepted', 0, 'I can fix flat tires'),
-(16, 16, '2026-09-01', 'pending', 0, ''),
-(17, 17, '2026-08-01', 'accepted', 0, 'Have diving license'),
-(18, 18, '2026-11-01', 'planning', 0, ''),
-(19, 19, '2026-02-28', 'completed', 8, 'Exhausting but worth it'),
-(20, 20, '2026-06-10', 'accepted', 0, ''),
-(21, 21, '2026-07-01', 'accepted', 0, 'Surf up'),
-(22, 22, '2026-03-01', 'accepted', 0, 'Green Ireland'),
-(23, 23, '2026-04-10', 'pending', 0, ''),
-(24, 24, '2026-02-01', 'rejected', 0, 'Event closed'),
-(25, 25, '2026-07-15', 'pending', 0, 'I know Python'),
-(1, 6, '2026-05-25', 'accepted', 0, 'Travel plans aligned'),
-(2, 7, '2026-07-01', 'pending', 0, ''),
-(5, 11, '2026-08-20', 'pending', 0, ''),
-(3, 19, '2026-02-28', 'completed', 8, 'Good team'),
-(4, 14, '2026-04-05', 'accepted', 0, '');
+-- In Progress
+(6, 11, '2026-01-02', 'accepted', 0, 'I am a law student, eager to help.'),
+(7, 12, '2026-01-01', 'accepted', 0, 'I can cook for large groups.'),
+(8, 12, '2026-01-03', 'pending', 0, 'Available for the evening shifts.'),
+(9, 13, '2026-01-01', 'accepted', 0, 'I have agricultural experience from home.'),
+(10, 14, '2025-12-15', 'accepted', 0, 'I love bears and cold weather!'),
+(61, 16, '2026-01-01', 'accepted', 0, 'Watching the fires.'),
+(62, 17, '2026-01-05', 'pending', 0, 'I can teach math.'),
+(63, 18, '2026-01-04', 'accepted', 0, 'Ice looks thin, careful.'),
+
+-- Future / Open (Pending/Accepted)
+(11, 21, '2026-01-09', 'pending', 0, 'I am TEFL certified and love kids.'),
+(12, 22, '2026-01-10', 'pending', 0, 'I have experience as a camp counselor.'),
+(13, 23, '2025-12-20', 'accepted', 0, 'Training for this marathon all year!'),
+(14, 24, '2026-01-05', 'pending', 0, 'I can bring my own transport.'),
+(15, 25, '2026-01-08', 'pending', 0, 'Math major here, happy to tutor.'),
+(64, 41, '2026-01-05', 'accepted', 0, 'Love planting trees!'),
+(65, 42, '2026-01-06', 'pending', 0, 'I have binoculars.'),
+(66, 43, '2026-01-07', 'accepted', 0, 'Jazz fan here.'),
+(67, 44, '2026-01-08', 'pending', 0, 'I live in Mamaia.'),
+(68, 45, '2026-01-09', 'accepted', 0, 'History buff.'),
+(69, 46, '2026-01-10', 'pending', 0, 'Need to learn CPR.'),
+(70, 47, '2026-01-01', 'accepted', 0, 'Running the marathon anyway.'),
+(71, 48, '2026-01-02', 'pending', 0, 'I speak Java and Arabic.'),
+(72, 49, '2026-01-03', 'accepted', 0, 'Vet student.'),
+(73, 50, '2026-01-04', 'pending', 0, 'Trip to Iceland booked.'),
+(74, 51, '2026-01-05', 'accepted', 0, 'Oranje!'),
+(75, 52, '2026-01-06', 'pending', 0, 'My aunt is in a wheelchair, I know the drill.'),
+(44, 53, '2026-01-07', 'accepted', 0, 'Green thumb.'),
+(45, 54, '2026-01-08', 'pending', 0, 'Motorbike license.'),
+(46, 55, '2026-01-09', 'accepted', 0, 'No plastic!'),
+(47, 56, '2026-01-10', 'pending', 0, 'Gamer for life.'),
+(48, 57, '2026-01-01', 'accepted', 0, 'Art student.'),
+(49, 58, '2026-01-02', 'pending', 0, 'Stay safe.'),
+(50, 59, '2026-01-03', 'accepted', 0, 'Love Ireland.'),
+(51, 60, '2026-01-04', 'pending', 0, 'I have a boat license.'),
+-- Random fills (Corectate)
+(52, 21, '2026-01-05', 'pending', 0, 'Can teach Japanese too.'),
+(53, 23, '2026-01-05', 'accepted', 0, 'Running.'),
+(54, 26, '2026-01-05', 'rejected', 0, 'Full.'),
+(55, 28, '2026-01-05', 'pending', 0, 'Good cause.'),
+(56, 30, '2026-01-05', 'accepted', 0, 'Hiking.'),
+(57, 46, '2026-01-05', 'pending', 0, 'Medical skills.'),
+(58, 48, '2026-01-05', 'accepted', 0, 'Coding.'),
+(59, 50, '2026-01-05', 'pending', 0, 'Birds.'),
+(60, 53, '2026-01-05', 'accepted', 0, 'Trees.'),
+(61, 56, '2026-01-05', 'pending', 0, 'Esports.'),
+(62, 60, '2026-01-05', 'accepted', 0, 'Delta.'),
+(63, 41, '2026-01-05', 'pending', 0, 'Romania.'),
+(64, 42, '2026-01-05', 'accepted', 0, 'Birds.'),
+(65, 43, '2026-01-05', 'pending', 0, 'Jazz.'),
+(66, 44, '2026-01-05', 'accepted', 0, 'Sea.'),
+(67, 45, '2026-01-05', 'pending', 0, 'History.'),
+(68, 46, '2026-01-05', 'accepted', 0, 'Aid.'),
+(69, 48, '2026-01-05', 'pending', 0, 'Java.'),
+(70, 50, '2026-01-05', 'accepted', 0, 'Puffins.'),
+(71, 53, '2026-01-05', 'pending', 0, 'Amazon.'),
+(72, 56, '2026-01-05', 'accepted', 0, 'LoL.'),
+(73, 60, '2026-01-05', 'pending', 0, 'Patrol.');
 
 
--- 8. Insert DONATIONS (Total: 25 Donations)
+-- ==========================================
+-- 8. INSERT DONATIONS
+-- ==========================================
 INSERT INTO donations (ong_registration_number, donor_name, amount, donation_date, type, notes)
 VALUES
--- Originals
 ('UK-REG-2020-001', 'EcoCorp Inc.', 5000.00, '2025-12-15', 'Corporate', 'Annual sponsorship'),
 ('US-501C3-9988', 'Anonymous', 50.00, '2026-01-05', 'Individual', 'Online donation'),
 ('FR-ASSO-1122', 'Global Health Fund', 12000.00, '2025-11-20', 'Grant', 'For equipment'),
 ('RO-NGO-556677', 'Local Bakery', 200.00, '2026-02-01', 'In-Kind', 'Food'),
 ('AU-ABN-778899', 'Surfers United', 750.00, '2026-01-18', 'Event', 'Fundraiser'),
-
--- New entries (20)
 ('DE-NGO-1001', 'Hans Foundation', 2000.00, '2026-01-10', 'Grant', 'General support'),
-('IT-ONLUS-2002', 'Museum Lovers', 500.00, '2026-02-15', 'Individual', 'Ticket sales donation'),
+('RO-NGO-2002', 'Muzeul Astra', 500.00, '2026-02-15', 'Individual', 'Sponsorizare eveniment'),
 ('ES-ONG-3003', 'PetShop Madrid', 1000.00, '2026-03-01', 'Corporate', 'Pet food supplies'),
 ('JP-NPO-4004', 'Tokyo Corp', 10000.00, '2025-12-31', 'Corporate', 'End of year gift'),
 ('CA-CHARITY-5005', 'Winter Gear Ltd', 3000.00, '2026-01-01', 'In-Kind', 'Coats and boots'),
@@ -309,10 +485,15 @@ VALUES
 ('SE-NGO-1111', 'IKEA Foundation', 8000.00, '2026-01-05', 'Grant', 'Conservation fund'),
 ('NO-NGO-1212', 'Fish Market', 300.00, '2026-02-10', 'Corporate', 'Event sponsorship'),
 ('CH-NGO-1313', 'Bank of Zurich', 20000.00, '2025-12-25', 'Corporate', 'Holiday donation'),
-('PL-NGO-1414', 'Community Chest', 100.00, '2026-03-05', 'Individual', 'Cash'),
-('GR-NGO-1515', 'History Uni', 1500.00, '2026-01-30', 'Grant', 'Research materials'),
-('PT-NGO-1616', 'Surf School', 200.00, '2026-04-20', 'In-Kind', 'Boards'),
+('RO-NGO-1414', 'Comunitatea Locala', 100.00, '2026-03-05', 'Individual', 'Donatie anonima'),
+('RO-NGO-1515', 'Universitatea Babes-Bolyai', 1500.00, '2026-01-30', 'Grant', 'Materiale cercetare'),
+('RO-NGO-1616', 'Magazin Sportiv', 200.00, '2026-04-20', 'In-Kind', 'Echipament curatenie'),
 ('IE-CHARITY-1717', 'Guinness Store', 1000.00, '2026-03-17', 'Corporate', 'St Patricks Day'),
 ('NZ-NGO-1818', 'Nature Trust', 5000.00, '2026-02-12', 'Grant', 'Kiwi protection'),
 ('SG-CHARITY-1919', 'Garden City Fund', 3000.00, '2026-01-25', 'Grant', 'Urban greening'),
-('KR-NGO-2020', 'Samsung Electronics', 12000.00, '2026-02-05', 'Corporate', 'Laptops for students');
+('KR-NGO-2020', 'Samsung Electronics', 12000.00, '2026-02-05', 'Corporate', 'Laptops for students'),
+('RO-NGO-2121', 'Pensiunea Delta', 4000.00, '2026-01-02', 'Grant', 'Protectia stufului'),
+('IS-NGO-2222', 'Ice Hotel', 2500.00, '2025-12-20', 'Corporate', 'Winter gear'),
+('VN-NGO-2323', 'Coffee Growers', 600.00, '2026-01-15', 'Individual', 'Community pool'),
+('KE-NGO-2424', 'Safari Tours', 1500.00, '2026-01-09', 'Corporate', 'Jeep maintenance'),
+('PE-NGO-2525', 'Llama Lovers', 300.00, '2026-01-05', 'Individual', 'Wool blankets');
