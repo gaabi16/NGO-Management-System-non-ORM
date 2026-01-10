@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,22 @@ public class ActivityRepository {
                 activity.setPendingCount(0);
             }
 
+            // Mapăm statusul voluntarului
+            try {
+                activity.setEnrollmentStatus(rs.getString("enrollment_status"));
+            } catch (SQLException e) { }
+
+            // [NOU] Mapăm detaliile coordonatorului dacă există în query
+            try {
+                String first = rs.getString("coord_first");
+                String last = rs.getString("coord_last");
+                if (first != null && last != null) {
+                    activity.setCoordinatorName(first + " " + last);
+                }
+                activity.setCoordinatorEmail(rs.getString("coord_email"));
+                activity.setCoordinatorPhone(rs.getString("coord_phone"));
+            } catch (SQLException e) { }
+
             return activity;
         }
     };
@@ -78,9 +95,32 @@ public class ActivityRepository {
         return jdbcTemplate.query(sql, activityRowMapper, coordinatorId);
     }
 
+    // [MODIFICAT] Metoda pentru activitățile voluntarului (Include JOIN pentru Coordonator)
+    public List<Activity> findActivitiesByVolunteerId(Integer volunteerId, String statusFilter) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT a.*, va.status as enrollment_status, cat.name as category_name, " +
+                        "u.first_name as coord_first, u.last_name as coord_last, u.email as coord_email, u.phone_number as coord_phone " +
+                        "FROM activities a " +
+                        "JOIN volunteer_activities va ON a.id_activity = va.id_activity " +
+                        "LEFT JOIN activity_categories cat ON a.id_category = cat.id_category " +
+                        "JOIN coordinators c ON a.id_coordinator = c.id_coordinator " +
+                        "JOIN users u ON c.id_user = u.id_user " +
+                        "WHERE va.id_volunteer = ? ");
+
+        List<Object> params = new ArrayList<>();
+        params.add(volunteerId);
+
+        if (statusFilter != null && !statusFilter.isEmpty() && !statusFilter.equals("all")) {
+            sql.append("AND va.status = ? ");
+            params.add(statusFilter);
+        }
+
+        sql.append("ORDER BY a.start_date DESC");
+
+        return jdbcTemplate.query(sql.toString(), activityRowMapper, params.toArray());
+    }
+
     public void save(Activity activity) {
-        // [MODIFICAT] Status default 'open' la creare.
-        // Va deveni 'in_progress' automat prin Scheduler daca data de start e acum.
         String sql = "INSERT INTO activities (id_category, id_coordinator, name, description, location, start_date, end_date, max_volunteers, status, donations_collected) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', 0.0)";
 
@@ -142,29 +182,23 @@ public class ActivityRepository {
         return total != null ? total : 0.0;
     }
 
-    // [NOU] Verifică dacă există deja o activitate care se suprapune pentru același coordonator
     public boolean hasOverlappingActivity(Integer coordinatorId, LocalDateTime start, LocalDateTime end) {
-        // Logica de suprapunere: (StartA < EndB) si (EndA > StartB)
         String sql = "SELECT COUNT(*) FROM activities " +
                 "WHERE id_coordinator = ? " +
                 "AND start_date < ? AND end_date > ? " +
-                "AND status != 'completed'"; // Ignoram cele deja terminate, deși teoretic sunt în trecut
+                "AND status != 'completed'";
 
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, coordinatorId, end, start);
         return count != null && count > 0;
     }
 
-    // [NOU] Update automat la 'in_progress' pentru activitățile care se desfășoară ACUM
     public void updateStatusToInProgress(LocalDateTime now) {
-        // Trecem la 'in_progress' orice activitate (open sau closed/full) care se află în intervalul de timp
-        // și nu este deja completed sau in_progress.
         String sql = "UPDATE activities SET status = 'in_progress' " +
                 "WHERE start_date <= ? AND end_date >= ? " +
                 "AND status NOT IN ('in_progress', 'completed')";
         jdbcTemplate.update(sql, now, now);
     }
 
-    // [NOU] Update automat la 'completed' pentru activitățile care s-au terminat
     public void updateStatusToCompleted(LocalDateTime now) {
         String sql = "UPDATE activities SET status = 'completed' " +
                 "WHERE end_date < ? AND status != 'completed'";
