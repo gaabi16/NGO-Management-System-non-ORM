@@ -5,17 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coordinator Dashboard</title>
     <style>
-        /* ... (CSS existent) ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; min-height: 100vh; }
+
         .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         .nav-brand { font-size: 1.5rem; font-weight: bold; }
-        .nav-links { display: flex; align-items: center; gap: 10px; }
-        .nav-btn { color: white; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; transition: all 0.3s ease; font-size: 0.95rem; }
+        .nav-links { display: flex; align-items: center; gap: 20px; }
+
+        .nav-btn { color: white; text-decoration: none; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: background 0.3s; font-size: 0.95rem; }
         .nav-btn:hover { background: rgba(255,255,255,0.2); }
-        .nav-btn.active-nav { background: rgba(255,255,255,0.25); font-weight: 600; border: 1px solid rgba(255,255,255,0.4); }
-        .logout-btn { background: #dc3545; border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.3s; margin-left: 10px; }
+
+        /* [MODIFICAT] Buton logout mai mic */
+        .logout-btn {
+            background: #dc3545;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-weight: 500;
+            padding: 5px 12px;       /* Padding redus */
+            font-size: 0.85rem;      /* Font mai mic */
+            border-radius: 15px;     /* Raza mai mica */
+            margin-left: 5px;
+            transition: background 0.3s;
+        }
         .logout-btn:hover { background: #c82333; }
+
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
         .dashboard-header { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
         .ong-title h1 { font-size: 1.8rem; color: #333; }
@@ -38,9 +52,13 @@
         th, td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #edf2f7; }
         th { background: #f8fafc; color: #4a5568; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
         tr:hover { background: #f7fafc; }
-        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+
+        .status-badge { padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; display: inline-block; }
         .status-open { background: #c6f6d5; color: #22543d; }
         .status-closed { background: #fed7d7; color: #822727; }
+        .status-in-progress { background: #feebc8; color: #c05621; }
+        .status-completed { background: #FFEFBD; color: #FFBC14; }
+
         .btn-view-details { display: inline-block; background: #667eea; color: white; padding: 6px 14px; border-radius: 6px; text-decoration: none; font-size: 0.9rem; transition: background 0.3s; }
         .btn-view-details:hover { background: #5a67d8; }
         .notification-badge { display: inline-flex; align-items: center; background-color: #fff5f5; color: #e53e3e; border: 1px solid #fc8181; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; margin-left: 10px; }
@@ -51,13 +69,25 @@
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: 500; }
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 1rem; }
-
-        /* [NOU] Styles pentru required/optional */
         .required { color: #dc3545; font-size: 12px; font-weight: bold; }
-        .optional { color: #999; font-size: 12px; font-weight: normal; }
-
         .alert { padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; animation: slideDown 0.3s; }
         .alert-success { background-color: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
@@ -66,18 +96,27 @@
 <nav class="navbar">
     <div class="nav-brand">Coordinator Dashboard</div>
     <div class="nav-links">
-        <a th:href="@{/coordinator/dashboard(view='activities')}" th:class="'nav-btn ' + (${currentView == 'activities'} ? 'active-nav' : '')">Manage Activities</a>
-        <a th:href="@{/coordinator/dashboard(view='volunteers')}" th:class="'nav-btn ' + (${currentView == 'volunteers'} ? 'active-nav' : '')">Manage Volunteers</a>
-        <a href="/coordinator/profile" class="nav-btn" style="margin-left: 15px;">My Profile</a>
-        <form th:action="@{/logout}" method="post" style="display:inline;"><button class="logout-btn">Logout</button></form>
+        <a th:href="@{/coordinator/dashboard(view='activities')}"
+           class="nav-btn"
+           th:style="${currentView == 'activities'} ? 'background: rgba(255,255,255,0.2);' : ''">Manage Activities</a>
+
+        <a th:href="@{/coordinator/dashboard(view='volunteers')}"
+           class="nav-btn"
+           th:style="${currentView == 'volunteers'} ? 'background: rgba(255,255,255,0.2);' : ''">Manage Volunteers</a>
+
+        <a href="/coordinator/profile" class="nav-btn">Profile</a>
+
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button class="logout-btn">Logout</button>
+        </form>
     </div>
 </nav>
 
 <div class="container">
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
     <div th:if="${param.success}" class="alert alert-success">
-        <span th:if="${#strings.equals(param.success[0], 'ActivityCreated')}">Activity created successfully!</span>
         <span th:if="${#strings.equals(param.success[0], 'EnrollmentClosed')}">Enrollment closed successfully!</span>
-        <span th:unless="${#strings.equals(param.success[0], 'ActivityCreated') or #strings.equals(param.success[0], 'EnrollmentClosed')}">Action completed successfully!</span>
+        <span th:unless="${#strings.equals(param.success[0], 'EnrollmentClosed')}">Action completed successfully!</span>
     </div>
 
     <div class="dashboard-header">
@@ -114,7 +153,17 @@
                     <td th:text="${#temporals.format(activity.startDate, 'dd MMM yyyy')}">Date</td>
                     <td th:text="${activity.location}">Location</td>
                     <td th:text="${activity.maxVolunteers}">50</td>
-                    <td><span th:class="'status-badge ' + (${activity.status == 'open'} ? 'status-open' : 'status-closed')" th:text="${activity.status}">OPEN</span></td>
+                    <td>
+                        <span th:class="'status-badge ' +
+                              (${activity.status == 'open'} ? 'status-open' :
+                              (${activity.status == 'closed'} ? 'status-closed' :
+                              (${activity.status == 'in_progress'} ? 'status-in-progress' :
+                              (${activity.status == 'completed'} ? 'status-completed' : ''))))"
+                              th:text="${activity.status == 'in_progress' ? 'In progress...' :
+                                       (activity.status == 'open' ? 'Open' :
+                                       (activity.status == 'closed' ? 'Closed' :
+                                       (activity.status == 'completed' ? 'Completed' : activity.status)))}">STATUS</span>
+                    </td>
                     <td><a th:href="@{/coordinator/activities/{id}(id=${activity.idActivity})}" class="btn-view-details">View Details</a></td>
                 </tr>
                 </tbody>
@@ -145,6 +194,9 @@
     <div class="modal-content">
         <span class="close" onclick="closeModal('createActivityModal')">&times;</span>
         <h2 style="margin-bottom: 20px; color: #333;">Create New Activity</h2>
+
+        <div th:if="${createActivityError}" class="alert-error" th:text="${createActivityError}"></div>
+
         <form th:action="@{/coordinator/activities/create}" th:object="${newActivity}" method="post">
             <div class="form-group"><label>Activity Name <span class="required">*</span></label><input type="text" th:field="*{name}" required></div>
             <div class="form-group"><label>Category <span class="required">*</span></label><select th:field="*{idCategory}" required><option th:each="cat : ${categories}" th:value="${cat.id_category}" th:text="${cat.name}">Category</option></select></div>
@@ -162,14 +214,18 @@
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     window.onclick = function(event) { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; }
 
-    // Auto-hide alerts script
-    setTimeout(function() {
-        document.querySelectorAll('.alert').forEach(a => {
-            a.style.transition = 'opacity 0.5s ease';
-            a.style.opacity = '0';
-            setTimeout(() => a.remove(), 500);
-        });
-    }, 3000);
+    document.addEventListener('DOMContentLoaded', function() {
+        if ([[${createActivityError != null}]]) {
+            openModal('createActivityModal');
+        }
+        setTimeout(function() {
+            document.querySelectorAll('.alert, .alert-error').forEach(a => {
+                a.style.transition = 'opacity 0.5s ease';
+                a.style.opacity = '0';
+                setTimeout(() => a.remove(), 500);
+            });
+        }, 3000);
+    });
 </script>
 
 </body>

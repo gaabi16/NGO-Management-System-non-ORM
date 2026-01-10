@@ -7,15 +7,29 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; min-height: 100vh; }
-        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+
+        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         .nav-brand { font-size: 1.5rem; font-weight: bold; }
-        .nav-links { display: flex; align-items: center; gap: 15px; }
-        .nav-btn { color: white; text-decoration: none; padding: 8px 16px; border-radius: 20px; font-weight: 500; transition: background 0.3s; }
+        .nav-links { display: flex; align-items: center; gap: 20px; }
+        .nav-btn { color: white; text-decoration: none; padding: 8px 16px; border-radius: 20px; font-weight: 500; transition: background 0.3s; font-size: 0.95rem; }
         .nav-btn:hover { background: rgba(255,255,255,0.2); }
-        .logout-btn { background: #dc3545; border: none; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+        /* [MODIFICAT] Buton logout mai mic */
+        .logout-btn {
+            background: #dc3545;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-weight: 500;
+            padding: 5px 12px;       /* Padding redus */
+            font-size: 0.85rem;      /* Font mai mic */
+            border-radius: 15px;     /* Raza mai mica */
+            margin-left: 5px;
+            transition: background 0.3s;
+        }
+        .logout-btn:hover { background: #c82333; }
+
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-        .back-link { display: inline-block; margin-bottom: 20px; color: #667eea; text-decoration: none; font-weight: 600; }
-        .back-link:hover { text-decoration: underline; }
         .activity-header { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .activity-title { font-size: 2rem; color: #333; margin-bottom: 10px; }
         .activity-meta { color: #666; font-size: 0.95rem; margin-bottom: 20px; display: flex; gap: 20px; flex-wrap: wrap;}
@@ -36,17 +50,30 @@
         th, td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #edf2f7; }
         th { background: #f8fafc; color: #4a5568; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
         tr:hover { background: #f7fafc; }
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
-        .status-pending { background: #fefcbf; color: #b7791f; }
-        .status-accepted { background: #c6f6d5; color: #22543d; }
-        .status-rejected { background: #fed7d7; color: #822727; }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: inline-block;
+            letter-spacing: 0.5px;
+        }
+
+        .status-open { background: #c6f6d5; color: #22543d; }
+        .status-closed { background: #fed7d7; color: #822727; }
+        .status-in-progress { background: #feebc8; color: #c05621; }
+        .status-completed { background: #FFEFBD; color: #FFBC14; }
+
+        .app-status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+        .app-status-pending { background: #fefcbf; color: #b7791f; }
+        .app-status-accepted { background: #c6f6d5; color: #22543d; }
+        .app-status-rejected { background: #fed7d7; color: #822727; }
+
         .motivation-text { font-style: italic; color: #555; font-size: 0.9rem; background: #f9f9f9; padding: 8px; border-radius: 4px; margin-top: 5px; }
         .action-form { display: inline-block; }
         .btn-accept { background: #38a169; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px; }
         .btn-deny { background: #e53e3e; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-        .btn-disabled { background: #cbd5e0; cursor: not-allowed; opacity: 0.7; }
-
-        /* [NOU] Alert Styles */
         .alert { padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; animation: slideDown 0.3s; }
         .alert-success { background-color: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -57,13 +84,22 @@
 <nav class="navbar">
     <div class="nav-brand">Coordinator Dashboard</div>
     <div class="nav-links">
-        <a href="#" class="nav-btn">My Profile</a>
-        <form th:action="@{/logout}" method="post" style="display:inline;"><button class="logout-btn">Logout</button></form>
+        <a th:href="@{/coordinator/dashboard(view='activities')}"
+           class="nav-btn"
+           style="background: rgba(255,255,255,0.2);">Manage Activities</a>
+
+        <a th:href="@{/coordinator/dashboard(view='volunteers')}"
+           class="nav-btn">Manage Volunteers</a>
+
+        <a href="/coordinator/profile" class="nav-btn">Profile</a>
+
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button class="logout-btn">Logout</button>
+        </form>
     </div>
 </nav>
 
 <div class="container">
-    <a href="/coordinator/dashboard" class="back-link">← Back to Dashboard</a>
 
     <div th:if="${param.success}" class="alert alert-success">
         <span th:if="${#strings.equals(param.success[0], 'StatusUpdated')}">Application status updated successfully!</span>
@@ -71,9 +107,19 @@
     </div>
 
     <div class="activity-header">
-        <div style="display:flex; justify-content:space-between;">
+        <div style="display:flex; justify-content:space-between; align-items: flex-start;">
             <h1 class="activity-title" th:text="${activity.name}">Activity Name</h1>
-            <span th:class="'status-badge ' + (${activity.status == 'open'} ? 'status-accepted' : 'status-rejected')" th:text="${activity.status}" style="font-size: 1rem; height: fit-content; margin-top: 10px;">OPEN</span>
+
+            <span th:class="'status-badge ' +
+                  (${activity.status == 'open'} ? 'status-open' :
+                  (${activity.status == 'closed'} ? 'status-closed' :
+                  (${activity.status == 'in_progress'} ? 'status-in-progress' :
+                  (${activity.status == 'completed'} ? 'status-completed' : ''))))"
+                  th:text="${activity.status == 'in_progress' ? 'In progress...' :
+                           (activity.status == 'open' ? 'Open' :
+                           (activity.status == 'closed' ? 'Closed' :
+                           (activity.status == 'completed' ? 'Completed' : activity.status)))}"
+                  style="margin-top: 5px;">STATUS</span>
         </div>
         <div class="activity-meta">
             <span>📅 <span th:text="${#temporals.format(activity.startDate, 'dd MMMM yyyy HH:mm')}">Date</span></span>
@@ -109,7 +155,9 @@
                 <td><div th:text="${app.first_name + ' ' + app.last_name}" style="font-weight:600;">Name</div><div style="font-size:0.85rem; color:#666;" th:text="${app.email}">email@example.com</div><div style="font-size:0.85rem; color:#666;" th:text="${app.phone_number}">phone</div></td>
                 <td th:text="${#dates.format(app.enrollment_date, 'dd MMM yyyy')}">Date</td>
                 <td><div class="motivation-text" th:text="${app.feedback}">I really want to join because...</div></td>
-                <td><span th:class="'status-badge status-' + ${app.status}" th:text="${app.status}">PENDING</span></td>
+                <td>
+                    <span th:class="'app-status-badge app-status-' + ${app.status}" th:text="${app.status}">PENDING</span>
+                </td>
                 <td>
                     <div th:if="${app.status == 'pending'}">
                         <form th:action="@{/coordinator/applications/update}" method="post" class="action-form">
@@ -128,7 +176,6 @@
 </div>
 
 <script>
-    // [NOU] Auto-hide alerts script
     setTimeout(function() {
         document.querySelectorAll('.alert').forEach(a => {
             a.style.transition = 'opacity 0.5s ease';
