@@ -62,10 +62,7 @@ public class VolunteerController {
         if (ong == null) return "redirect:/volunteer/dashboard";
 
         Map<String, Object> stats = volunteerPageService.getOngStatistics(id);
-
-        // [MODIFICAT] Trimitem email-ul pentru a verifica înscrierile
         List<Activity> activities = volunteerPageService.getOngActivities(id, authentication.getName());
-
         User user = userRepository.findByEmail(authentication.getName()).orElse(new User());
 
         model.addAttribute("ong", ong);
@@ -82,6 +79,23 @@ public class VolunteerController {
                                Authentication authentication) {
         volunteerPageService.enrollInActivity(authentication.getName(), id, motivation);
         return "redirect:/volunteer/ong/" + ongId + "?success=true";
+    }
+
+    // [NOU] Endpoint pentru pagina My Activities
+    @GetMapping("/my-activities")
+    public String myActivities(@RequestParam(required = false, defaultValue = "all") String status,
+                               Model model,
+                               Authentication authentication) {
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email).orElse(new User());
+
+        List<Activity> activities = volunteerPageService.getMyActivities(email, status);
+
+        model.addAttribute("activities", activities);
+        model.addAttribute("selectedStatus", status);
+        model.addAttribute("firstName", user.getFirstName());
+
+        return "volunteer-my-activities";
     }
 
     @GetMapping("/profile")
