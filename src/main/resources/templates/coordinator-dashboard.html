@@ -9,16 +9,13 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; min-height: 100vh; }
 
-        /* [MODIFICAT] Navbar consistent cu volunteer-dashboard */
         .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         .nav-brand { font-size: 1.5rem; font-weight: bold; }
-        .nav-links { display: flex; align-items: center; gap: 20px; } /* Gap ajustat la 20px ca la volunteer */
+        .nav-links { display: flex; align-items: center; gap: 20px; }
 
-        /* [MODIFICAT] Border radius 20px si eliminat stilurile vechi */
         .nav-btn { color: white; text-decoration: none; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: background 0.3s; font-size: 0.95rem; }
         .nav-btn:hover { background: rgba(255,255,255,0.2); }
 
-        /* [MODIFICAT] Logout button stilizat consistent */
         .logout-btn { background: #dc3545; border: none; cursor: pointer; color: white; font-weight: 500; }
         .logout-btn:hover { background: #c82333; }
 
@@ -59,8 +56,35 @@
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 1rem; }
         .required { color: #dc3545; font-size: 12px; font-weight: bold; }
         .optional { color: #999; font-size: 12px; font-weight: normal; }
+
+        /* [MODIFICAT] Stiluri pentru alerta de succes si eroare cu animatie */
         .alert { padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; animation: slideDown 0.3s; }
         .alert-success { background-color: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
+
+        /* Stiluri noi aduse din signup.html pentru erori */
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .alert-error.fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
@@ -86,10 +110,11 @@
 </nav>
 
 <div class="container">
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
     <div th:if="${param.success}" class="alert alert-success">
-        <span th:if="${#strings.equals(param.success[0], 'ActivityCreated')}">Activity created successfully!</span>
         <span th:if="${#strings.equals(param.success[0], 'EnrollmentClosed')}">Enrollment closed successfully!</span>
-        <span th:unless="${#strings.equals(param.success[0], 'ActivityCreated') or #strings.equals(param.success[0], 'EnrollmentClosed')}">Action completed successfully!</span>
+        <span th:unless="${#strings.equals(param.success[0], 'EnrollmentClosed')}">Action completed successfully!</span>
     </div>
 
     <div class="dashboard-header">
@@ -157,6 +182,9 @@
     <div class="modal-content">
         <span class="close" onclick="closeModal('createActivityModal')">&times;</span>
         <h2 style="margin-bottom: 20px; color: #333;">Create New Activity</h2>
+
+        <div th:if="${createActivityError}" class="alert-error" th:text="${createActivityError}"></div>
+
         <form th:action="@{/coordinator/activities/create}" th:object="${newActivity}" method="post">
             <div class="form-group"><label>Activity Name <span class="required">*</span></label><input type="text" th:field="*{name}" required></div>
             <div class="form-group"><label>Category <span class="required">*</span></label><select th:field="*{idCategory}" required><option th:each="cat : ${categories}" th:value="${cat.id_category}" th:text="${cat.name}">Category</option></select></div>
@@ -174,14 +202,23 @@
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     window.onclick = function(event) { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; }
 
-    // Auto-hide alerts script
-    setTimeout(function() {
-        document.querySelectorAll('.alert').forEach(a => {
-            a.style.transition = 'opacity 0.5s ease';
-            a.style.opacity = '0';
-            setTimeout(() => a.remove(), 500);
-        });
-    }, 3000);
+    // Auto-hide alerts script (inclusiv pentru cea roșie din modal)
+    document.addEventListener('DOMContentLoaded', function() {
+        // [MODIFICAT] Deschide modalul automat daca exista o eroare la creare
+        // Verificam in Thymeleaf daca variabila createActivityError nu e null
+        if ([[${createActivityError != null}]]) {
+            openModal('createActivityModal');
+        }
+
+        setTimeout(function() {
+            document.querySelectorAll('.alert, .alert-error').forEach(a => {
+                a.style.transition = 'opacity 0.5s ease';
+                a.style.opacity = '0'; // Se estompeaza vizual
+                // Se elimina complet din DOM putin mai tarziu
+                setTimeout(() => a.remove(), 500);
+            });
+        }, 3000); // Apare timp de 3 secunde
+    });
 </script>
 
 </body>
