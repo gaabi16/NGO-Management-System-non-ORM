@@ -90,6 +90,10 @@
         .btn-apply-filter:hover { background: #218838; transform: translateY(-1px); }
         .btn-clear-filter { background: #6c757d; color: white; flex: 1; }
         .btn-clear-filter:hover { background: #5a6268; transform: translateY(-1px); }
+        .no-results-container { text-align: center; padding: 50px 20px; background: #f8f9fa; border-radius: 10px; border: 2px dashed #e0e0e0; color: #6c757d; }
+        .no-results-icon { font-size: 48px; margin-bottom: 15px; display: block; }
+        .no-results-text { font-size: 18px; font-weight: 600; }
+        .no-results-subtext { font-size: 14px; margin-top: 5px; }
         #coordinatorFields, #volunteerFields, #createCoordinatorFields, #createVolunteerFields { padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0; margin-top: 15px; margin-bottom: 20px; animation: fadeIn 0.3s ease; }
         #coordinatorFields, #createCoordinatorFields { background-color: #f3f4fc; border-left: 4px solid #667eea; }
         #volunteerFields, #createVolunteerFields { background-color: #e8f5e9; border-left: 4px solid #28a745; }
@@ -141,8 +145,15 @@
             </div>
 
             <div class="filter-section">
-                <button class="btn-filter" onclick="toggleFilterMenu()">🔍 Filter Users <span class="filter-arrow">▼</span></button>
+                <button class="btn-filter" onclick="toggleFilterMenu()">🔍 Search & Filter Users <span class="filter-arrow">▼</span></button>
                 <div id="filterMenu" class="filter-menu">
+                    <div class="filter-group">
+                        <label class="filter-label">Search Users:</label>
+                        <input type="text" id="userSearchInput" class="search-input-modal"
+                               placeholder="Search by Name or Email (Press Enter to Apply)"
+                               th:value="${currentUserSearch}">
+                    </div>
+
                     <div class="filter-group">
                         <label class="filter-label">Filter by Role:</label>
                         <div class="filter-options">
@@ -151,8 +162,17 @@
                             <button class="filter-option" data-role="admin" onclick="toggleRoleFilter('admin')"><span class="checkbox"></span> Admin</button>
                         </div>
                     </div>
-                    <div class="filter-actions"><button class="btn-apply-filter" onclick="applyFilters()">Apply Filters</button><button class="btn-clear-filter" onclick="clearFilters()">Clear All</button></div>
+                    <div class="filter-actions">
+                        <button class="btn-apply-filter" onclick="applyFilters()">Apply Filters</button>
+                        <button class="btn-clear-filter" onclick="clearFilters()">Clear All</button>
+                    </div>
                 </div>
+            </div>
+
+            <div th:if="${usersPage != null && usersPage.content.isEmpty()}" class="no-results-container">
+                <span class="no-results-icon">🕵️</span>
+                <div class="no-results-text">No users found!</div>
+                <div class="no-results-subtext">Try adjusting your search criteria or filters.</div>
             </div>
 
             <table th:if="${usersPage != null && usersPage.content.size() > 0}">
@@ -169,36 +189,29 @@
                 </tbody>
             </table>
 
-            <div class="pagination" th:if="${usersPage.totalPages > 1}">
-                <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles})}"
+            <div class="pagination" th:if="${usersPage != null && usersPage.totalPages > 1}">
+                <a th:href="@{/admin/dashboard(view='users', page=${currentPage - 1}, roles=${param.roles}, userSearch=${currentUserSearch})}"
                    th:class="${currentPage == 0} ? 'disabled' : ''"
                    th:onclick="${currentPage == 0} ? 'return false;' : ''">← Prev</a>
-
                 <th:block th:if="${usersPage.totalPages <= 3}">
                     <a th:each="i : ${#numbers.sequence(0, usersPage.totalPages - 1)}"
-                       th:href="@{/admin/dashboard(view='users', page=${i}, roles=${param.roles})}"
+                       th:href="@{/admin/dashboard(view='users', page=${i}, roles=${param.roles}, userSearch=${currentUserSearch})}"
                        th:class="${currentPage == i} ? 'active' : ''"
                        th:text="${i + 1}"></a>
                 </th:block>
-
                 <th:block th:if="${usersPage.totalPages > 3}">
-                    <a th:href="@{/admin/dashboard(view='users', page=0, roles=${param.roles})}"
+                    <a th:href="@{/admin/dashboard(view='users', page=0, roles=${param.roles}, userSearch=${currentUserSearch})}"
                        th:class="${currentPage == 0} ? 'active' : ''">1</a>
-
                     <span class="dots" th:if="${currentPage > 1}">...</span>
-
                     <span class="current-page"
                           th:if="${currentPage > 0 and currentPage < usersPage.totalPages - 1}"
                           th:text="${currentPage + 1}"></span>
-
                     <span class="dots" th:if="${currentPage < usersPage.totalPages - 2}">...</span>
-
-                    <a th:href="@{/admin/dashboard(view='users', page=${usersPage.totalPages - 1}, roles=${param.roles})}"
-                       th:class="${currentPage usersPage.totalPages - 1} ? 'active' : ''"
+                    <a th:href="@{/admin/dashboard(view='users', page=${usersPage.totalPages - 1}, roles=${param.roles}, userSearch=${currentUserSearch})}"
+                       th:class="${currentPage == usersPage.totalPages - 1} ? 'active' : ''"
                        th:text="${usersPage.totalPages}"></a>
                 </th:block>
-
-                <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles})}"
+                <a th:href="@{/admin/dashboard(view='users', page=${currentPage + 1}, roles=${param.roles}, userSearch=${currentUserSearch})}"
                    th:class="${currentPage >= usersPage.totalPages - 1} ? 'disabled' : ''"
                    th:onclick="${currentPage >= usersPage.totalPages - 1} ? 'return false;' : ''">Next →</a>
             </div>
@@ -211,14 +224,41 @@
             </div>
 
             <div class="filter-section">
-                <button class="btn-filter" onclick="toggleOngFilterMenu()">🔍 Filter ONGs <span class="filter-arrow" id="ongFilterArrow">▼</span></button>
+                <button class="btn-filter" onclick="toggleOngFilterMenu()">🔍 Search & Filter ONGs <span class="filter-arrow" id="ongFilterArrow">▼</span></button>
                 <div id="ongFilterMenu" class="filter-menu">
                     <div class="filter-group">
-                        <label class="filter-label" for="filter_reg_number">Search by Registration Number:</label>
-                        <input type="text" id="filter_reg_number" placeholder="Enter registration number..." th:value="${currentSearch}">
+                        <label class="filter-label">Search ONGs:</label>
+                        <input type="text" id="ongSearchInput" class="search-input-modal"
+                               placeholder="Search by Name, Reg. Number or Email (Press Enter to Apply)"
+                               th:value="${currentSearch}">
                     </div>
-                    <div class="filter-actions"><button class="btn-apply-filter" onclick="applyOngFilters()">Apply Filters</button><button class="btn-clear-filter" onclick="clearOngFilters()">Clear All</button></div>
+
+                    <div class="filter-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="filter-group">
+                            <label class="filter-label">Select Continent:</label>
+                            <select id="continentSelect" class="search-input-modal" onchange="updateCountryOptions()">
+                                <option value="">-- All Continents --</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Select Country:</label>
+                            <select id="countrySelect" class="search-input-modal">
+                                <option value="">-- Select Country --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button class="btn-apply-filter" onclick="applyOngFilters()">Apply Filters</button>
+                        <button class="btn-clear-filter" onclick="clearOngFilters()">Clear All</button>
+                    </div>
                 </div>
+            </div>
+
+            <div th:if="${ongsPage != null && ongsPage.content.isEmpty()}" class="no-results-container">
+                <span class="no-results-icon">🏢</span>
+                <div class="no-results-text">No ONGs found!</div>
+                <div class="no-results-subtext">Try searching for a different name or checking other countries.</div>
             </div>
 
             <table th:if="${ongsPage != null && ongsPage.content.size() > 0}">
@@ -249,36 +289,29 @@
                 </tbody>
             </table>
 
-            <div class="pagination" th:if="${ongsPage.totalPages > 1}">
-                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 1}, search=${currentSearch})}"
+            <div class="pagination" th:if="${ongsPage != null && ongsPage.totalPages > 1}">
+                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage - 1}, search=${currentSearch}, country=${currentCountry})}"
                    th:class="${currentPage == 0} ? 'disabled' : ''"
                    th:onclick="${currentPage == 0} ? 'return false;' : ''">← Prev</a>
-
                 <th:block th:if="${ongsPage.totalPages <= 3}">
                     <a th:each="i : ${#numbers.sequence(0, ongsPage.totalPages - 1)}"
-                       th:href="@{/admin/dashboard(view='ongs', page=${i}, search=${currentSearch})}"
+                       th:href="@{/admin/dashboard(view='ongs', page=${i}, search=${currentSearch}, country=${currentCountry})}"
                        th:class="${currentPage == i} ? 'active' : ''"
                        th:text="${i + 1}"></a>
                 </th:block>
-
                 <th:block th:if="${ongsPage.totalPages > 3}">
-                    <a th:href="@{/admin/dashboard(view='ongs', page=0, search=${currentSearch})}"
+                    <a th:href="@{/admin/dashboard(view='ongs', page=0, search=${currentSearch}, country=${currentCountry})}"
                        th:class="${currentPage == 0} ? 'active' : ''">1</a>
-
                     <span class="dots" th:if="${currentPage > 1}">...</span>
-
                     <span class="current-page"
                           th:if="${currentPage > 0 and currentPage < ongsPage.totalPages - 1}"
                           th:text="${currentPage + 1}"></span>
-
                     <span class="dots" th:if="${currentPage < ongsPage.totalPages - 2}">...</span>
-
-                    <a th:href="@{/admin/dashboard(view='ongs', page=${ongsPage.totalPages - 1}, search=${currentSearch})}"
+                    <a th:href="@{/admin/dashboard(view='ongs', page=${ongsPage.totalPages - 1}, search=${currentSearch}, country=${currentCountry})}"
                        th:class="${currentPage == ongsPage.totalPages - 1} ? 'active' : ''"
                        th:text="${ongsPage.totalPages}"></a>
                 </th:block>
-
-                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 1}, search=${currentSearch})}"
+                <a th:href="@{/admin/dashboard(view='ongs', page=${currentPage + 1}, search=${currentSearch}, country=${currentCountry})}"
                    th:class="${currentPage >= ongsPage.totalPages - 1} ? 'disabled' : ''"
                    th:onclick="${currentPage >= ongsPage.totalPages - 1} ? 'return false;' : ''">Next →</a>
             </div>
@@ -311,7 +344,6 @@
             <div class="form-group"><label>Email <span class="required">*</span></label><input type="email" name="email" required/></div>
             <div class="form-group"><label>Password <span class="required">*</span></label><input type="password" name="password" required/></div>
             <div class="form-group"><label>Phone <span class="optional">(optional)</span></label><input type="text" name="phone_number"/></div>
-
             <div class="form-group">
                 <label>Role <span class="required">*</span></label>
                 <select name="role" id="create_role" required onchange="toggleCreateRoleFields()">
@@ -320,7 +352,6 @@
                     <option value="admin">Admin</option>
                 </select>
             </div>
-
             <div id="createCoordinatorFields" style="display: none;">
                 <h3>Coordinator Details</h3>
                 <div class="form-group"><label>Find ONG (Search by Name or Reg. Number):</label><input type="text" id="createOngSearchInput" class="search-input-modal" placeholder="Type to filter... (Press Enter to Select)"></div>
@@ -328,7 +359,6 @@
                 <div class="form-group"><label>Department <span class="required">*</span></label><input type="text" name="department"></div>
                 <div class="form-row"><div class="form-group"><label>Experience <span class="required">*</span></label><input type="number" name="experienceYears"></div><div class="form-group"><label>Type <span class="required">*</span></label><select name="employmentType"><option value="">-- Select --</option><option value="Full-time">Full-time</option><option value="Part-time">Part-time</option></select></div></div>
             </div>
-
             <div id="createVolunteerFields" style="display: block;">
                 <h3>Volunteer Details</h3>
                 <div class="form-group"><label>Birth Date <span class="required">*</span></label><input type="date" name="birthDate"></div>
@@ -336,7 +366,6 @@
                 <div class="form-group"><label>Availability <span class="required">*</span></label><input type="text" name="availability"></div>
                 <div class="form-group"><label>Emergency Contact <span class="optional">(optional)</span></label><input type="text" name="emergencyContact"></div>
             </div>
-
             <button type="submit" class="btn-submit">Create User</button>
         </form>
     </div>
@@ -348,7 +377,6 @@
         <form id="editForm" method="post" novalidate>
             <input type="hidden" id="original_role" name="original_role" value="">
             <input type="hidden" id="editing_user_id" value="">
-
             <div class="form-row">
                 <div class="form-group"><label>First Name <span class="required">*</span></label><input type="text" id="edit_first_name" name="first_name" required/></div>
                 <div class="form-group"><label>Last Name <span class="required">*</span></label><input type="text" id="edit_last_name" name="last_name" required/></div>
@@ -356,7 +384,6 @@
             <div class="form-group"><label>Email <span class="required">*</span></label><input type="email" id="edit_email" name="email" required/></div>
             <div class="form-group"><label>Phone <span class="optional">(optional)</span></label><input type="text" id="edit_phone" name="phone_number"/></div>
             <div class="form-group"><label>Role <span class="required">*</span></label><select id="edit_role" name="role" required onchange="toggleRoleSpecificFields()"><option value="volunteer">Volunteer</option><option value="coordinator">Coordinator</option><option value="admin">Admin</option></select></div>
-
             <div id="coordinatorFields" style="display: none;">
                 <h3>Coordinator Details</h3>
                 <div class="form-group"><label>Find ONG (Search by Name or Reg. Number):</label><input type="text" id="ongSearchInput" class="search-input-modal" placeholder="Type to filter... (Press Enter to Select)"></div>
@@ -364,7 +391,6 @@
                 <div class="form-group"><label>Department <span class="required">*</span></label><input type="text" id="coord_department" name="department"></div>
                 <div class="form-row"><div class="form-group"><label>Experience <span class="required">*</span></label><input type="number" id="coord_experience" name="experienceYears"></div><div class="form-group"><label>Type <span class="required">*</span></label><select id="coord_employment" name="employmentType"><option value="">-- Select --</option><option value="Full-time">Full-time</option><option value="Part-time">Part-time</option></select></div></div>
             </div>
-
             <div id="volunteerFields" style="display: none;">
                 <h3>Volunteer Details</h3>
                 <div class="form-group"><label>Birth Date <span class="required">*</span></label><input type="date" id="vol_birth_date" name="birthDate"></div>
@@ -409,7 +435,127 @@
 
 <script th:inline="javascript">
     var currentUserEmail = /*[[${currentUserEmail}]]*/ '';
+    var serverCurrentCountry = /*[[${currentCountry}]]*/ ''; // Tara venita de la server (pentru reselectare)
+
+    // --- LOGICA UTILIZATORI (EXISTENTA) ---
     var selectedRoles = [];
+    var urlParams = new URLSearchParams(window.location.search);
+    var rolesFromUrl = urlParams.getAll('roles');
+    if(rolesFromUrl && rolesFromUrl.length > 0) {
+        selectedRoles = rolesFromUrl;
+        selectedRoles.forEach(role => {
+            let btn = document.querySelector(`.filter-option[data-role="${role}"]`);
+            if(btn) btn.classList.add('active');
+        });
+    }
+
+    var userSearchInput = document.getElementById('userSearchInput');
+    if(userSearchInput) {
+        userSearchInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") { event.preventDefault(); applyFilters(); }
+        });
+    }
+
+    // --- LOGICA NOUA PENTRU ONG-uri (CONTINENTE & TARI) ---
+
+    // Lista de continente si tari
+    const continentData = {
+        "Africa": ["Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cabo Verde", "Cameroon", "Central African Republic", "Chad", "Comoros", "Congo (Democratic Republic of the)", "Congo (Republic of the)", "Cote d'Ivoire", "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar", "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique", "Namibia", "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda", "Zambia", "Zimbabwe"],
+        "Asia": ["Afghanistan", "Armenia", "Azerbaijan", "Bahrain", "Bangladesh", "Bhutan", "Brunei", "Cambodia", "China", "Cyprus", "Georgia", "India", "Indonesia", "Iran", "Iraq", "Israel", "Japan", "Jordan", "Kazakhstan", "Kuwait", "Kyrgyzstan", "Laos", "Lebanon", "Malaysia", "Maldives", "Mongolia", "Myanmar", "Nepal", "North Korea", "Oman", "Pakistan", "Palestine", "Philippines", "Qatar", "Russia", "Saudi Arabia", "Singapore", "South Korea", "Sri Lanka", "Syria", "Taiwan", "Tajikistan", "Thailand", "Timor-Leste", "Turkey", "Turkmenistan", "United Arab Emirates", "Uzbekistan", "Vietnam", "Yemen"],
+        "Europe": ["Albania", "Andorra", "Austria", "Belarus", "Belgium", "Bosnia and Herzegovina", "Bulgaria", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", "Kosovo", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", "Malta", "Moldova", "Monaco", "Montenegro", "Netherlands", "North Macedonia", "Norway", "Poland", "Portugal", "Romania", "San Marino", "Serbia", "Slovakia", "Slovenia", "Spain", "Sweden", "Switzerland", "Ukraine", "United Kingdom", "Vatican City"],
+        "North America": ["Antigua and Barbuda", "Bahamas", "Barbados", "Belize", "Canada", "Costa Rica", "Cuba", "Dominica", "Dominican Republic", "El Salvador", "Grenada", "Guatemala", "Haiti", "Honduras", "Jamaica", "Mexico", "Nicaragua", "Panama", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Trinidad and Tobago", "United States"],
+        "Oceania": ["Australia", "Fiji", "Kiribati", "Marshall Islands", "Micronesia", "Nauru", "New Zealand", "Palau", "Papua New Guinea", "Samoa", "Solomon Islands", "Tonga", "Tuvalu", "Vanuatu"],
+        "South America": ["Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Ecuador", "Guyana", "Paraguay", "Peru", "Suriname", "Uruguay", "Venezuela"]
+    };
+
+    function initOngFilters() {
+        const continentSelect = document.getElementById('continentSelect');
+        const countrySelect = document.getElementById('countrySelect');
+
+        if(!continentSelect || !countrySelect) return;
+
+        // Populam dropdown-ul de Continente
+        for (const continent in continentData) {
+            let option = document.createElement('option');
+            option.value = continent;
+            option.text = continent;
+            continentSelect.add(option);
+        }
+
+        // Logic pentru restaurarea selectiei la reload (cand serverul trimite tara inapoi)
+        if (serverCurrentCountry && serverCurrentCountry.trim() !== "") {
+            // Cautam din ce continent face parte tara selectata
+            let foundContinent = null;
+            for (const continent in continentData) {
+                if (continentData[continent].includes(serverCurrentCountry)) {
+                    foundContinent = continent;
+                    break;
+                }
+            }
+
+            if (foundContinent) {
+                continentSelect.value = foundContinent;
+                updateCountryOptions(); // Populam tarile pe baza continentului
+                countrySelect.value = serverCurrentCountry; // Selectam tara
+            } else {
+                // Caz fallback (tara custom care nu e in lista noastra)
+                // Putem adauga o optiune temporara sau lasa asa.
+            }
+        }
+    }
+
+    function updateCountryOptions() {
+        const continentSelect = document.getElementById('continentSelect');
+        const countrySelect = document.getElementById('countrySelect');
+        const selectedContinent = continentSelect.value;
+
+        // Golim lista de tari
+        countrySelect.innerHTML = '<option value="">-- Select Country --</option>';
+
+        if (selectedContinent && continentData[selectedContinent]) {
+            continentData[selectedContinent].forEach(country => {
+                let option = document.createElement('option');
+                option.value = country;
+                option.text = country;
+                countrySelect.add(option);
+            });
+        }
+    }
+
+    var ongSearchInput = document.getElementById('ongSearchInput');
+    if(ongSearchInput) {
+        ongSearchInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") { event.preventDefault(); applyOngFilters(); }
+        });
+    }
+
+    function toggleOngFilterMenu() {
+        document.getElementById('ongFilterMenu').classList.toggle('active');
+        document.getElementById('ongFilterArrow').classList.toggle('rotate');
+    }
+
+    function applyOngFilters() {
+        let search = document.getElementById('ongSearchInput').value;
+        let country = document.getElementById('countrySelect').value;
+
+        let url = new URL(window.location.href);
+        url.searchParams.set('view', 'ongs');
+
+        if(search && search.trim() !== '') url.searchParams.set('search', search.trim());
+        else url.searchParams.delete('search');
+
+        if(country && country.trim() !== '') url.searchParams.set('country', country.trim());
+        else url.searchParams.delete('country');
+
+        url.searchParams.set('page', '0');
+        window.location.href = url.toString();
+    }
+
+    function clearOngFilters() {
+        window.location.href = '/admin/dashboard?view=ongs';
+    }
+
+    // --- FUNCTII GENERALE ---
 
     setTimeout(function() {
         document.querySelectorAll('.alert').forEach(a => {
@@ -420,32 +566,32 @@
     }, 3000);
 
     function toggleFilterMenu() { document.getElementById('filterMenu').classList.toggle('active'); document.querySelector('.filter-arrow').classList.toggle('rotate'); }
+
     function toggleRoleFilter(role) {
         const btn = document.querySelector(`.filter-option[data-role="${role}"]`);
         btn.classList.toggle('active');
         if(selectedRoles.includes(role)) selectedRoles = selectedRoles.filter(r => r !== role);
         else selectedRoles.push(role);
     }
+
     function applyFilters() {
         let url = new URL(window.location.href);
         url.searchParams.set('view', 'users');
+        selectedRoles = [];
+        document.querySelectorAll('.filter-option.active').forEach(btn => { selectedRoles.push(btn.getAttribute('data-role')); });
         url.searchParams.delete('roles');
         selectedRoles.forEach(r => url.searchParams.append('roles', r));
+        let searchText = document.getElementById('userSearchInput').value;
+        if(searchText && searchText.trim() !== '') url.searchParams.set('userSearch', searchText.trim());
+        else url.searchParams.delete('userSearch');
         url.searchParams.set('page', '0');
         window.location.href = url.toString();
     }
-    function clearFilters() { selectedRoles = []; window.location.href = '/admin/dashboard?view=users'; }
 
-    function toggleOngFilterMenu() { document.getElementById('ongFilterMenu').classList.toggle('active'); document.getElementById('ongFilterArrow').classList.toggle('rotate'); }
-    function applyOngFilters() {
-        let search = document.getElementById('filter_reg_number').value;
-        let url = new URL(window.location.href);
-        url.searchParams.set('view', 'ongs');
-        if(search) url.searchParams.set('search', search); else url.searchParams.delete('search');
-        url.searchParams.set('page', '0');
-        window.location.href = url.toString();
+    function clearFilters() {
+        selectedRoles = [];
+        window.location.href = '/admin/dashboard?view=users';
     }
-    function clearOngFilters() { window.location.href = '/admin/dashboard?view=ongs'; }
 
     function openCreateModal() { document.getElementById('createModal').style.display = 'block'; toggleCreateRoleFields(); }
     function closeCreateModal() { document.getElementById('createModal').style.display = 'none'; }
@@ -564,6 +710,11 @@
     function confirmDelete(id, email, role) { if(confirm('Delete user?')) { const f = document.createElement('form'); f.method='POST'; f.action='/admin/users/delete/'+id; document.body.appendChild(f); f.submit(); } }
     function confirmDeleteOng(id) { if(confirm('Warning: Deleting this ONG will also delete all associated COORDINATORS and their ACTIVITIES.\n\nThis action cannot be undone.\n\nAre you sure you want to proceed?')) { const f = document.createElement('form'); f.method='POST'; f.action='/admin/ongs/delete/'+id; document.body.appendChild(f); f.submit(); } }
     window.onclick = function(e) { if(e.target.className === 'modal') e.target.style.display = 'none'; }
+
+    // Initializare filtre ONG la incarcare
+    window.onload = function() {
+        initOngFilters();
+    };
 </script>
 </body>
 </html>
