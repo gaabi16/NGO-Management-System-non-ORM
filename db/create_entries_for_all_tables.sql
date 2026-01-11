@@ -317,7 +317,8 @@ VALUES
 -- * Status 'open': Start > 2026-01-10
 -- ==========================================
 
-INSERT INTO activities (ID_category, ID_coordinator, name, description, location, start_date, end_date, max_volunteers, status, donations_collected)
+-- UPDATED: donations_collected renamed to target_donation
+INSERT INTO activities (ID_category, ID_coordinator, name, description, location, start_date, end_date, max_volunteers, status, target_donation)
 VALUES
 -- 1. PAST / COMPLETED (Before Jan 10, 2026)
 (5, 1, 'Xmas Food Drive', 'Collecting food for holidays.', 'London Community Center', '2025-12-20 09:00:00', '2025-12-24 17:00:00', 50, 'completed', 5000.00),
