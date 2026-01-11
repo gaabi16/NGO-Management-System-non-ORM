@@ -160,7 +160,7 @@
                 <div class="act-date">
                     📅 <span th:text="${#temporals.format(activity.startDate, 'dd MMMM yyyy HH:mm')}">Date</span>
                     📍 <span th:text="${activity.location}">Location</span>
-                    💲 Goal: <span th:text="${activity.donationsCollected != null ? '$' + #numbers.formatDecimal(activity.donationsCollected, 0, 'COMMA', 2, 'POINT') : '$0.00'}">$0.00</span>
+                    💲 Goal: <span th:text="${activity.targetDonation != null ? '$' + #numbers.formatDecimal(activity.targetDonation, 0, 'COMMA', 2, 'POINT') : '$0.00'}">$0.00</span>
                 </div>
             </div>
 
