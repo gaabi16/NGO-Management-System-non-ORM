@@ -12,11 +12,8 @@
         .nav-links { display: flex; gap: 20px; align-items: center; }
         .nav-btn { color: white; text-decoration: none; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: background 0.3s; }
         .nav-btn:hover { background: rgba(255,255,255,0.2); }
-
-        /* [MODIFICAT] Stilul butonului de logout aliniat cu profilul */
         .logout-btn { background: #dc3545; border: none; cursor: pointer; }
         .logout-btn:hover { background: #c82333; }
-
         .hero { text-align: center; padding: 60px 20px; background: white; margin-bottom: 30px; }
         .hero h1 { font-size: 3.5rem; color: #333; margin-bottom: 10px; font-weight: 300; }
         .hero h1 span { color: #667eea; font-weight: 600; }
@@ -44,7 +41,48 @@
         .ong-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; }
         .ong-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s; display: flex; flex-direction: column; width: 350px; max-width: 100%; }
         .ong-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2); }
-        .card-header { background-color: #667eea; height: 100px; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; }
+
+        /* [MODIFICAT] Stiluri pentru validare imagine vs fallback */
+        .card-header {
+            height: 180px;
+            position: relative;
+            background-color: #eee; /* Fallback neutru pana se incarca */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Imaginea ocupa tot header-ul */
+        .header-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0; left: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Textul de fallback (litera) - ascuns implicit */
+        .fallback-text {
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+            display: none;
+            z-index: 1;
+        }
+
+        /* Cand suntem in mod fallback (fara imagine) */
+        .card-header.fallback-mode {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Culoarea originala */
+        }
+        .card-header.fallback-mode .header-img {
+            display: none;
+        }
+        .card-header.fallback-mode .fallback-text {
+            display: block;
+        }
+
         .card-body { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
         .card-title { font-size: 1.4rem; font-weight: 700; color: #333; margin-bottom: 10px; }
         .card-desc { color: #666; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px; flex-grow: 1; }
@@ -119,9 +157,19 @@
 
     <div class="ong-grid">
         <div th:each="ong : ${ongs}" class="ong-card">
-            <div class="card-header">
-                <span th:text="${#strings.substring(ong.name, 0, 1)}">L</span>
+
+            <div class="card-header"
+                 th:classappend="${ong.imageUrl == null or ong.imageUrl.isEmpty()} ? 'fallback-mode' : ''">
+
+                <img th:if="${ong.imageUrl != null and !ong.imageUrl.isEmpty()}"
+                     th:src="${ong.imageUrl}"
+                     class="header-img"
+                     alt="Cover"
+                     onerror="this.style.display='none'; this.parentElement.classList.add('fallback-mode');" />
+
+                <span class="fallback-text" th:text="${#strings.substring(ong.name, 0, 1)}">L</span>
             </div>
+
             <div class="card-body">
                 <h3 class="card-title" th:text="${ong.name}">Organization Name</h3>
                 <p class="card-desc"
