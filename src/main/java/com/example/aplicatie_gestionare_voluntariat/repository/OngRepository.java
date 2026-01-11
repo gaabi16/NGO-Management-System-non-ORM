@@ -34,6 +34,8 @@ public class OngRepository {
             if (rs.getDate("founding_date") != null) {
                 ong.setFoundingDate(rs.getDate("founding_date").toLocalDate());
             }
+            // Mapam imaginea
+            ong.setImageUrl(rs.getString("image_url"));
             return ong;
         }
     };
@@ -47,9 +49,9 @@ public class OngRepository {
     public Ong save(Ong ong) {
         Optional<Ong> existing = findById(ong.getRegistrationNumber());
         if (existing.isEmpty()) {
-            // INSERT
-            String sql = "INSERT INTO ongs (registration_number, name, description, address, country, phone, email, founding_date) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            // INSERT - includem image_url
+            String sql = "INSERT INTO ongs (registration_number, name, description, address, country, phone, email, founding_date, image_url) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             jdbcTemplate.update(sql,
                     ong.getRegistrationNumber(),
                     ong.getName(),
@@ -58,11 +60,12 @@ public class OngRepository {
                     ong.getCountry(),
                     ong.getPhone(),
                     ong.getEmail(),
-                    ong.getFoundingDate()
+                    ong.getFoundingDate(),
+                    ong.getImageUrl()
             );
         } else {
-            // UPDATE
-            String sql = "UPDATE ongs SET name = ?, description = ?, address = ?, country = ?, phone = ?, email = ?, founding_date = ? " +
+            // UPDATE - includem image_url
+            String sql = "UPDATE ongs SET name = ?, description = ?, address = ?, country = ?, phone = ?, email = ?, founding_date = ?, image_url = ? " +
                     "WHERE registration_number = ?";
             jdbcTemplate.update(sql,
                     ong.getName(),
@@ -72,6 +75,7 @@ public class OngRepository {
                     ong.getPhone(),
                     ong.getEmail(),
                     ong.getFoundingDate(),
+                    ong.getImageUrl(),
                     ong.getRegistrationNumber()
             );
         }
@@ -153,7 +157,6 @@ public class OngRepository {
         return jdbcTemplate.queryForObject(sql, Long.class, "%" + regNum + "%");
     }
 
-    // [MODIFICAT] Calculeaza suma reala din tabela donations
     public Optional<java.util.Map<String, Object>> findTopFundraisingOng() {
         String sql = "SELECT o.name, SUM(d.amount) as total " +
                 "FROM ongs o " +

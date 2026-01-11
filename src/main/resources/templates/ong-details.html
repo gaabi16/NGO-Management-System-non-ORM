@@ -157,10 +157,23 @@
                 <div class="act-cat" th:text="${activity.categoryName}">Category</div>
                 <h3 class="act-title" th:text="${activity.name}">Activity Name</h3>
                 <p class="act-desc" th:text="${activity.description}">Description...</p>
+
                 <div class="act-date">
-                    📅 <span th:text="${#temporals.format(activity.startDate, 'dd MMMM yyyy HH:mm')}">Date</span>
+                    📅 <span th:text="${#temporals.format(activity.startDate, 'dd MMM yyyy HH:mm')}">Start</span>
+                    - <span th:text="${#temporals.format(activity.endDate, 'dd MMM yyyy HH:mm')}">End</span>
                     📍 <span th:text="${activity.location}">Location</span>
                     💲 Goal: <span th:text="${activity.targetDonation != null ? '$' + #numbers.formatDecimal(activity.targetDonation, 0, 'COMMA', 2, 'POINT') : '$0.00'}">$0.00</span>
+
+                    <div style="margin-top: 8px; color: #4a5568; font-size: 0.9rem;">
+                        <div>
+                            👤 <strong>Coordinator:</strong> <span th:text="${activity.coordinatorName}">Nume Coordonator</span>
+                        </div>
+                        <div style="font-size: 0.85rem; margin-top: 3px;">
+                            📧 <span th:text="${activity.coordinatorEmail}">email@example.com</span>
+                            <span style="margin: 0 5px; color: #cbd5e0;">|</span>
+                            📱 <span th:text="${activity.coordinatorPhone}">07xxxxxxxx</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
