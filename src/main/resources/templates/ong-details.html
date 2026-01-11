@@ -6,44 +6,66 @@
     <title th:text="${ong.name} + ' - Details'">ONG Details</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; min-height: 100vh; overflow-x: hidden; }
 
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            color: white;
-        }
+        /* --- Navbar Styles (Identic cu Volunteer Profile) --- */
+        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: white; position: relative; z-index: 10; }
         .nav-brand { font-size: 1.5rem; font-weight: bold; }
         .nav-links { display: flex; gap: 20px; align-items: center; }
-        .nav-btn {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 20px;
-            transition: background 0.3s;
-        }
+        .nav-btn { color: white; text-decoration: none; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: background 0.3s; }
         .nav-btn:hover { background: rgba(255,255,255,0.2); }
-        .logout-btn { background: #dc3545; border: none; cursor: pointer; font-size: 1rem; }
 
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-        .ong-header { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        /* Stil specific pentru butonul de logout (mai mic, override) */
+        .logout-btn { background: #dc3545; border: none; cursor: pointer; }
+        .logout-btn:hover { background: #c82333; }
+
+        /* --- Layout & Container --- */
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+        /* --- Animations Keyframes (Warm & Smooth) --- */
+        @keyframes slideInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUpModal { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* --- Page Content Styles --- */
+        .ong-header {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: slideInDown 0.8s ease-out forwards;
+        }
         .ong-title { font-size: 2.5rem; margin-bottom: 15px; color: #2d3748; }
         .ong-meta { display: flex; gap: 20px; color: #666; margin-bottom: 20px; font-size: 0.9rem; flex-wrap: wrap; }
         .ong-desc { font-size: 1.1rem; line-height: 1.6; color: #4a5568; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .stat-card { background: white; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out forwards 0.3s;
+        }
+        .stat-card { background: white; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); }
         .stat-number { font-size: 2.5rem; font-weight: bold; color: #667eea; margin-bottom: 5px; }
         .stat-label { color: #718096; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
 
-        .activities-section { background: white; padding: 30px; border-radius: 15px; }
+        .activities-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out forwards 0.5s;
+        }
         .section-heading { font-size: 1.8rem; margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; }
 
+        /* Card Activitate (Cascadă) */
         .activity-card {
             border: 1px solid #e2e8f0;
             border-radius: 10px;
@@ -54,9 +76,10 @@
             align-items: stretch;
             transition: all 0.2s;
             gap: 20px;
+            opacity: 0; /* Hidden for JS Animation */
         }
 
-        .activity-card:hover { border-color: #667eea; background-color: #f8fafc; }
+        .activity-card:hover { border-color: #667eea; background-color: #f8fafc; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .act-main { flex: 1; min-width: 300px; }
         .act-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
         .act-cat { display: inline-block; background: #e2e8f0; padding: 3px 10px; border-radius: 15px; font-size: 0.8rem; color: #4a5568; margin-bottom: 10px; }
@@ -78,24 +101,22 @@
         .status-in-progress { background: #feebc8; color: #c05621; }
         .status-completed { background: #FFEFBD; color: #FFBC14; }
 
-        .join-btn { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
-        .join-btn:hover { background: #218838; }
+        .join-btn { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        .join-btn:hover { background: #218838; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3); }
 
-        .info-text-neutral {
-            font-size: 0.9rem;
-            color: #8898aa;
-            font-style: italic;
-            margin-top: 10px;
-            display: inline-block;
-        }
+        .info-text-neutral { font-size: 0.9rem; color: #8898aa; font-style: italic; margin-top: 10px; display: inline-block; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; position: relative; }
+        /* Modal Styles */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.3s; backdrop-filter: blur(2px); }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; position: relative; animation: slideUpModal 0.4s; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
-        .form-group textarea { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; resize: vertical; font-family: inherit; }
-        .close { position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 1.5rem; color: #888; }
-        .success-msg { background: #c6f6d5; color: #22543d; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        .form-group textarea { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; resize: vertical; font-family: inherit; transition: border-color 0.3s; }
+        .form-group textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        .close { position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 1.5rem; color: #888; transition: color 0.2s; }
+        .close:hover { color: #333; }
+        .success-msg { background: #c6f6d5; color: #22543d; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; animation: slideDown 0.4s; }
+
     </style>
 </head>
 <body>
@@ -105,7 +126,7 @@
     <div class="nav-links">
         <a href="/volunteer/dashboard" class="nav-btn">Home</a>
         <a href="/volunteer/my-activities" class="nav-btn">My Activities</a>
-        <a href="/volunteer/profile" class="nav-btn">Profile</a>
+        <a href="/volunteer/profile" class="nav-btn" style="background: rgba(255,255,255,0.2);">Profile</a>
         <form th:action="@{/logout}" method="post">
             <button type="submit" class="nav-btn logout-btn">Logout</button>
         </form>
@@ -161,11 +182,13 @@
                 <div class="act-date">
                     📅 <span th:text="${#temporals.format(activity.startDate, 'dd MMM yyyy HH:mm')}">Start</span>
                     - <span th:text="${#temporals.format(activity.endDate, 'dd MMM yyyy HH:mm')}">End</span>
-                    📍 <span th:text="${activity.location}">Location</span>
-                    💲 Goal: <span th:text="${activity.targetDonation != null ? '$' + #numbers.formatDecimal(activity.targetDonation, 0, 'COMMA', 2, 'POINT') : '$0.00'}">$0.00</span>
+
+                    <span style="margin-left: 10px;">📍 <span th:text="${activity.location}">Location</span></span>
+                    <span style="margin-left: 10px;">💲 Goal: <span th:text="${activity.targetDonation != null ? '$' + #numbers.formatDecimal(activity.targetDonation, 0, 'COMMA', 2, 'POINT') : '$0.00'}">$0.00</span></span>
 
                     <div style="margin-top: 8px; color: #4a5568; font-size: 0.9rem;">
-                        <div>
+                        <div>👥 <strong>Participants:</strong> <span th:text="${activity.acceptedCount + ' / ' + activity.maxVolunteers}">0/50</span></div>
+                        <div style="margin-top: 4px;">
                             👤 <strong>Coordinator:</strong> <span th:text="${activity.coordinatorName}">Nume Coordonator</span>
                         </div>
                         <div style="font-size: 0.85rem; margin-top: 3px;">
@@ -232,12 +255,22 @@
                 <label for="motivation">Why do you want to join? (Optional)</label>
                 <textarea id="motivation" name="motivation" rows="4" placeholder="Briefly describe your interest or relevant skills..."></textarea>
             </div>
-            <button type="submit" class="submit-btn join-btn" style="width: 100%">Submit Request</button>
+            <button type="submit" class="join-btn" style="width: 100%">Submit Request</button>
         </form>
     </div>
 </div>
 
 <script>
+    // --- Staggered Entrance Animation ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.activity-card');
+        cards.forEach((card, index) => {
+            // Delay start after header (0.6s) + staggered delay per card
+            const delay = 0.6 + (index * 0.1);
+            card.style.animation = `fadeInUp 0.6s ease-out forwards ${delay}s`;
+        });
+    });
+
     function openJoinModal(activityId, activityName) {
         document.getElementById('modalActivityName').innerText = activityName;
         document.getElementById('joinForm').action = '/volunteer/activity/' + activityId + '/join';

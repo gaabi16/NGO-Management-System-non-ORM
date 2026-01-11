@@ -22,7 +22,7 @@
             to { opacity: 1; }
         }
 
-        /* Navbar - Fără animație */
+        /* Navbar */
         .navbar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 1rem 2rem;
@@ -33,7 +33,6 @@
             color: white;
             position: relative;
             z-index: 100;
-            /* Animația a fost eliminată de aici */
         }
 
         .nav-brand { font-size: 1.5rem; font-weight: bold; }
@@ -45,7 +44,7 @@
 
         .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
 
-        /* Titlu cu animatie */
+        /* Titlu cu animatie implicită */
         .section-title {
             font-size: 1.8rem;
             color: #444;
@@ -100,12 +99,12 @@
             border-left: 5px solid #667eea;
             overflow: hidden;
             transition: box-shadow 0.3s ease, transform 0.3s ease;
-            opacity: 0; /* Hidden for JS staggered animation */
+            opacity: 0; /* Hidden initially for JS animation */
         }
 
         .activity-card-row:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.1); transform: translateY(-2px); }
 
-        /* HEADER - Tot timpul vizibil */
+        /* HEADER */
         .card-header-row {
             padding: 20px 25px;
             display: flex;
@@ -141,7 +140,6 @@
         .toggle-icon {
             font-size: 1.2rem;
             color: #667eea;
-            /* Animatie rapida (0.4s) dar dinamica (540 grade) */
             transition: transform 0.4s ease-in-out;
             width: 24px;
             height: 24px;
@@ -152,14 +150,13 @@
             background: #f0f2ff;
         }
 
-        /* Rotire cand e activ: 180 (flip) + 360 (spin) = 540 grade */
         .toggle-icon.rotated {
             transform: rotate(540deg);
             background: #667eea;
             color: white;
         }
 
-        /* BODY - Ascuns initial */
+        /* BODY */
         .card-body-collapsible {
             max-height: 0;
             overflow: hidden;
@@ -170,7 +167,7 @@
         }
 
         .card-body-collapsible.expanded {
-            max-height: 800px; /* Suficient pentru continut */
+            max-height: 800px;
             opacity: 1;
         }
 
@@ -212,6 +209,13 @@
 
         .empty-state h3 { font-size: 1.6rem; color: #4a5568; margin-bottom: 15px; font-weight: 700; }
         .empty-state p { font-size: 1.1rem; color: #718096; margin: 0; }
+
+        /* --- CLASA UTILITARĂ NOUĂ PENTRU A OPRI ANIMAȚIILE --- */
+        .skip-animation {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
     </style>
 </head>
 <body>
@@ -219,10 +223,10 @@
 <nav class="navbar">
     <div class="nav-brand">VolunteerHub</div>
     <div class="nav-links">
-        <a href="/volunteer/dashboard" class="nav-btn">Home</a>
+        <a href="/volunteer/dashboard" class="nav-btn" onclick="resetAnimationState()">Home</a>
         <a href="/volunteer/my-activities" class="nav-btn" style="background: rgba(255,255,255,0.2);">My Activities</a>
-        <a href="/volunteer/profile" class="nav-btn">Profile</a>
-        <form th:action="@{/logout}" method="post">
+        <a href="/volunteer/profile" class="nav-btn" onclick="resetAnimationState()">Profile</a>
+        <form th:action="@{/logout}" method="post" onsubmit="resetAnimationState()">
             <button type="submit" class="nav-btn logout-btn">Logout</button>
         </form>
     </div>
@@ -300,26 +304,60 @@
 </div>
 
 <script>
-    // --- ANIMATII DE INTRARE (Cascada) ---
+    // Cheie pentru sessionStorage
+    const ANIMATION_STORAGE_KEY = 'my_activities_intro_shown';
+
     document.addEventListener('DOMContentLoaded', function() {
         const cards = document.querySelectorAll('.activity-card-row');
-        cards.forEach((card, index) => {
-            // Intarziere progresiva: incepem dupa ce se incarca filtrele (0.6s) + delay per card
-            const delay = 0.6 + (index * 0.15);
-            card.style.animation = `fadeInUp 0.6s ease-out forwards ${delay}s`;
-        });
+        const title = document.querySelector('.section-title');
+        const filters = document.querySelector('.filter-container');
+        const emptyState = document.querySelector('.empty-state');
+
+        // Verificăm dacă utilizatorul a văzut deja animațiile în această sesiune
+        const hasSeenIntro = sessionStorage.getItem(ANIMATION_STORAGE_KEY);
+
+        if (hasSeenIntro) {
+            // CAZ 1: Utilizatorul filtrează (a mai fost aici) -> FĂRĂ animații
+
+            // Oprim animațiile pentru titlu și filtre
+            if (title) title.classList.add('skip-animation');
+            if (filters) filters.classList.add('skip-animation');
+            if (emptyState) emptyState.classList.add('skip-animation');
+
+            // Afișăm cardurile instantaneu
+            cards.forEach(card => {
+                card.classList.add('skip-animation');
+                // Asigurăm vizibilitatea manual pentru siguranță
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            });
+
+        } else {
+            // CAZ 2: Prima vizită -> Executăm animațiile normale
+
+            // Setăm flag-ul că a văzut intro-ul
+            sessionStorage.setItem(ANIMATION_STORAGE_KEY, 'true');
+
+            // Aplicăm animația în cascadă pentru carduri
+            cards.forEach((card, index) => {
+                // Intarziere progresiva: incepem dupa ce se incarca filtrele (0.6s) + delay per card
+                const delay = 0.6 + (index * 0.15);
+                card.style.animation = `fadeInUp 0.6s ease-out forwards ${delay}s`;
+            });
+        }
     });
 
-    // --- LOGICA DE TOGGLE (Originala) ---
+    // Funcție pentru a "uita" că am văzut animațiile
+    // Se apelează când plecăm spre Home, Profile sau Logout
+    function resetAnimationState() {
+        sessionStorage.removeItem(ANIMATION_STORAGE_KEY);
+    }
+
+    // --- LOGICA DE TOGGLE ---
     function toggleCard(headerElement) {
-        // Găsim elementul body imediat următor (sibling)
         const bodyContent = headerElement.nextElementSibling;
         const icon = headerElement.querySelector('.toggle-icon');
-
-        // Toggle la clasa 'expanded' pentru animația de înălțime și opacitate
         bodyContent.classList.toggle('expanded');
-
-        // Rotim iconița cu 540 de grade (prin CSS).
         icon.classList.toggle('rotated');
     }
 </script>
