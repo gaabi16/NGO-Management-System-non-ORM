@@ -15,16 +15,15 @@
         .nav-btn { color: white; text-decoration: none; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: background 0.3s; font-size: 0.95rem; }
         .nav-btn:hover { background: rgba(255,255,255,0.2); }
 
-        /* [MODIFICAT] Buton logout mai mic */
         .logout-btn {
             background: #dc3545;
             border: none;
             cursor: pointer;
             color: white;
             font-weight: 500;
-            padding: 5px 12px;       /* Padding redus */
-            font-size: 0.85rem;      /* Font mai mic */
-            border-radius: 15px;     /* Raza mai mica */
+            padding: 5px 12px;
+            font-size: 0.85rem;
+            border-radius: 15px;
             margin-left: 5px;
             transition: background 0.3s;
         }
@@ -149,7 +148,16 @@
                 <tbody>
                 <tr th:if="${activities.empty}"><td colspan="6" style="text-align:center; color:#999;">No activities created yet.</td></tr>
                 <tr th:each="activity : ${activities}">
-                    <td><span th:text="${activity.name}">Tree Planting</span><span class="notification-badge" th:if="${activity.pendingCount > 0}"><span class="dot"></span><span th:text="${activity.pendingCount} + ' New'"></span></span></td>
+                    <td>
+                        <span th:text="${activity.name}">Tree Planting</span>
+                        <span class="notification-badge" th:if="${activity.pendingCount > 0}">
+                            <span class="dot"></span>
+                            <span th:text="${activity.pendingCount} + ' New'"></span>
+                        </span>
+                        <span class="notification-badge" th:if="${activity.status == 'completed' && !activity.donationRegistered}" style="margin-left: 5px;">
+                            <span class="dot"></span> Donation Needed
+                        </span>
+                    </td>
                     <td th:text="${#temporals.format(activity.startDate, 'dd MMM yyyy')}">Date</td>
                     <td th:text="${activity.location}">Location</td>
                     <td th:text="${activity.maxVolunteers}">50</td>
