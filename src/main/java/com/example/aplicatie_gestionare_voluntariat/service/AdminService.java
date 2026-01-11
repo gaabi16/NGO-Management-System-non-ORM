@@ -328,6 +328,12 @@ public class AdminService {
         Ong ong = ongRepository.findById(registrationNumber).orElse(null);
         if (ong == null) return false;
 
+        // [MODIFICAT] Stergere donatii asociate pentru a evita eroarea de Foreign Key
+        // Aceasta linie asigura stergerea doar a donatiilor legate de ONG-ul curent
+        String sqlDeleteDonations = "DELETE FROM donations WHERE ong_registration_number = ?";
+        jdbcTemplate.update(sqlDeleteDonations, registrationNumber);
+
+        // Apoi continuam cu stergerea coordonatorilor si activitatilor lor
         String sqlGetCoordinators = "SELECT id_user FROM coordinators WHERE ong_registration_number = ?";
         List<Integer> coordinatorUserIds = jdbcTemplate.queryForList(sqlGetCoordinators, Integer.class, registrationNumber);
 
