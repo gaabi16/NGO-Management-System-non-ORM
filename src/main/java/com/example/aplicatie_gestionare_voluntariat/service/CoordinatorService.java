@@ -1,9 +1,6 @@
 package com.example.aplicatie_gestionare_voluntariat.service;
 
-import com.example.aplicatie_gestionare_voluntariat.model.Activity;
-import com.example.aplicatie_gestionare_voluntariat.model.Coordinator;
-import com.example.aplicatie_gestionare_voluntariat.model.Ong;
-import com.example.aplicatie_gestionare_voluntariat.model.User;
+import com.example.aplicatie_gestionare_voluntariat.model.*;
 import com.example.aplicatie_gestionare_voluntariat.repository.ActivityRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.CoordinatorRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.OngRepository;
@@ -38,10 +35,6 @@ public class CoordinatorService {
     // Regex
     private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
-    private boolean isValidEmail(String email) {
-        return email != null && Pattern.matches(EMAIL_PATTERN, email);
-    }
-
     public Coordinator getCoordinatorByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         Coordinator coordinator = coordinatorRepository.findByUserId(user.getIdUser()).orElseThrow(() -> new RuntimeException("Coordinator profile not found"));
@@ -68,12 +61,39 @@ public class CoordinatorService {
         return stats;
     }
 
-    public List<Activity> getActivitiesByCoordinator(Integer coordinatorId) { return activityRepository.findByCoordinatorId(coordinatorId); }
+    public List<Activity> getActivitiesByCoordinator(Integer coordinatorId) {
+        List<Activity> activities = activityRepository.findByCoordinatorId(coordinatorId);
+
+        String sqlCoord = "SELECT ong_registration_number FROM coordinators WHERE id_coordinator = ?";
+        String ongRegNumber = jdbcTemplate.queryForObject(sqlCoord, String.class, coordinatorId);
+
+        for (Activity activity : activities) {
+            // Calculăm cererile în așteptare
+            String sqlPending = "SELECT COUNT(*) FROM volunteer_activities WHERE id_activity = ? AND status = 'pending'";
+            Long countPending = jdbcTemplate.queryForObject(sqlPending, Long.class, activity.getIdActivity());
+            activity.setPendingCount(countPending != null ? countPending.intValue() : 0);
+
+            // [NOU] Calculăm voluntarii acceptați pentru afișarea x / y
+            String sqlAccepted = "SELECT COUNT(*) FROM volunteer_activities WHERE id_activity = ? AND status = 'accepted'";
+            Long countAccepted = jdbcTemplate.queryForObject(sqlAccepted, Long.class, activity.getIdActivity());
+            activity.setAcceptedCount(countAccepted != null ? countAccepted.intValue() : 0);
+
+            // Verificăm dacă există donație înregistrată (pentru activitățile finalizate)
+            if ("completed".equalsIgnoreCase(activity.getStatus())) {
+                String sqlDonation = "SELECT COUNT(*) FROM donations WHERE donor_name = ? AND ong_registration_number = ?";
+                Integer donationCount = jdbcTemplate.queryForObject(sqlDonation, Integer.class, activity.getName(), ongRegNumber);
+                activity.setDonationRegistered(donationCount != null && donationCount > 0);
+            } else {
+                activity.setDonationRegistered(false);
+            }
+        }
+        return activities;
+    }
+
     public Activity getActivityById(Integer activityId) { return activityRepository.findById(activityId).orElse(null); }
 
     @Transactional
     public void createActivity(Activity activity, Coordinator coordinator) {
-        // Validări de bază
         if (activity.getName() == null || activity.getName().trim().isEmpty()) throw new IllegalArgumentException("Activity Name is required");
         if (activity.getDescription() == null || activity.getDescription().trim().isEmpty()) throw new IllegalArgumentException("Description is required");
         if (activity.getLocation() == null || activity.getLocation().trim().isEmpty()) throw new IllegalArgumentException("Location is required");
@@ -81,7 +101,10 @@ public class CoordinatorService {
         if (activity.getEndDate() == null) throw new IllegalArgumentException("End Date is required");
         if (activity.getMaxVolunteers() == null || activity.getMaxVolunteers() < 1) throw new IllegalArgumentException("Max Volunteers must be at least 1");
 
-        // Validare logică timp
+        // [NOU] Validare Target Donation Amount
+        if (activity.getDonationsCollected() == null) throw new IllegalArgumentException("Target Donation Amount is required");
+        if (activity.getDonationsCollected() < 0) throw new IllegalArgumentException("Target Donation Amount cannot be negative");
+
         if (activity.getEndDate().isBefore(activity.getStartDate())) {
             throw new IllegalArgumentException("End Date cannot be before Start Date");
         }
@@ -89,7 +112,6 @@ public class CoordinatorService {
             throw new IllegalArgumentException("Cannot schedule activities in the past");
         }
 
-        // [NOU] Validare suprapunere activități pentru același coordonator
         if (activityRepository.hasOverlappingActivity(coordinator.getIdCoordinator(), activity.getStartDate(), activity.getEndDate())) {
             throw new IllegalArgumentException("You already have an activity scheduled during this time interval. Please choose different hours.");
         }
@@ -97,8 +119,58 @@ public class CoordinatorService {
         activity.setIdCoordinator(coordinator.getIdCoordinator());
         if (activity.getIdCategory() == null) activity.setIdCategory(1);
 
-        // Activitatea se salvează implicit cu status 'open' (din repository)
         activityRepository.save(activity);
+    }
+
+    private Double convertToUsd(Double amount, String currency) {
+        if (amount == null) return 0.0;
+        if (currency == null) return amount;
+        switch (currency.toUpperCase()) {
+            case "EUR": return amount * 1.09;
+            case "RON": return amount * 0.22;
+            case "GBP": return amount * 1.27;
+            case "CHF": return amount * 1.17;
+            case "JPY": return amount * 0.0069;
+            case "USD":
+            default: return amount;
+        }
+    }
+
+    @Transactional
+    public void addDonation(Donation donation, Coordinator coordinator) {
+        if (donation.getAmount() == null || donation.getAmount() <= 0) {
+            throw new IllegalArgumentException("Donation amount must be positive");
+        }
+        if (donation.getDonorName() == null || donation.getDonorName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Donor name is required");
+        }
+        if (donation.getDonationDate() == null) {
+            throw new IllegalArgumentException("Donation date is required");
+        }
+
+        Double finalAmountInUsd = convertToUsd(donation.getAmount(), donation.getCurrency());
+        String finalNotes = (donation.getNotes() != null ? donation.getNotes() : "") +
+                " [Original: " + donation.getAmount() + " " + donation.getCurrency() + "]";
+
+        String sql = "INSERT INTO donations (ong_registration_number, donor_name, amount, donation_date, type, notes) VALUES (?, ?, ?, ?, ?, ?)";
+
+        jdbcTemplate.update(sql,
+                coordinator.getOngRegistrationNumber(),
+                donation.getDonorName(),
+                finalAmountInUsd,
+                donation.getDonationDate(),
+                donation.getType(),
+                finalNotes
+        );
+    }
+
+    public Double getActualDonationAmount(Integer activityId) {
+        Activity activity = activityRepository.findById(activityId).orElse(null);
+        if (activity == null) return 0.0;
+        String sqlCoord = "SELECT ong_registration_number FROM coordinators WHERE id_coordinator = ?";
+        String ongRegNumber = jdbcTemplate.queryForObject(sqlCoord, String.class, activity.getIdCoordinator());
+        String sql = "SELECT COALESCE(SUM(amount), 0.0) FROM donations WHERE donor_name = ? AND ong_registration_number = ?";
+        return jdbcTemplate.queryForObject(sql, Double.class, activity.getName(), ongRegNumber);
     }
 
     public void closeEnrollment(Integer activityId) { activityRepository.updateStatus(activityId, "closed"); }
@@ -142,13 +214,11 @@ public class CoordinatorService {
         String sql = "UPDATE volunteer_activities SET status = ? WHERE id_activity = ? AND id_volunteer = ?";
         jdbcTemplate.update(sql, newStatus, activityId, volunteerId);
 
-        // Dacă a fost acceptat, verificăm dacă s-a atins capacitatea maximă pentru a închide automat înscrierile
         if ("accepted".equalsIgnoreCase(newStatus)) {
             String countSql = "SELECT COUNT(*) FROM volunteer_activities WHERE id_activity = ? AND status = 'accepted'";
             Integer acceptedCount = jdbcTemplate.queryForObject(countSql, Integer.class, activityId);
             Activity activity = activityRepository.findById(activityId).orElse(null);
 
-            // Inchidem (closed) doar dacă activitatea nu e deja completed sau in_progress
             if (activity != null &&
                     acceptedCount != null &&
                     acceptedCount >= activity.getMaxVolunteers() &&
@@ -201,19 +271,11 @@ public class CoordinatorService {
         userRepository.deleteById(user.getIdUser());
     }
 
-    // [NOU] SCHEDULER: Rulează la fiecare minut pentru a actualiza statusurile
-    @Scheduled(fixedRate = 60000) // 60000 ms = 1 minut
+    @Scheduled(fixedRate = 60000)
     @Transactional
     public void updateActivityStatusesAutomatically() {
         LocalDateTime now = LocalDateTime.now();
-
-        // 1. Trecem la 'in_progress' activitățile care au început și nu sunt încă marcate ca atare sau terminate
-        // Aceasta suprascrie 'open' sau 'closed' (dacă erau închise pentru înscrieri, acum sunt în progres fizic)
         activityRepository.updateStatusToInProgress(now);
-
-        // 2. Trecem la 'completed' activitățile care s-au terminat
         activityRepository.updateStatusToCompleted(now);
-
-        // Notă: Folosind @Transactional, aceste update-uri sunt atomice per rulare.
     }
 }

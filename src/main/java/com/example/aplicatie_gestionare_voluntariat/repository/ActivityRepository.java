@@ -97,7 +97,6 @@ public class ActivityRepository {
         return jdbcTemplate.query(sql, activityRowMapper, coordinatorId);
     }
 
-    // [CORECȚIE] JOIN ongs o ON c.ong_registration_number = o.registration_number (nu o.ong_registration_number)
     public List<Activity> findActivitiesByVolunteerId(Integer volunteerId, String statusFilter) {
         StringBuilder sql = new StringBuilder(
                 "SELECT a.*, va.status as enrollment_status, cat.name as category_name, " +
@@ -108,7 +107,7 @@ public class ActivityRepository {
                         "LEFT JOIN activity_categories cat ON a.id_category = cat.id_category " +
                         "JOIN coordinators c ON a.id_coordinator = c.id_coordinator " +
                         "JOIN users u ON c.id_user = u.id_user " +
-                        "JOIN ongs o ON c.ong_registration_number = o.registration_number " + // Aici a fost eroarea
+                        "JOIN ongs o ON c.ong_registration_number = o.registration_number " +
                         "WHERE va.id_volunteer = ? ");
 
         List<Object> params = new ArrayList<>();
@@ -125,8 +124,9 @@ public class ActivityRepository {
     }
 
     public void save(Activity activity) {
+        // [MODIFICAT] donations_collected primește acum valoarea din obiect, nu 0.0
         String sql = "INSERT INTO activities (id_category, id_coordinator, name, description, location, start_date, end_date, max_volunteers, status, donations_collected) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', 0.0)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', ?)";
 
         jdbcTemplate.update(sql,
                 activity.getIdCategory(),
@@ -136,7 +136,8 @@ public class ActivityRepository {
                 activity.getLocation(),
                 activity.getStartDate(),
                 activity.getEndDate(),
-                activity.getMaxVolunteers());
+                activity.getMaxVolunteers(),
+                activity.getDonationsCollected()); // Folosim valoarea setată în form
     }
 
     public void updateStatus(Integer activityId, String status) {
