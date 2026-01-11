@@ -316,6 +316,8 @@ public class AdminService {
             existingOng.setPhone(updatedOng.getPhone());
             existingOng.setEmail(updatedOng.getEmail());
             existingOng.setFoundingDate(updatedOng.getFoundingDate());
+            // ADĂUGAT: Actualizare Image URL
+            existingOng.setImageUrl(updatedOng.getImageUrl());
             return ongRepository.save(existingOng);
         }
         throw new IllegalArgumentException("ONG not found");
