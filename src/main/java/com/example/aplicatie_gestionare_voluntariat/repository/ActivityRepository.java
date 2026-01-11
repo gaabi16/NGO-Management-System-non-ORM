@@ -43,7 +43,9 @@ public class ActivityRepository {
 
             activity.setMaxVolunteers(rs.getInt("max_volunteers"));
             activity.setStatus(rs.getString("status"));
-            activity.setDonationsCollected(rs.getDouble("donations_collected"));
+
+            // [MODIFICAT] donations_collected -> target_donation
+            activity.setTargetDonation(rs.getDouble("target_donation"));
 
             try {
                 activity.setCategoryName(rs.getString("category_name"));
@@ -124,8 +126,8 @@ public class ActivityRepository {
     }
 
     public void save(Activity activity) {
-        // [MODIFICAT] donations_collected primește acum valoarea din obiect, nu 0.0
-        String sql = "INSERT INTO activities (id_category, id_coordinator, name, description, location, start_date, end_date, max_volunteers, status, donations_collected) " +
+        // [MODIFICAT] donations_collected -> target_donation
+        String sql = "INSERT INTO activities (id_category, id_coordinator, name, description, location, start_date, end_date, max_volunteers, status, target_donation) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', ?)";
 
         jdbcTemplate.update(sql,
@@ -137,7 +139,7 @@ public class ActivityRepository {
                 activity.getStartDate(),
                 activity.getEndDate(),
                 activity.getMaxVolunteers(),
-                activity.getDonationsCollected()); // Folosim valoarea setată în form
+                activity.getTargetDonation()); // Folosim noua metodă getTargetDonation()
     }
 
     public void updateStatus(Integer activityId, String status) {
@@ -182,7 +184,8 @@ public class ActivityRepository {
     }
 
     public Double getTotalSystemDonations() {
-        String sql = "SELECT SUM(donations_collected) FROM activities";
+        // [MODIFICAT] donations_collected -> target_donation
+        String sql = "SELECT SUM(target_donation) FROM activities";
         Double total = jdbcTemplate.queryForObject(sql, Double.class);
         return total != null ? total : 0.0;
     }

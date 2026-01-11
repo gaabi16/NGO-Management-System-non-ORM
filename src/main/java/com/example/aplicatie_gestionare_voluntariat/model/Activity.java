@@ -20,7 +20,9 @@ public class Activity {
 
     private Integer maxVolunteers;
     private String status;
-    private Double donationsCollected;
+
+    // [MODIFICAT] donationsCollected -> targetDonation
+    private Double targetDonation;
 
     // Câmpuri tranzitorii (afișare)
     private String categoryName;
@@ -76,8 +78,9 @@ public class Activity {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public Double getDonationsCollected() { return donationsCollected; }
-    public void setDonationsCollected(Double donationsCollected) { this.donationsCollected = donationsCollected; }
+    // [MODIFICAT] Getters/Setters
+    public Double getTargetDonation() { return targetDonation; }
+    public void setTargetDonation(Double targetDonation) { this.targetDonation = targetDonation; }
 
     public String getCategoryName() { return categoryName; }
     public void setCategoryName(String categoryName) { this.categoryName = categoryName; }

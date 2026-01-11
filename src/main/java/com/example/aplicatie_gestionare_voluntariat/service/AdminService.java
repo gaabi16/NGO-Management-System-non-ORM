@@ -88,12 +88,11 @@ public class AdminService {
     public Map<String, Object> getSystemStatistics() {
         Map<String, Object> stats = new HashMap<>();
 
-        // Asumăm că celelalte repository-uri returnează Map sau null direct (dacă nu au fost modificate să returneze Optional)
         Map<String, Object> topVol = volunteerRepository.findMostActiveVolunteer();
         stats.put("topVolunteerName", topVol != null ? topVol.get("name") : "N/A");
         stats.put("topVolunteerCount", topVol != null ? topVol.get("count") : 0);
 
-        // [CORECȚIE] Aici extragem valoarea din Optional folosind orElse(null)
+        // Aceasta metoda din ongRepository a fost actualizata sa citeasca din donations
         Map<String, Object> topOng = ongRepository.findTopFundraisingOng().orElse(null);
         stats.put("topOngName", topOng != null ? topOng.get("name") : "N/A");
         stats.put("topOngDonations", topOng != null ? String.format("%.2f", topOng.get("total")) : "0.00");
@@ -106,8 +105,10 @@ public class AdminService {
         stats.put("popularActivityName", popAct != null ? popAct.get("name") : "N/A");
         stats.put("popularActivityCount", popAct != null ? popAct.get("count") : 0);
 
-        Double totalDonations = activityRepository.getTotalSystemDonations();
+        // [MODIFICAT] Calculul total sistem donations direct din tabela donations (Actual Amount)
+        Double totalDonations = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(amount), 0) FROM donations", Double.class);
         stats.put("totalSystemDonations", String.format("%.2f", totalDonations));
+
         stats.put("totalVolunteers", volunteerRepository.count());
         stats.put("totalCoordinators", coordinatorRepository.count());
         return stats;
@@ -120,7 +121,6 @@ public class AdminService {
         if (user.getFirstName() == null || user.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name is required");
         if (user.getLastName() == null || user.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name is required");
 
-        // VALIDARE EMAIL
         if (user.getEmail() == null || user.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email is required");
         if (!isValidEmail(user.getEmail())) throw new IllegalArgumentException("Invalid email format (example: user@domain.com)");
 
@@ -179,7 +179,6 @@ public class AdminService {
         if (updatedUser.getFirstName() == null || updatedUser.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name cannot be empty");
         if (updatedUser.getLastName() == null || updatedUser.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name cannot be empty");
 
-        // VALIDARE EMAIL
         if (updatedUser.getEmail() == null || updatedUser.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email cannot be empty");
         if (!isValidEmail(updatedUser.getEmail())) throw new IllegalArgumentException("Invalid email format (example: user@domain.com)");
 
@@ -285,7 +284,6 @@ public class AdminService {
         if (ong.getCountry() == null || ong.getCountry().trim().isEmpty()) throw new IllegalArgumentException("Country is required");
         if (ong.getPhone() == null || ong.getPhone().trim().isEmpty()) throw new IllegalArgumentException("Phone is required");
 
-        // VALIDARE EMAIL ONG
         if (ong.getEmail() == null || ong.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email is required");
         if (!isValidEmail(ong.getEmail())) throw new IllegalArgumentException("Invalid email format (example: contact@ong.com)");
 
@@ -306,7 +304,6 @@ public class AdminService {
         if (updatedOng.getCountry() == null || updatedOng.getCountry().trim().isEmpty()) throw new IllegalArgumentException("Country cannot be empty");
         if (updatedOng.getPhone() == null || updatedOng.getPhone().trim().isEmpty()) throw new IllegalArgumentException("Phone cannot be empty");
 
-        // VALIDARE EMAIL ONG UPDATE
         if (updatedOng.getEmail() == null || updatedOng.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email cannot be empty");
         if (!isValidEmail(updatedOng.getEmail())) throw new IllegalArgumentException("Invalid email format (example: contact@ong.com)");
 

@@ -48,7 +48,7 @@ CREATE TABLE activity_categories (
     description TEXT
 );
 
--- Activities (Toate câmpurile rămân NOT NULL)
+-- Activities (MODIFICAT: donations_collected -> target_donation)
 CREATE TABLE activities (
     ID_activity SERIAL PRIMARY KEY,
     ID_coordinator INT NOT NULL REFERENCES coordinators(ID_coordinator),
@@ -60,7 +60,7 @@ CREATE TABLE activities (
     end_date TIMESTAMP NOT NULL,
     max_volunteers INT NOT NULL,
     status VARCHAR(50) NOT NULL,
-    donations_collected DECIMAL(10,2) NOT NULL DEFAULT 0.00
+    target_donation DECIMAL(10,2) NOT NULL DEFAULT 0.00
 );
 
 -- Volunteer Activities (Toate câmpurile rămân NOT NULL)

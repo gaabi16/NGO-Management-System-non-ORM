@@ -117,6 +117,7 @@ public class VolunteerPageService {
         long totalParticipants = uniqueVolunteersCount + coordinators.size();
         stats.put("totalVolunteers", totalParticipants);
 
+        // [MODIFICAT] Suma din tabela donations (Actual Donation Amount)
         String sqlDonations = "SELECT COALESCE(SUM(amount), 0) FROM donations WHERE ong_registration_number = ?";
         Double totalDonations = jdbcTemplate.queryForObject(sqlDonations, Double.class, ongRegNumber);
         stats.put("totalDonations", totalDonations);
@@ -142,7 +143,6 @@ public class VolunteerPageService {
         return activities;
     }
 
-    // [NOU] Metoda pentru preluarea activităților voluntarului logat
     public List<Activity> getMyActivities(String email, String statusFilter) {
         Integer volunteerId = getVolunteerIdByEmail(email);
         if (volunteerId == null) {
