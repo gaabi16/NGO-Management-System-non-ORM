@@ -97,6 +97,10 @@ public class CoordinatorService {
         if (activity.getEndDate() == null) throw new IllegalArgumentException("End Date is required");
         if (activity.getMaxVolunteers() == null || activity.getMaxVolunteers() < 1) throw new IllegalArgumentException("Max Volunteers must be at least 1");
 
+        // [NOU] Validare Target Donation Amount
+        if (activity.getDonationsCollected() == null) throw new IllegalArgumentException("Target Donation Amount is required");
+        if (activity.getDonationsCollected() < 0) throw new IllegalArgumentException("Target Donation Amount cannot be negative");
+
         if (activity.getEndDate().isBefore(activity.getStartDate())) {
             throw new IllegalArgumentException("End Date cannot be before Start Date");
         }
