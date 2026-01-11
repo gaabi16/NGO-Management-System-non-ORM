@@ -2,6 +2,7 @@ package com.example.aplicatie_gestionare_voluntariat.controllers;
 
 import com.example.aplicatie_gestionare_voluntariat.model.Activity;
 import com.example.aplicatie_gestionare_voluntariat.model.Coordinator;
+import com.example.aplicatie_gestionare_voluntariat.model.Donation;
 import com.example.aplicatie_gestionare_voluntariat.model.Ong;
 import com.example.aplicatie_gestionare_voluntariat.service.CoordinatorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +44,6 @@ public class CoordinatorController {
             model.addAttribute("activities", activities);
             model.addAttribute("categories", categories);
 
-            // [MODIFICAT] Verificăm dacă există deja un 'newActivity' (din FlashAttribute in caz de eroare)
-            // Dacă nu există, creăm unul gol. Dacă există, îl folosim pe cel cu datele completate de user.
             if (!model.containsAttribute("newActivity")) {
                 model.addAttribute("newActivity", new Activity());
             }
@@ -60,16 +59,9 @@ public class CoordinatorController {
             coordinatorService.createActivity(activity, coordinator);
             redirectAttributes.addFlashAttribute("successMessage", "Activity created successfully!");
         } catch (IllegalArgumentException e) {
-            // [MODIFICAT] În loc de parametru în URL, folosim FlashAttribute
-            // 1. Trimitem mesajul de eroare specific (cu animația roșie)
             redirectAttributes.addFlashAttribute("createActivityError", e.getMessage());
-
-            // 2. Trimitem obiectul activity înapoi ca 'newActivity' pentru a popula câmpurile cu ce a scris userul
             redirectAttributes.addFlashAttribute("newActivity", activity);
-
-            // 3. Setăm view-ul corect pentru redirect
             redirectAttributes.addAttribute("view", "activities");
-
             return "redirect:/coordinator/dashboard";
         }
         return "redirect:/coordinator/dashboard?view=activities";
@@ -101,7 +93,39 @@ public class CoordinatorController {
         model.addAttribute("pendingCount", activityStats.get("pending"));
         model.addAttribute("totalApplicants", activityStats.get("total"));
 
+        // Calculăm suma reală bazându-ne pe numele activității
+        Double actualDonation = coordinatorService.getActualDonationAmount(id);
+        model.addAttribute("actualDonationAmount", actualDonation);
+
+        // Dacă s-a găsit o donație cu numele activității, considerăm că e înregistrată
+        model.addAttribute("isDonationRegistered", actualDonation > 0);
+
+        if (!model.containsAttribute("newDonation")) {
+            Donation donation = new Donation();
+            // [IMPORTANT] Pre-setăm numele donatorului cu numele activității
+            donation.setDonorName(activity.getName());
+            model.addAttribute("newDonation", donation);
+        }
+
         return "coordinator-activity-details";
+    }
+
+    @PostMapping("/activities/{id}/register-donation")
+    public String registerDonation(@PathVariable Integer id,
+                                   @ModelAttribute Donation donation,
+                                   Authentication authentication,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            Coordinator coordinator = coordinatorService.getCoordinatorByEmail(authentication.getName());
+            // Nu mai setăm activityId, ne bazăm pe donorName care vine din form
+            coordinatorService.addDonation(donation, coordinator);
+
+            redirectAttributes.addFlashAttribute("successMessage", "Donation registered successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error registering donation: " + e.getMessage());
+        }
+
+        return "redirect:/coordinator/activities/" + id;
     }
 
     @PostMapping("/applications/update")
