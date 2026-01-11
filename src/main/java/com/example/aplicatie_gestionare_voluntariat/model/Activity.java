@@ -26,17 +26,20 @@ public class Activity {
     private String categoryName;
     private Integer pendingCount = 0;
 
+    // [NOU] Număr voluntari acceptați (x / y)
+    private Integer acceptedCount = 0;
+
     // Câmpuri pentru logica de voluntari (My Activities)
     private boolean enrolled = false;
     private String enrollmentStatus; // 'pending', 'accepted', 'rejected'
 
-    // [NOU] Detalii Coordonator & ONG pentru afișare extinsă
+    // Detalii Coordonator & ONG pentru afișare extinsă
     private String coordinatorName;
     private String coordinatorEmail;
     private String coordinatorPhone;
     private String ongName;
 
-    // [ADĂUGAT ACUM] Necesar pentru notificarea din dashboard
+    // Necesar pentru notificarea din dashboard
     private boolean donationRegistered;
 
     public Activity() {}
@@ -81,6 +84,9 @@ public class Activity {
 
     public Integer getPendingCount() { return pendingCount; }
     public void setPendingCount(Integer pendingCount) { this.pendingCount = pendingCount; }
+
+    public Integer getAcceptedCount() { return acceptedCount; }
+    public void setAcceptedCount(Integer acceptedCount) { this.acceptedCount = acceptedCount; }
 
     public boolean isEnrolled() { return enrolled; }
     public void setEnrolled(boolean enrolled) { this.enrolled = enrolled; }

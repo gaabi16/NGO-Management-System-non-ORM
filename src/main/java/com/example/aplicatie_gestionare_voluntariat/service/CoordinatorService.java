@@ -68,13 +68,17 @@ public class CoordinatorService {
         String ongRegNumber = jdbcTemplate.queryForObject(sqlCoord, String.class, coordinatorId);
 
         for (Activity activity : activities) {
+            // Calculăm cererile în așteptare
             String sqlPending = "SELECT COUNT(*) FROM volunteer_activities WHERE id_activity = ? AND status = 'pending'";
-            Long count = jdbcTemplate.queryForObject(sqlPending, Long.class, activity.getIdActivity());
+            Long countPending = jdbcTemplate.queryForObject(sqlPending, Long.class, activity.getIdActivity());
+            activity.setPendingCount(countPending != null ? countPending.intValue() : 0);
 
-            // [CORECTIE] Convertim Long la Integer
-            activity.setPendingCount(count != null ? count.intValue() : 0);
+            // [NOU] Calculăm voluntarii acceptați pentru afișarea x / y
+            String sqlAccepted = "SELECT COUNT(*) FROM volunteer_activities WHERE id_activity = ? AND status = 'accepted'";
+            Long countAccepted = jdbcTemplate.queryForObject(sqlAccepted, Long.class, activity.getIdActivity());
+            activity.setAcceptedCount(countAccepted != null ? countAccepted.intValue() : 0);
 
-            // Verificam donatia
+            // Verificăm dacă există donație înregistrată (pentru activitățile finalizate)
             if ("completed".equalsIgnoreCase(activity.getStatus())) {
                 String sqlDonation = "SELECT COUNT(*) FROM donations WHERE donor_name = ? AND ong_registration_number = ?";
                 Integer donationCount = jdbcTemplate.queryForObject(sqlDonation, Integer.class, activity.getName(), ongRegNumber);
