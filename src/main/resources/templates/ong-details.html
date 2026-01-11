@@ -44,7 +44,6 @@
         .activities-section { background: white; padding: 30px; border-radius: 15px; }
         .section-heading { font-size: 1.8rem; margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; }
 
-        /* [MODIFICAT] align-items: stretch pentru ca cele doua coloane sa aiba aceeasi inaltime */
         .activity-card {
             border: 1px solid #e2e8f0;
             border-radius: 10px;
@@ -52,7 +51,7 @@
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
-            align-items: stretch; /* Important pentru pozitionare jos */
+            align-items: stretch;
             transition: all 0.2s;
             gap: 20px;
         }
@@ -64,11 +63,10 @@
         .act-desc { color: #718096; margin-bottom: 10px; }
         .act-date { font-size: 0.9rem; color: #4a5568; font-weight: 500; }
 
-        /* [NOU] Container pentru partea dreapta (Status + Buton/Mesaj) */
         .act-actions {
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Impinge status sus si mesaj jos */
+            justify-content: space-between;
             align-items: flex-end;
             min-width: 160px;
             text-align: right;
@@ -83,14 +81,12 @@
         .join-btn { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
         .join-btn:hover { background: #218838; }
 
-        /* [MODIFICAT] Stil minimalist pentru mesajele text */
         .info-text-neutral {
             font-size: 0.9rem;
-            color: #8898aa; /* Gri subtil */
+            color: #8898aa;
             font-style: italic;
             margin-top: 10px;
             display: inline-block;
-            /* Fara background, fara border */
         }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
@@ -139,7 +135,7 @@
             <div class="stat-label">Total Participants</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number" th:text="${#numbers.formatCurrency(stats.totalDonations)}">$0</div>
+            <div class="stat-number" th:text="'$' + ${#numbers.formatDecimal(stats.totalDonations, 0, 'COMMA', 2, 'POINT')}">$0.00</div>
             <div class="stat-label">Total Donations</div>
         </div>
         <div class="stat-card">
@@ -163,8 +159,8 @@
                 <p class="act-desc" th:text="${activity.description}">Description...</p>
                 <div class="act-date">
                     📅 <span th:text="${#temporals.format(activity.startDate, 'dd MMMM yyyy HH:mm')}">Date</span>
-                    📍 <span th:text="${activity.location}">Location</span> |
-                    💰 Raised: <span th:text="${activity.donationsCollected != null ? #numbers.formatCurrency(activity.donationsCollected) : '0.00'}">0.00</span>
+                    📍 <span th:text="${activity.location}">Location</span>
+                    💲 Goal: <span th:text="${activity.donationsCollected != null ? '$' + #numbers.formatDecimal(activity.donationsCollected, 0, 'COMMA', 2, 'POINT') : '$0.00'}">$0.00</span>
                 </div>
             </div>
 
