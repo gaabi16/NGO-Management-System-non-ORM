@@ -120,40 +120,50 @@ INSERT INTO users (email, password_hash, first_name, last_name, phone_number, ro
 
 -- ==========================================
 -- 2. INSERT ONGS (Total: 30 ONGs)
+-- [ACTUALIZAT] Link-uri Unsplash noi și verificate pentru intrările cu probleme
 -- ==========================================
-INSERT INTO ongs (registration_number, name, description, address, country, phone, email, founding_date)
+INSERT INTO ongs (registration_number, name, description, address, country, phone, email, founding_date, image_url)
 VALUES
 -- Originals
-('UK-REG-2020-001', 'Global Green Initiative', 'Focusing on reforestation.', '123 Earth Avenue, London', 'UK', '+442071234567', 'contact@globalgreen.org', '2015-04-22'),
-('US-501C3-9988', 'Tech for All', 'Bridging the digital divide.', '456 Silicon Valley, San Francisco', 'USA', '+16505550199', 'info@techforall.org', '2018-09-10'),
-('FR-ASSO-1122', 'Health Without Borders', 'Medical aid for remote villages.', '789 Rue de la Paix, Paris', 'France', '+33140001122', 'support@hwb.fr', '2010-01-15'),
-('RO-NGO-556677', 'Education First Romania', 'After-school programs.', 'Bulevardul Unirii 10, Bucharest', 'Romania', '+40213334455', 'contact@edufirst.ro', '2012-06-01'),
-('AU-ABN-778899', 'Ocean Cleanup Squad', 'Removing plastic waste.', '88 Beach Road, Sydney', 'Australia', '+61298765432', 'volunteer@oceancleanup.com', '2019-11-30'),
-('DE-NGO-1001', 'Kinder Hilfe', 'Support for children in need.', 'Berlin Strasse 1', 'Germany', '+4930123456', 'info@kinderhilfe.de', '2005-05-05'),
-('RO-NGO-2002', 'Traditii Romanesti', 'Pastrarea traditiilor culturale din Marginimea Sibiului.', 'Strada Cetatii 5, Sibiu', 'Romania', '+40269123456', 'contact@traditii.ro', '2011-02-20'),
-('ES-ONG-3003', 'Vida Animal', 'Animal shelter and adoption.', 'Madrid Plaza 5', 'Spain', '+3491123456', 'hola@vidaanimal.es', NULL),
-('JP-NPO-4004', 'Elderly Care Japan', 'Assisting the elderly.', 'Tokyo Central 1-1', 'Japan', '+81312345678', 'help@elderly.jp', '1998-10-10'),
-('CA-CHARITY-5005', 'Winter Warmth', 'Providing shelter in winter.', 'Toronto Main St 50', 'Canada', '+14161234567', 'warmth@canada.org', '2015-11-01'),
-('BR-NGO-6006', 'Amazonia Verde', 'Protecting the rainforest.', 'Manaus Centro', 'Brazil', '+559212345678', 'amazonia@verde.br', '2000-01-01'),
-('IN-NGO-7007', 'Clean Water India', 'Sanitation and water projects.', 'Mumbai High St', 'India', '+912212345678', 'water@india.org', '2013-03-22'),
-('ZA-NPO-8008', 'Ubuntu Youth', 'Youth empowerment.', 'Cape Town Loop St', 'South Africa', '+27211234567', 'youth@ubuntu.za', '2016-06-16'),
-('MX-NGO-9009', 'Comida Para Todos', 'Food bank.', 'Mexico City Reforma', 'Mexico', '+525512345678', 'comida@mx.org', NULL),
-('NL-ANBI-1010', 'Bike City', 'Promoting cycling safety.', 'Amsterdam Canal 5', 'Netherlands', '+31201234567', 'bike@city.nl', '2019-04-30'),
-('SE-NGO-1111', 'Nordic Nature', 'Conservation of nordic wildlife.', 'Stockholm Gamla Stan', 'Sweden', '+4681234567', 'nature@nordic.se', '2010-08-15'),
-('NO-NGO-1212', 'Fjord Guardians', 'Marine life protection.', 'Oslo Harbor', 'Norway', '+4722123456', 'guardians@fjord.no', '2018-05-20'),
-('CH-NGO-1313', 'Alpine Rescue', 'Mountain rescue services.', 'Zurich Mountain Rd', 'Switzerland', '+41441234567', 'rescue@alpine.ch', '1980-12-01'),
-('RO-NGO-1414', 'Speranta Romania', 'Ajutor pentru sinistrati si situatii de urgenta.', 'Calea Victoriei 100, Bucharest', 'Romania', '+40213123456', 'ajutor@speranta.ro', '2022-02-24'),
-('RO-NGO-1515', 'Dacian Heritage', 'Promovarea siturilor arheologice dacice.', 'Piata Unirii 1, Cluj-Napoca', 'Romania', '+40264123456', 'dacii@heritage.ro', '1995-07-07'),
-('RO-NGO-1616', 'Marea Neagra Clean', 'Curatarea plajelor si protectia delfinilor.', 'Bulevardul Mamaia 20, Constanta', 'Romania', '+40241123456', 'mare@neagra.ro', NULL),
-('IE-CHARITY-1717', 'Green Isle', 'Reforestation in Ireland.', 'Dublin Park', 'Ireland', '+35311234567', 'trees@green.ie', '2020-03-17'),
-('NZ-NGO-1818', 'Kiwi Saver', 'Bird conservation.', 'Wellington Forest', 'New Zealand', '+6441234567', 'kiwi@saver.nz', '2008-09-09'),
-('SG-CHARITY-1919', 'Urban Farm', 'Community gardening.', 'Singapore Garden Bay', 'Singapore', '+6561234567', 'farm@urban.sg', '2021-01-01'),
-('KR-NGO-2020', 'Tech Mentors', 'Teaching coding to seniors.', 'Seoul Gangnam', 'South Korea', '+82212345678', 'tech@mentors.kr', '2017-11-11'),
-('RO-NGO-2121', 'Delta Dunarii Eco', 'Agricultura sustenabila in Delta Dunarii.', 'Strada Portului 2, Tulcea', 'Romania', '+40240123456', 'delta@eco.ro', '2014-04-14'),
-('IS-NGO-2222', 'Polar Bears Int', 'Arctic wildlife protection.', 'Reykjavik Ice Rd', 'Iceland', '+3545123456', 'bears@iceland.is', '2009-09-09'),
-('VN-NGO-2323', 'Vietnam Vet Help', 'Helping veterans.', 'Hanoi Old Quarter', 'Vietnam', '+842412345678', 'vets@vietnam.org', '2000-05-30'),
-('KE-NGO-2424', 'Kenya Wildlife', 'Savanna conservation.', 'Nairobi Park', 'Kenya', '+254712345678', 'lions@kenya.ke', '1990-12-12'),
-('PE-NGO-2525', 'Peru Heritage', 'Inca trail preservation.', 'Cusco Plaza', 'Peru', '+5184123456', 'inca@peru.pe', '2003-03-03');
+('UK-REG-2020-001', 'Global Green Initiative', 'Focusing on reforestation.', '123 Earth Avenue, London', 'UK', '+442071234567', 'contact@globalgreen.org', '2015-04-22', 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=500&q=60'),
+('US-501C3-9988', 'Tech for All', 'Bridging the digital divide.', '456 Silicon Valley, San Francisco', 'USA', '+16505550199', 'info@techforall.org', '2018-09-10', 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=500&q=60'),
+('FR-ASSO-1122', 'Health Without Borders', 'Medical aid for remote villages.', '789 Rue de la Paix, Paris', 'France', '+33140001122', 'support@hwb.fr', '2010-01-15', 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=500&q=60'),
+('RO-NGO-556677', 'Education First Romania', 'After-school programs.', 'Bulevardul Unirii 10, Bucharest', 'Romania', '+40213334455', 'contact@edufirst.ro', '2012-06-01', 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=500&q=60'),
+-- [UPDATED] Ocean Cleanup Squad
+('AU-ABN-778899', 'Ocean Cleanup Squad', 'Removing plastic waste.', '88 Beach Road, Sydney', 'Australia', '+61298765432', 'volunteer@oceancleanup.com', '2019-11-30', 'https://images.unsplash.com/photo-1618477461853-5f8dd68aa1fd?auto=format&fit=crop&w=500&q=60'),
+('DE-NGO-1001', 'Kinder Hilfe', 'Support for children in need.', 'Berlin Strasse 1', 'Germany', '+4930123456', 'info@kinderhilfe.de', '2005-05-05', 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=500&q=60'),
+-- [UPDATED] Traditii Romanesti
+('RO-NGO-2002', 'Traditii Romanesti', 'Pastrarea traditiilor culturale din Marginimea Sibiului.', 'Strada Cetatii 5, Sibiu', 'Romania', '+40269123456', 'contact@traditii.ro', '2011-02-20', 'https://images.unsplash.com/photo-1581337204873-ef36aa186caa?auto=format&fit=crop&w=500&q=60'),
+('ES-ONG-3003', 'Vida Animal', 'Animal shelter and adoption.', 'Madrid Plaza 5', 'Spain', '+3491123456', 'hola@vidaanimal.es', NULL, 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=500&q=60'),
+('JP-NPO-4004', 'Elderly Care Japan', 'Assisting the elderly.', 'Tokyo Central 1-1', 'Japan', '+81312345678', 'help@elderly.jp', '1998-10-10', 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=500&q=60'),
+-- [UPDATED] Winter Warmth
+('CA-CHARITY-5005', 'Winter Warmth', 'Providing shelter in winter.', 'Toronto Main St 50', 'Canada', '+14161234567', 'warmth@canada.org', '2015-11-01', 'https://images.unsplash.com/photo-1542384701-c0e46e94c034?auto=format&fit=crop&w=500&q=60'),
+-- [UPDATED] Amazonia Verde
+('BR-NGO-6006', 'Amazonia Verde', 'Protecting the rainforest.', 'Manaus Centro', 'Brazil', '+559212345678', 'amazonia@verde.br', '2000-01-01', 'https://images.unsplash.com/photo-1516937941348-c09645f31e3d?auto=format&fit=crop&w=500&q=60'),
+('IN-NGO-7007', 'Clean Water India', 'Sanitation and water projects.', 'Mumbai High St', 'India', '+912212345678', 'water@india.org', '2013-03-22', 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=500&q=60'),
+('ZA-NPO-8008', 'Ubuntu Youth', 'Youth empowerment.', 'Cape Town Loop St', 'South Africa', '+27211234567', 'youth@ubuntu.za', '2016-06-16', 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=500&q=60'),
+('MX-NGO-9009', 'Comida Para Todos', 'Food bank.', 'Mexico City Reforma', 'Mexico', '+525512345678', 'comida@mx.org', NULL, 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=500&q=60'),
+('NL-ANBI-1010', 'Bike City', 'Promoting cycling safety.', 'Amsterdam Canal 5', 'Netherlands', '+31201234567', 'bike@city.nl', '2019-04-30', 'https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?auto=format&fit=crop&w=500&q=60'),
+('SE-NGO-1111', 'Nordic Nature', 'Conservation of nordic wildlife.', 'Stockholm Gamla Stan', 'Sweden', '+4681234567', 'nature@nordic.se', '2010-08-15', 'https://images.unsplash.com/photo-1486334803289-1623f249dd1e?auto=format&fit=crop&w=500&q=60'),
+-- [UPDATED] Fjord Guardians
+('NO-NGO-1212', 'Fjord Guardians', 'Marine life protection.', 'Oslo Harbor', 'Norway', '+4722123456', 'guardians@fjord.no', '2018-05-20', 'https://images.unsplash.com/photo-1507272931001-fc06c17e4f43?auto=format&fit=crop&w=500&q=60'),
+-- [UPDATED] Alpine Rescue
+('CH-NGO-1313', 'Alpine Rescue', 'Mountain rescue services.', 'Zurich Mountain Rd', 'Switzerland', '+41441234567', 'rescue@alpine.ch', '1980-12-01', 'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?auto=format&fit=crop&w=500&q=60'),
+-- [UPDATED] Speranta Romania
+('RO-NGO-1414', 'Speranta Romania', 'Ajutor pentru sinistrati si situatii de urgenta.', 'Calea Victoriei 100, Bucharest', 'Romania', '+40213123456', 'ajutor@speranta.ro', '2022-02-24', 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&w=500&q=60'),
+-- [UPDATED] Dacian Heritage
+('RO-NGO-1515', 'Dacian Heritage', 'Promovarea siturilor arheologice dacice.', 'Piata Unirii 1, Cluj-Napoca', 'Romania', '+40264123456', 'dacii@heritage.ro', '1995-07-07', 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=500&q=60'),
+-- [UPDATED] Marea Neagra Clean
+('RO-NGO-1616', 'Marea Neagra Clean', 'Curatarea plajelor si protectia delfinilor.', 'Bulevardul Mamaia 20, Constanta', 'Romania', '+40241123456', 'mare@neagra.ro', NULL, 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=500&q=60'),
+('IE-CHARITY-1717', 'Green Isle', 'Reforestation in Ireland.', 'Dublin Park', 'Ireland', '+35311234567', 'trees@green.ie', '2020-03-17', 'https://images.unsplash.com/photo-1590053916723-4c92b5e28a96?auto=format&fit=crop&w=500&q=60'),
+('NZ-NGO-1818', 'Kiwi Saver', 'Bird conservation.', 'Wellington Forest', 'New Zealand', '+6441234567', 'kiwi@saver.nz', '2008-09-09', 'https://images.unsplash.com/photo-1452570053594-1b985d6ea890?auto=format&fit=crop&w=500&q=60'),
+('SG-CHARITY-1919', 'Urban Farm', 'Community gardening.', 'Singapore Garden Bay', 'Singapore', '+6561234567', 'farm@urban.sg', '2021-01-01', 'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=500&q=60'),
+('KR-NGO-2020', 'Tech Mentors', 'Teaching coding to seniors.', 'Seoul Gangnam', 'South Korea', '+82212345678', 'tech@mentors.kr', '2017-11-11', 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=500&q=60'),
+('RO-NGO-2121', 'Delta Dunarii Eco', 'Agricultura sustenabila in Delta Dunarii.', 'Strada Portului 2, Tulcea', 'Romania', '+40240123456', 'delta@eco.ro', '2014-04-14', 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=500&q=60'),
+('IS-NGO-2222', 'Polar Bears Int', 'Arctic wildlife protection.', 'Reykjavik Ice Rd', 'Iceland', '+3545123456', 'bears@iceland.is', '2009-09-09', 'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=500&q=60'),
+('VN-NGO-2323', 'Vietnam Vet Help', 'Helping veterans.', 'Hanoi Old Quarter', 'Vietnam', '+842412345678', 'vets@vietnam.org', '2000-05-30', 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=500&q=60'),
+('KE-NGO-2424', 'Kenya Wildlife', 'Savanna conservation.', 'Nairobi Park', 'Kenya', '+254712345678', 'lions@kenya.ke', '1990-12-12', 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=500&q=60'),
+('PE-NGO-2525', 'Peru Heritage', 'Inca trail preservation.', 'Cusco Plaza', 'Peru', '+5184123456', 'inca@peru.pe', '2003-03-03', 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=500&q=60');
 
 
 -- ==========================================
