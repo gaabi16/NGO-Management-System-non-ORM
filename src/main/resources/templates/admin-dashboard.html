@@ -577,6 +577,9 @@
 
         if(!continentSelect || !countrySelect) return;
 
+        // Resetam optiunile pentru a evita duplicarea (fix pentru problema raportata)
+        continentSelect.innerHTML = '<option value="">-- All Continents --</option>';
+
         // Populam dropdown-ul de Continente
         for (const continent in continentData) {
             let option = document.createElement('option');
@@ -814,11 +817,6 @@
     function confirmDelete(id, email, role) { if(confirm('Delete user?')) { const f = document.createElement('form'); f.method='POST'; f.action='/admin/users/delete/'+id; document.body.appendChild(f); f.submit(); } }
     function confirmDeleteOng(id) { if(confirm('Warning: Deleting this ONG will also delete all associated COORDINATORS and their ACTIVITIES.\n\nThis action cannot be undone.\n\nAre you sure you want to proceed?')) { const f = document.createElement('form'); f.method='POST'; f.action='/admin/ongs/delete/'+id; document.body.appendChild(f); f.submit(); } }
     window.onclick = function(e) { if(e.target.className === 'modal') e.target.style.display = 'none'; }
-
-    // Initializare filtre ONG la incarcare
-    window.onload = function() {
-        initOngFilters();
-    };
 </script>
 </body>
 </html>
