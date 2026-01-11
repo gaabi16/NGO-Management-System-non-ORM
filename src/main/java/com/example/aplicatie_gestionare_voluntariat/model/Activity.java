@@ -1,5 +1,6 @@
 package com.example.aplicatie_gestionare_voluntariat.model;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 
 public class Activity {
@@ -10,7 +11,11 @@ public class Activity {
     private String name;
     private String description;
     private String location;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime startDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDate;
 
     private Integer maxVolunteers;
@@ -29,7 +34,10 @@ public class Activity {
     private String coordinatorName;
     private String coordinatorEmail;
     private String coordinatorPhone;
-    private String ongName; // [NOU]
+    private String ongName;
+
+    // [ADĂUGAT ACUM] Necesar pentru notificarea din dashboard
+    private boolean donationRegistered;
 
     public Activity() {}
 
@@ -89,6 +97,9 @@ public class Activity {
     public String getCoordinatorPhone() { return coordinatorPhone; }
     public void setCoordinatorPhone(String coordinatorPhone) { this.coordinatorPhone = coordinatorPhone; }
 
-    public String getOngName() { return ongName; } // [NOU]
-    public void setOngName(String ongName) { this.ongName = ongName; } // [NOU]
+    public String getOngName() { return ongName; }
+    public void setOngName(String ongName) { this.ongName = ongName; }
+
+    public boolean isDonationRegistered() { return donationRegistered; }
+    public void setDonationRegistered(boolean donationRegistered) { this.donationRegistered = donationRegistered; }
 }
