@@ -80,12 +80,17 @@ public class ActivityRepository {
     };
 
     public List<Activity> findByOngId(String ongRegistrationNumber) {
-        String sql = "SELECT a.*, cat.name as category_name " +
+        // Am adăugat JOIN cu users și selectarea câmpurilor coord_*
+        String sql = "SELECT a.*, cat.name as category_name, " +
+                "u.first_name as coord_first, u.last_name as coord_last, " +
+                "u.email as coord_email, u.phone_number as coord_phone " +
                 "FROM activities a " +
                 "JOIN coordinators c ON a.id_coordinator = c.id_coordinator " +
+                "JOIN users u ON c.id_user = u.id_user " + // <-- JOIN-ul nou
                 "LEFT JOIN activity_categories cat ON a.id_category = cat.id_category " +
                 "WHERE c.ong_registration_number = ? " +
                 "ORDER BY a.start_date DESC";
+
         return jdbcTemplate.query(sql, activityRowMapper, ongRegistrationNumber);
     }
 
