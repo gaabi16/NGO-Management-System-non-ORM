@@ -8,10 +8,11 @@ public class Ong {
     private String name;
     private String description;
     private String address;
-    private String country; // Câmp nou
+    private String country;
     private String phone;
     private String email;
     private LocalDate foundingDate;
+    private String imageUrl; // Camp nou
 
     public Ong() {}
 
@@ -40,6 +41,9 @@ public class Ong {
     public LocalDate getFoundingDate() { return foundingDate; }
     public void setFoundingDate(LocalDate foundingDate) { this.foundingDate = foundingDate; }
 
-    // Metodă de compatibilitate pentru a ușura tranziția în template-uri (opțional)
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    // Metodă de compatibilitate
     public String getIdOng() { return registrationNumber; }
 }

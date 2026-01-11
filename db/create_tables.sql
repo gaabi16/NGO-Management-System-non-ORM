@@ -16,10 +16,10 @@ CREATE TABLE volunteers (
     birth_date DATE NOT NULL,
     skills TEXT NOT NULL,
     availability VARCHAR(100) NOT NULL,
-    emergency_contact VARCHAR(100) -- Acum permite NULL
+    emergency_contact VARCHAR(100)
 );
 
--- ONGs (founding_date este acum NULLABLE)
+-- ONGs (MODIFICAT: am adaugat image_url)
 CREATE TABLE ongs (
     registration_number VARCHAR(50) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -28,10 +28,11 @@ CREATE TABLE ongs (
     country VARCHAR(100) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     email VARCHAR(100) NOT NULL,
-    founding_date DATE -- Acum permite NULL
+    founding_date DATE,
+    image_url VARCHAR(255) -- Coloana noua pentru imagine
 );
 
--- Coordinators (Toate câmpurile rămân NOT NULL)
+-- Coordinators (Neschimbat)
 CREATE TABLE coordinators (
     ID_coordinator SERIAL PRIMARY KEY,
     ID_user INT NOT NULL UNIQUE REFERENCES users(ID_user),
@@ -41,14 +42,14 @@ CREATE TABLE coordinators (
     employment_type VARCHAR(50) NOT NULL
 );
 
--- Activity Categories
+-- Activity Categories (Neschimbat)
 CREATE TABLE activity_categories (
     ID_category SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT
 );
 
--- Activities (MODIFICAT: donations_collected -> target_donation)
+-- Activities (Neschimbat)
 CREATE TABLE activities (
     ID_activity SERIAL PRIMARY KEY,
     ID_coordinator INT NOT NULL REFERENCES coordinators(ID_coordinator),
@@ -63,7 +64,7 @@ CREATE TABLE activities (
     target_donation DECIMAL(10,2) NOT NULL DEFAULT 0.00
 );
 
--- Volunteer Activities (Toate câmpurile rămân NOT NULL)
+-- Volunteer Activities (Neschimbat)
 CREATE TABLE volunteer_activities (
     ID_volunteer INT NOT NULL REFERENCES volunteers(ID_volunteer),
     ID_activity INT NOT NULL REFERENCES activities(ID_activity),
@@ -74,7 +75,7 @@ CREATE TABLE volunteer_activities (
     PRIMARY KEY (ID_volunteer, ID_activity)
 );
 
--- Donations (Toate câmpurile rămân NOT NULL)
+-- Donations (Neschimbat)
 CREATE TABLE donations (
     ID_donation SERIAL PRIMARY KEY,
     ong_registration_number VARCHAR(50) NOT NULL REFERENCES ongs(registration_number),
