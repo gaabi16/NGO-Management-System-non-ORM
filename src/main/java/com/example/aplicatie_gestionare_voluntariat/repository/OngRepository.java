@@ -91,12 +91,10 @@ public class OngRepository {
         return jdbcTemplate.query("SELECT * FROM ongs ORDER BY founding_date DESC LIMIT 5", ongRowMapper);
     }
 
-    // [NOU] Metoda de filtrare avansata (Search + Country)
     public List<Ong> findFilteredOngs(String search, String country, int offset, int limit) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ongs WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
 
-        // Cautare dupa Nume, Nr Inreg sau Email
         if (search != null && !search.trim().isEmpty()) {
             sql.append("AND (LOWER(name) LIKE LOWER(?) OR LOWER(registration_number) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?)) ");
             String searchPattern = "%" + search.trim() + "%";
@@ -105,7 +103,6 @@ public class OngRepository {
             params.add(searchPattern);
         }
 
-        // Filtrare dupa tara
         if (country != null && !country.trim().isEmpty() && !country.equals("all")) {
             sql.append("AND LOWER(country) = LOWER(?) ");
             params.add(country.trim());
@@ -118,7 +115,6 @@ public class OngRepository {
         return jdbcTemplate.query(sql.toString(), ongRowMapper, params.toArray());
     }
 
-    // [NOU] Count pentru filtrare avansata
     public long countFilteredOngs(String search, String country) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ongs WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
@@ -139,7 +135,6 @@ public class OngRepository {
         return jdbcTemplate.queryForObject(sql.toString(), Long.class, params.toArray());
     }
 
-    // Metode legacy pastrate pentru compatibilitate (daca e cazul)
     public List<Ong> findAll(int limit, int offset) {
         return jdbcTemplate.query("SELECT * FROM ongs ORDER BY name ASC LIMIT ? OFFSET ?", ongRowMapper, limit, offset);
     }
@@ -158,11 +153,11 @@ public class OngRepository {
         return jdbcTemplate.queryForObject(sql, Long.class, "%" + regNum + "%");
     }
 
+    // [MODIFICAT] Calculeaza suma reala din tabela donations
     public Optional<java.util.Map<String, Object>> findTopFundraisingOng() {
-        String sql = "SELECT o.name, SUM(a.donated_amount) as total " +
+        String sql = "SELECT o.name, SUM(d.amount) as total " +
                 "FROM ongs o " +
-                "JOIN coordinators c ON o.registration_number = c.ong_registration_number " +
-                "JOIN activities a ON c.id_coordinator = a.id_coordinator " +
+                "JOIN donations d ON o.registration_number = d.ong_registration_number " +
                 "GROUP BY o.name " +
                 "ORDER BY total DESC LIMIT 1";
         try {

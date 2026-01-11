@@ -55,6 +55,8 @@ public class CoordinatorService {
         String sqlActiveVol = "SELECT COUNT(DISTINCT va.id_volunteer) FROM volunteer_activities va JOIN activities a ON va.id_activity = a.id_activity WHERE a.id_coordinator = ? AND va.status = 'accepted'";
         Integer activeVolunteers = jdbcTemplate.queryForObject(sqlActiveVol, Integer.class, coordinator.getIdCoordinator());
         stats.put("activeVolunteers", activeVolunteers);
+
+        // [IMPORTANT] Calculul sumei totale de donatii REALE (Actual Donation Amount) pentru intregul ONG
         String sqlDonations = "SELECT COALESCE(SUM(amount), 0) FROM donations WHERE ong_registration_number = ?";
         Double totalDonations = jdbcTemplate.queryForObject(sqlDonations, Double.class, coordinator.getOngRegistrationNumber());
         stats.put("totalDonations", totalDonations);
@@ -68,17 +70,14 @@ public class CoordinatorService {
         String ongRegNumber = jdbcTemplate.queryForObject(sqlCoord, String.class, coordinatorId);
 
         for (Activity activity : activities) {
-            // Calculăm cererile în așteptare
             String sqlPending = "SELECT COUNT(*) FROM volunteer_activities WHERE id_activity = ? AND status = 'pending'";
             Long countPending = jdbcTemplate.queryForObject(sqlPending, Long.class, activity.getIdActivity());
             activity.setPendingCount(countPending != null ? countPending.intValue() : 0);
 
-            // [NOU] Calculăm voluntarii acceptați pentru afișarea x / y
             String sqlAccepted = "SELECT COUNT(*) FROM volunteer_activities WHERE id_activity = ? AND status = 'accepted'";
             Long countAccepted = jdbcTemplate.queryForObject(sqlAccepted, Long.class, activity.getIdActivity());
             activity.setAcceptedCount(countAccepted != null ? countAccepted.intValue() : 0);
 
-            // Verificăm dacă există donație înregistrată (pentru activitățile finalizate)
             if ("completed".equalsIgnoreCase(activity.getStatus())) {
                 String sqlDonation = "SELECT COUNT(*) FROM donations WHERE donor_name = ? AND ong_registration_number = ?";
                 Integer donationCount = jdbcTemplate.queryForObject(sqlDonation, Integer.class, activity.getName(), ongRegNumber);
