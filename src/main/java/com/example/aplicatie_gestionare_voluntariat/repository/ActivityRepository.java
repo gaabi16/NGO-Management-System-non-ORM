@@ -44,7 +44,6 @@ public class ActivityRepository {
             activity.setMaxVolunteers(rs.getInt("max_volunteers"));
             activity.setStatus(rs.getString("status"));
 
-            // [MODIFICAT] donations_collected -> target_donation
             activity.setTargetDonation(rs.getDouble("target_donation"));
 
             try {
@@ -61,7 +60,6 @@ public class ActivityRepository {
                 activity.setEnrollmentStatus(rs.getString("enrollment_status"));
             } catch (SQLException e) { }
 
-            // Mapăm detaliile coordonatorului și ONG-ului
             try {
                 String first = rs.getString("coord_first");
                 String last = rs.getString("coord_last");
@@ -70,8 +68,6 @@ public class ActivityRepository {
                 }
                 activity.setCoordinatorEmail(rs.getString("coord_email"));
                 activity.setCoordinatorPhone(rs.getString("coord_phone"));
-
-                // Mapare nume ONG
                 activity.setOngName(rs.getString("ong_name"));
             } catch (SQLException e) { }
 
@@ -80,7 +76,6 @@ public class ActivityRepository {
     };
 
     public List<Activity> findByOngId(String ongRegistrationNumber) {
-        // Am adăugat JOIN cu users și selectarea câmpurilor coord_*
         String sql = "SELECT a.*, cat.name as category_name, " +
                 "u.first_name as coord_first, u.last_name as coord_last, " +
                 "u.email as coord_email, u.phone_number as coord_phone " +
@@ -131,7 +126,6 @@ public class ActivityRepository {
     }
 
     public void save(Activity activity) {
-        // [MODIFICAT] donations_collected -> target_donation
         String sql = "INSERT INTO activities (id_category, id_coordinator, name, description, location, start_date, end_date, max_volunteers, status, target_donation) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', ?)";
 
@@ -189,7 +183,6 @@ public class ActivityRepository {
     }
 
     public Double getTotalSystemDonations() {
-        // [MODIFICAT] donations_collected -> target_donation
         String sql = "SELECT SUM(target_donation) FROM activities";
         Double total = jdbcTemplate.queryForObject(sql, Double.class);
         return total != null ? total : 0.0;

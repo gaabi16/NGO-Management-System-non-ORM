@@ -114,7 +114,6 @@ public class CoordinatorRepository {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM coordinators", Long.class);
     }
 
-    // [NOU] Returnează coordonatorul cu cele mai multe activități create
     public Map<String, Object> findTopCoordinator() {
         String sql = "SELECT u.first_name, u.last_name, COUNT(a.id_activity) as act_count " +
                 "FROM coordinators c " +

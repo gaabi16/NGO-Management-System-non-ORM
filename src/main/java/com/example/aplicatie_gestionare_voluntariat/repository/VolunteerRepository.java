@@ -88,7 +88,6 @@ public class VolunteerRepository {
         jdbcTemplate.update(sql, userId);
     }
 
-    // [NOU] Returnează voluntarul cu cele mai multe activități
     public Map<String, Object> findMostActiveVolunteer() {
         String sql = "SELECT u.first_name, u.last_name, COUNT(va.id_activity) as act_count " +
                 "FROM volunteers v " +

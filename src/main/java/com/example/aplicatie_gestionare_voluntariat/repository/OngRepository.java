@@ -34,7 +34,6 @@ public class OngRepository {
             if (rs.getDate("founding_date") != null) {
                 ong.setFoundingDate(rs.getDate("founding_date").toLocalDate());
             }
-            // Mapam imaginea
             ong.setImageUrl(rs.getString("image_url"));
             return ong;
         }

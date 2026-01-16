@@ -88,13 +88,11 @@ public class UserRepository {
         jdbcTemplate.update(sql, id);
     }
 
-    // [MODIFICAT] Logica de cautare pentru a include concatenarea numelui
     public List<User> findFilteredUsers(String search, List<User.Role> roles, int offset, int limit) {
         StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
 
         if (search != null && !search.trim().isEmpty()) {
-            // Cautam in Prenume SAU Nume SAU "Prenume Nume" (concatenat) SAU Email
             sql.append("AND (LOWER(first_name) LIKE LOWER(?) OR LOWER(last_name) LIKE LOWER(?) OR LOWER(first_name || ' ' || last_name) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?)) ");
             String searchPattern = "%" + search.trim() + "%";
             params.add(searchPattern);
@@ -119,7 +117,6 @@ public class UserRepository {
         return jdbcTemplate.query(sql.toString(), userRowMapper, params.toArray());
     }
 
-    // [MODIFICAT] Acelasi fix si pentru count (necesar pentru paginare)
     public long countFilteredUsers(String search, List<User.Role> roles) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
