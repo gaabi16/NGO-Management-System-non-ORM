@@ -125,6 +125,33 @@ public class ActivityRepository {
         return jdbcTemplate.query(sql.toString(), activityRowMapper, params.toArray());
     }
 
+    public List<Activity> findRecommendationsForVolunteer(Integer volunteerId) {
+        String sql = "SELECT DISTINCT a.*, cat.name as category_name, " +
+                "u.first_name as coord_first, u.last_name as coord_last, " +
+                "u.email as coord_email, u.phone_number as coord_phone, " +
+                "o.name as ong_name " +
+                "FROM activities a " +
+                "JOIN coordinators c ON a.id_coordinator = c.id_coordinator " +
+                "JOIN users u ON c.id_user = u.id_user " +
+                "JOIN ongs o ON c.ong_registration_number = o.registration_number " +
+                "LEFT JOIN activity_categories cat ON a.id_category = cat.id_category " +
+                "WHERE o.country IN (" +
+                "    SELECT DISTINCT o2.country " +
+                "    FROM volunteer_activities va2 " +
+                "    JOIN activities a2 ON va2.id_activity = a2.id_activity " +
+                "    JOIN coordinators c2 ON a2.id_coordinator = c2.id_coordinator " +
+                "    JOIN ongs o2 ON c2.ong_registration_number = o2.registration_number " +
+                "    WHERE va2.id_volunteer = ? AND va2.status IN ('accepted', 'completed')" +
+                ") " +
+                "AND a.id_activity NOT IN (" +
+                "    SELECT va3.id_activity FROM volunteer_activities va3 WHERE va3.id_volunteer = ?" +
+                ") " +
+                "AND a.status = 'open' " +
+                "ORDER BY a.start_date ASC LIMIT 3";
+
+        return jdbcTemplate.query(sql, activityRowMapper, volunteerId, volunteerId);
+    }
+
     public void save(Activity activity) {
         String sql = "INSERT INTO activities (id_category, id_coordinator, name, description, location, start_date, end_date, max_volunteers, status, target_donation) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', ?)";

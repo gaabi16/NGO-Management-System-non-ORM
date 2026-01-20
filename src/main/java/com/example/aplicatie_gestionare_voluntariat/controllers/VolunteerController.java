@@ -89,8 +89,10 @@ public class VolunteerController {
         User user = userRepository.findByEmail(email).orElse(new User());
 
         List<Activity> activities = volunteerPageService.getMyActivities(email, status);
+        List<Activity> recommendations = volunteerPageService.getRecommendedActivities(email);
 
         model.addAttribute("activities", activities);
+        model.addAttribute("recommendations", recommendations);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("firstName", user.getFirstName());
 
