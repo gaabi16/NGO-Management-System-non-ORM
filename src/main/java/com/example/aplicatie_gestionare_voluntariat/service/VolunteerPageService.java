@@ -14,7 +14,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class VolunteerPageService {
@@ -148,6 +147,14 @@ public class VolunteerPageService {
             return new ArrayList<>();
         }
         return activityRepository.findActivitiesByVolunteerId(volunteerId, statusFilter);
+    }
+
+    public List<Activity> getRecommendedActivities(String email) {
+        Integer volunteerId = getVolunteerIdByEmail(email);
+        if (volunteerId == null) {
+            return new ArrayList<>();
+        }
+        return activityRepository.findRecommendationsForVolunteer(volunteerId);
     }
 
     public Integer getVolunteerIdByEmail(String email) {
