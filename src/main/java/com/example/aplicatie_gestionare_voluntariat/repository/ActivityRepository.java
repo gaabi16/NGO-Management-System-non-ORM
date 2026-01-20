@@ -71,6 +71,15 @@ public class ActivityRepository {
                 activity.setOngName(rs.getString("ong_name"));
             } catch (SQLException e) { }
 
+            try {
+                String regNum = rs.getString("ong_registration_number");
+                if (regNum != null) {
+                    activity.setOngRegistrationNumber(regNum);
+                }
+            } catch (SQLException e) {
+
+            }
+
             return activity;
         }
     };
@@ -103,7 +112,7 @@ public class ActivityRepository {
         StringBuilder sql = new StringBuilder(
                 "SELECT a.*, va.status as enrollment_status, cat.name as category_name, " +
                         "u.first_name as coord_first, u.last_name as coord_last, u.email as coord_email, u.phone_number as coord_phone, " +
-                        "o.name as ong_name " +
+                        "o.name as ong_name, o.registration_number as ong_registration_number " +
                         "FROM activities a " +
                         "JOIN volunteer_activities va ON a.id_activity = va.id_activity " +
                         "LEFT JOIN activity_categories cat ON a.id_category = cat.id_category " +
@@ -129,7 +138,7 @@ public class ActivityRepository {
         String sql = "SELECT DISTINCT a.*, cat.name as category_name, " +
                 "u.first_name as coord_first, u.last_name as coord_last, " +
                 "u.email as coord_email, u.phone_number as coord_phone, " +
-                "o.name as ong_name " +
+                "o.name as ong_name, o.registration_number as ong_registration_number " +
                 "FROM activities a " +
                 "JOIN coordinators c ON a.id_coordinator = c.id_coordinator " +
                 "JOIN users u ON c.id_user = u.id_user " +
