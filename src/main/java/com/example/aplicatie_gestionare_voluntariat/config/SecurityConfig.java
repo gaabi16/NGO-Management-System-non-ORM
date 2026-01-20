@@ -28,7 +28,7 @@ public class SecurityConfig {
                         .requestMatchers("/signup", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("admin")
                         .requestMatchers("/volunteer/**").hasRole("volunteer")
-                        .requestMatchers("/coordinator/**").hasRole("coordinator") // [NOU] Acces coordonator
+                        .requestMatchers("/coordinator/**").hasRole("coordinator")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

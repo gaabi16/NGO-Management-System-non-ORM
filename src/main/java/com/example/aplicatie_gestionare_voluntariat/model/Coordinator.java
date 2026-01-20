@@ -4,12 +4,11 @@ public class Coordinator {
 
     private Integer idCoordinator;
     private Integer idUser;
-    private String ongRegistrationNumber; // FK String
+    private String ongRegistrationNumber;
     private String department;
     private Integer experienceYears;
     private String employmentType;
 
-    // Relații pentru afișare
     private User user;
     private Ong ong;
 

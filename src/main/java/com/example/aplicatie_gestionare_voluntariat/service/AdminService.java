@@ -41,7 +41,6 @@ public class AdminService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    // Regex Validare
     private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
     private boolean isValidEmail(String email) {
@@ -69,7 +68,6 @@ public class AdminService {
         public int getNumber() { return currentPage; }
     }
 
-    // Metoda unificata care suporta search + roluri
     public PageWrapper<User> getUsersPageFiltered(int page, int size, String search, List<User.Role> roles) {
         int offset = page * size;
         List<User> users = userRepository.findFilteredUsers(search, roles, offset, size);
@@ -77,7 +75,6 @@ public class AdminService {
         return new PageWrapper<>(users, totalElements, page, size);
     }
 
-    // Metoda unificata pentru ONG-uri (Search + Country)
     public PageWrapper<Ong> getOngsPageFiltered(int page, int size, String search, String country) {
         int offset = page * size;
         List<Ong> ongs = ongRepository.findFilteredOngs(search, country, offset, size);
@@ -92,7 +89,6 @@ public class AdminService {
         stats.put("topVolunteerName", topVol != null ? topVol.get("name") : "N/A");
         stats.put("topVolunteerCount", topVol != null ? topVol.get("count") : 0);
 
-        // Aceasta metoda din ongRepository a fost actualizata sa citeasca din donations
         Map<String, Object> topOng = ongRepository.findTopFundraisingOng().orElse(null);
         stats.put("topOngName", topOng != null ? topOng.get("name") : "N/A");
         stats.put("topOngDonations", topOng != null ? String.format("%.2f", topOng.get("total")) : "0.00");
@@ -105,7 +101,6 @@ public class AdminService {
         stats.put("popularActivityName", popAct != null ? popAct.get("name") : "N/A");
         stats.put("popularActivityCount", popAct != null ? popAct.get("count") : 0);
 
-        // [MODIFICAT] Calculul total sistem donations direct din tabela donations (Actual Amount)
         Double totalDonations = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(amount), 0) FROM donations", Double.class);
         stats.put("totalSystemDonations", String.format("%.2f", totalDonations));
 
@@ -316,7 +311,6 @@ public class AdminService {
             existingOng.setPhone(updatedOng.getPhone());
             existingOng.setEmail(updatedOng.getEmail());
             existingOng.setFoundingDate(updatedOng.getFoundingDate());
-            // ADĂUGAT: Actualizare Image URL
             existingOng.setImageUrl(updatedOng.getImageUrl());
             return ongRepository.save(existingOng);
         }
@@ -328,12 +322,9 @@ public class AdminService {
         Ong ong = ongRepository.findById(registrationNumber).orElse(null);
         if (ong == null) return false;
 
-        // [MODIFICAT] Stergere donatii asociate pentru a evita eroarea de Foreign Key
-        // Aceasta linie asigura stergerea doar a donatiilor legate de ONG-ul curent
         String sqlDeleteDonations = "DELETE FROM donations WHERE ong_registration_number = ?";
         jdbcTemplate.update(sqlDeleteDonations, registrationNumber);
 
-        // Apoi continuam cu stergerea coordonatorilor si activitatilor lor
         String sqlGetCoordinators = "SELECT id_user FROM coordinators WHERE ong_registration_number = ?";
         List<Integer> coordinatorUserIds = jdbcTemplate.queryForList(sqlGetCoordinators, Integer.class, registrationNumber);
 

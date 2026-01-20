@@ -93,16 +93,13 @@ public class CoordinatorController {
         model.addAttribute("pendingCount", activityStats.get("pending"));
         model.addAttribute("totalApplicants", activityStats.get("total"));
 
-        // Calculăm suma reală bazându-ne pe numele activității
         Double actualDonation = coordinatorService.getActualDonationAmount(id);
         model.addAttribute("actualDonationAmount", actualDonation);
 
-        // Dacă s-a găsit o donație cu numele activității, considerăm că e înregistrată
         model.addAttribute("isDonationRegistered", actualDonation > 0);
 
         if (!model.containsAttribute("newDonation")) {
             Donation donation = new Donation();
-            // [IMPORTANT] Pre-setăm numele donatorului cu numele activității
             donation.setDonorName(activity.getName());
             model.addAttribute("newDonation", donation);
         }
@@ -117,7 +114,6 @@ public class CoordinatorController {
                                    RedirectAttributes redirectAttributes) {
         try {
             Coordinator coordinator = coordinatorService.getCoordinatorByEmail(authentication.getName());
-            // Nu mai setăm activityId, ne bazăm pe donorName care vine din form
             coordinatorService.addDonation(donation, coordinator);
 
             redirectAttributes.addFlashAttribute("successMessage", "Donation registered successfully!");

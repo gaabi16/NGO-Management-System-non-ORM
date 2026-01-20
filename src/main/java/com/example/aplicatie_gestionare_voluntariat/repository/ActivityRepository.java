@@ -81,7 +81,7 @@ public class ActivityRepository {
                 "u.email as coord_email, u.phone_number as coord_phone " +
                 "FROM activities a " +
                 "JOIN coordinators c ON a.id_coordinator = c.id_coordinator " +
-                "JOIN users u ON c.id_user = u.id_user " + // <-- JOIN-ul nou
+                "JOIN users u ON c.id_user = u.id_user " +
                 "LEFT JOIN activity_categories cat ON a.id_category = cat.id_category " +
                 "WHERE c.ong_registration_number = ? " +
                 "ORDER BY a.start_date DESC";
@@ -138,7 +138,7 @@ public class ActivityRepository {
                 activity.getStartDate(),
                 activity.getEndDate(),
                 activity.getMaxVolunteers(),
-                activity.getTargetDonation()); // Folosim noua metodă getTargetDonation()
+                activity.getTargetDonation());
     }
 
     public void updateStatus(Integer activityId, String status) {

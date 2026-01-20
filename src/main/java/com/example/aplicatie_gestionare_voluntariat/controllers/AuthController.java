@@ -44,7 +44,6 @@ public class AuthController {
             String rawPassword = registrationDto.getPassword();
             String registeredEmail = userService.registerVolunteer(registrationDto);
 
-            // Auto-login
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(registeredEmail, rawPassword);
             Authentication authentication = authenticationManager.authenticate(authToken);
@@ -56,7 +55,6 @@ public class AuthController {
             return "redirect:/home";
 
         } catch (IllegalArgumentException e) {
-            // Prindem erorile de validare din Service
             model.addAttribute("errorMessage", e.getMessage());
             return "signup";
         } catch (Exception e) {

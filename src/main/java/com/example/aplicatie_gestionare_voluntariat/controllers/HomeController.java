@@ -22,7 +22,6 @@ public class HomeController {
             if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_volunteer"))) {
                 return "redirect:/volunteer/dashboard";
             }
-            // [NOU] Redirecționare Coordinator
             if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_coordinator"))) {
                 return "redirect:/coordinator/dashboard";
             }

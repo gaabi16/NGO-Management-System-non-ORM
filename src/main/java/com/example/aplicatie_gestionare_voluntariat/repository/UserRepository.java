@@ -97,8 +97,8 @@ public class UserRepository {
             String searchPattern = "%" + search.trim() + "%";
             params.add(searchPattern);
             params.add(searchPattern);
-            params.add(searchPattern); // pentru concatenare
-            params.add(searchPattern); // pentru email
+            params.add(searchPattern);
+            params.add(searchPattern);
         }
 
         if (roles != null && !roles.isEmpty()) {
@@ -142,7 +142,6 @@ public class UserRepository {
         return jdbcTemplate.queryForObject(sql.toString(), Long.class, params.toArray());
     }
 
-    // Metode legacy
     public List<User> findAllPaginated(int offset, int limit) {
         return findFilteredUsers(null, null, offset, limit);
     }

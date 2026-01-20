@@ -32,7 +32,6 @@ public class CoordinatorService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    // Regex
     private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
     public Coordinator getCoordinatorByEmail(String email) {
@@ -56,7 +55,6 @@ public class CoordinatorService {
         Integer activeVolunteers = jdbcTemplate.queryForObject(sqlActiveVol, Integer.class, coordinator.getIdCoordinator());
         stats.put("activeVolunteers", activeVolunteers);
 
-        // [IMPORTANT] Calculul sumei totale de donatii REALE (Actual Donation Amount) pentru intregul ONG
         String sqlDonations = "SELECT COALESCE(SUM(amount), 0) FROM donations WHERE ong_registration_number = ?";
         Double totalDonations = jdbcTemplate.queryForObject(sqlDonations, Double.class, coordinator.getOngRegistrationNumber());
         stats.put("totalDonations", totalDonations);
@@ -100,7 +98,6 @@ public class CoordinatorService {
         if (activity.getEndDate() == null) throw new IllegalArgumentException("End Date is required");
         if (activity.getMaxVolunteers() == null || activity.getMaxVolunteers() < 1) throw new IllegalArgumentException("Max Volunteers must be at least 1");
 
-        // [CORECAT] Folosim getTargetDonation() în loc de getDonationsCollected()
         if (activity.getTargetDonation() == null) throw new IllegalArgumentException("Target Donation Amount is required");
         if (activity.getTargetDonation() < 0) throw new IllegalArgumentException("Target Donation Amount cannot be negative");
 
