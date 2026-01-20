@@ -216,6 +216,52 @@
             opacity: 1 !important;
             transform: translateY(0) !important;
         }
+
+        /* --- RECOMMENDATIONS STYLES --- */
+        .recommendations-section {
+            margin-top: 60px;
+            border-top: 2px dashed #d1d9e6;
+            padding-top: 40px;
+            animation: fadeInUp 1s ease-out forwards 0.6s;
+            opacity: 0;
+        }
+
+        .rec-subtitle {
+            color: #666;
+            margin-bottom: 25px;
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        .rec-card-row {
+            background: linear-gradient(to right, #fff, #fbfaff);
+            border-left-color: #6f42c1; /* Purple Accent */
+            opacity: 1 !important; /* Force visible as these load later */
+            animation: none !important;
+        }
+
+        .btn-view {
+            padding: 8px 18px;
+            background: #6f42c1;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background 0.3s;
+            display: inline-block;
+        }
+
+        .btn-view:hover { background: #5a32a3; transform: translateY(-1px); }
+
+        .rec-meta {
+            text-align: right;
+            font-size: 0.85rem;
+            color: #555;
+            margin-right: 15px;
+        }
+        
+        .rec-meta div { margin-bottom: 2px; }
     </style>
 </head>
 <body>
@@ -301,6 +347,32 @@
             <p>Start applying to activities from the Dashboard!</p>
         </div>
     </div>
+
+    <div class="recommendations-section" th:if="${!recommendations.isEmpty()}">
+        <h2 class="section-title" style="border-left-color: #6f42c1; opacity: 1; animation: none;">✨ Recommended for You</h2>
+        <p class="rec-subtitle">Based on the countries you've volunteered in, here are 3 opportunities you might like:</p>
+
+        <div class="activities-list">
+            <div th:each="rec : ${recommendations}" class="activity-card-row rec-card-row">
+                <div class="card-header-row" style="cursor: default;">
+                    <div class="header-content">
+                        <h3 class="activity-title" th:text="${rec.name}">New Opportunity</h3>
+                        <div class="ong-name" style="color: #6f42c1;">
+                            🏢 <span th:text="${rec.ongName}">Interesting ONG</span>
+                        </div>
+                    </div>
+
+                    <div class="header-status">
+                        <div class="rec-meta">
+                            <div>📅 <span th:text="${#temporals.format(rec.startDate, 'dd MMM HH:mm')}">Start</span> - <span th:text="${#temporals.format(rec.endDate, 'dd MMM HH:mm')}">End</span></div>
+                            <div>👤 <span th:text="${rec.coordinatorName}">Coord</span></div>
+                        </div>
+                        <a th:href="@{'/volunteer/ong/' + ${rec.ongName}}" class="btn-view">View details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -308,57 +380,52 @@
     const ANIMATION_STORAGE_KEY = 'my_activities_intro_shown';
 
     document.addEventListener('DOMContentLoaded', function() {
-        const cards = document.querySelectorAll('.activity-card-row');
+        // Selectam doar cardurile normale de activitati, nu si recomandarile (care au stiluri separate)
+        const cards = document.querySelectorAll('.activity-card-row:not(.rec-card-row)');
         const title = document.querySelector('.section-title');
         const filters = document.querySelector('.filter-container');
         const emptyState = document.querySelector('.empty-state');
+        const recSection = document.querySelector('.recommendations-section');
 
         // Verificăm dacă utilizatorul a văzut deja animațiile în această sesiune
         const hasSeenIntro = sessionStorage.getItem(ANIMATION_STORAGE_KEY);
 
         if (hasSeenIntro) {
             // CAZ 1: Utilizatorul filtrează (a mai fost aici) -> FĂRĂ animații
-
-            // Oprim animațiile pentru titlu și filtre
             if (title) title.classList.add('skip-animation');
             if (filters) filters.classList.add('skip-animation');
             if (emptyState) emptyState.classList.add('skip-animation');
+            if (recSection) recSection.classList.add('skip-animation');
 
-            // Afișăm cardurile instantaneu
             cards.forEach(card => {
                 card.classList.add('skip-animation');
-                // Asigurăm vizibilitatea manual pentru siguranță
                 card.style.opacity = '1';
                 card.style.transform = 'translateY(0)';
             });
 
         } else {
             // CAZ 2: Prima vizită -> Executăm animațiile normale
-
-            // Setăm flag-ul că a văzut intro-ul
             sessionStorage.setItem(ANIMATION_STORAGE_KEY, 'true');
 
-            // Aplicăm animația în cascadă pentru carduri
             cards.forEach((card, index) => {
-                // Intarziere progresiva: incepem dupa ce se incarca filtrele (0.6s) + delay per card
                 const delay = 0.6 + (index * 0.15);
                 card.style.animation = `fadeInUp 0.6s ease-out forwards ${delay}s`;
             });
         }
     });
 
-    // Funcție pentru a "uita" că am văzut animațiile
-    // Se apelează când plecăm spre Home, Profile sau Logout
     function resetAnimationState() {
         sessionStorage.removeItem(ANIMATION_STORAGE_KEY);
     }
 
-    // --- LOGICA DE TOGGLE ---
     function toggleCard(headerElement) {
+        // Prevent expanding recommendation cards if they lack collapsible body
         const bodyContent = headerElement.nextElementSibling;
+        if (!bodyContent) return; 
+        
         const icon = headerElement.querySelector('.toggle-icon');
         bodyContent.classList.toggle('expanded');
-        icon.classList.toggle('rotated');
+        if(icon) icon.classList.toggle('rotated');
     }
 </script>
 
