@@ -48,7 +48,6 @@ public class OngRepository {
     public Ong save(Ong ong) {
         Optional<Ong> existing = findById(ong.getRegistrationNumber());
         if (existing.isEmpty()) {
-            // INSERT - includem image_url
             String sql = "INSERT INTO ongs (registration_number, name, description, address, country, phone, email, founding_date, image_url) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             jdbcTemplate.update(sql,
@@ -63,7 +62,6 @@ public class OngRepository {
                     ong.getImageUrl()
             );
         } else {
-            // UPDATE - includem image_url
             String sql = "UPDATE ongs SET name = ?, description = ?, address = ?, country = ?, phone = ?, email = ?, founding_date = ?, image_url = ? " +
                     "WHERE registration_number = ?";
             jdbcTemplate.update(sql,

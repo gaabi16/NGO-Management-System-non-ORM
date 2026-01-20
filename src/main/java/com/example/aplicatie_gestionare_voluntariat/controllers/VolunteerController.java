@@ -81,7 +81,6 @@ public class VolunteerController {
         return "redirect:/volunteer/ong/" + ongId + "?success=true";
     }
 
-    // [NOU] Endpoint pentru pagina My Activities
     @GetMapping("/my-activities")
     public String myActivities(@RequestParam(required = false, defaultValue = "all") String status,
                                Model model,

@@ -33,8 +33,8 @@ public class AdminController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) List<String> roles,
             @RequestParam(required = false) String userSearch,
-            @RequestParam(required = false) String search, // search pentru ONG-uri (Name, Reg, Email)
-            @RequestParam(required = false) String country, // [NOU] filtru tara pentru ONG-uri
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String country,
             Model model,
             Authentication authentication) {
 
@@ -58,14 +58,13 @@ public class AdminController {
             model.addAttribute("currentUserSearch", userSearch);
 
         } else if ("ongs".equals(view)) {
-            // [MODIFICAT] Preluare pagina filtrata cu search si country
             int pageSize = 20;
             AdminService.PageWrapper<Ong> ongsPage = adminService.getOngsPageFiltered(page, pageSize, search, country);
 
             model.addAttribute("ongsPage", ongsPage);
             model.addAttribute("currentPage", page);
             model.addAttribute("currentSearch", search);
-            model.addAttribute("currentCountry", country); // Trimitem tara curenta inapoi la UI
+            model.addAttribute("currentCountry", country);
 
         } else if ("statistics".equals(view)) {
             model.addAttribute("stats", adminService.getSystemStatistics());

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public class Ong {
 
-    private String registrationNumber; // PK (String)
+    private String registrationNumber;
     private String name;
     private String description;
     private String address;
@@ -16,7 +16,6 @@ public class Ong {
 
     public Ong() {}
 
-    // Getteri și Setteri
     public String getRegistrationNumber() { return registrationNumber; }
     public void setRegistrationNumber(String registrationNumber) { this.registrationNumber = registrationNumber; }
 
@@ -44,6 +43,5 @@ public class Ong {
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-    // Metodă de compatibilitate
     public String getIdOng() { return registrationNumber; }
 }

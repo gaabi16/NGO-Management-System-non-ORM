@@ -6,25 +6,21 @@ import java.time.LocalDate;
 
 public class VolunteerRegistrationDto {
 
-    // User fields
     private String firstName;
     private String lastName;
     private String email;
     private String password;
     private String phoneNumber;
 
-    // Volunteer fields
-    @DateTimeFormat(pattern = "yyyy-MM-dd") // [MODIFICARE] Asigură formatarea corectă pentru input type="date"
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
 
     private String skills;
     private String availability;
     private String emergencyContact;
 
-    // Constructors
     public VolunteerRegistrationDto() {}
 
-    // Getters and Setters
     public String getFirstName() {
         return firstName;
     }

@@ -9,18 +9,16 @@ public class Donation {
     private String donorName;
     private Double amount;
 
-    // [NOU] Câmp pentru moneda selectată (nu se salvează în DB, se folosește la calcule)
     private String currency;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate donationDate;
 
-    private String type; // e.g., 'cash', 'transfer'
+    private String type;
     private String notes;
 
     public Donation() {}
 
-    // Getters and Setters
     public Integer getIdDonation() { return idDonation; }
     public void setIdDonation(Integer idDonation) { this.idDonation = idDonation; }
 

@@ -22,7 +22,6 @@ public class UserService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    // Regex pentru validare email: ceva@domeniu.extensie (minim 2 caractere la extensie)
     private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
     private boolean isValidEmail(String email) {
@@ -43,11 +42,9 @@ public class UserService {
 
     @Transactional
     public String registerVolunteer(VolunteerRegistrationDto registrationDto) {
-        // Validari la inregistrare
         if (registrationDto.getFirstName() == null || registrationDto.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name is required.");
         if (registrationDto.getLastName() == null || registrationDto.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name is required.");
 
-        // Validare Email
         if (registrationDto.getEmail() == null || registrationDto.getEmail().trim().isEmpty()) throw new IllegalArgumentException("Email is required.");
         if (!isValidEmail(registrationDto.getEmail())) throw new IllegalArgumentException("Invalid email format. Must be like: user@domain.com");
 
@@ -92,16 +89,11 @@ public class UserService {
 
     @Transactional
     public void updateVolunteerProfile(String email, VolunteerRegistrationDto dto) {
-        // VALIDARE STRICTA UPDATE VOLUNTEER
         if (dto.getFirstName() == null || dto.getFirstName().trim().isEmpty()) throw new IllegalArgumentException("First Name cannot be empty");
         if (dto.getLastName() == null || dto.getLastName().trim().isEmpty()) throw new IllegalArgumentException("Last Name cannot be empty");
         if (dto.getBirthDate() == null) throw new IllegalArgumentException("Birth Date cannot be empty");
         if (dto.getSkills() == null || dto.getSkills().trim().isEmpty()) throw new IllegalArgumentException("Skills cannot be empty");
         if (dto.getAvailability() == null || dto.getAvailability().trim().isEmpty()) throw new IllegalArgumentException("Availability cannot be empty");
-
-        // Email-ul nu se schimba aici de regula, dar userul il detine
-        // Daca am permite update la email, ar trebui validat si aici.
-        // In acest controller (profile update), emailul vine din sesiune, nu din DTO, deci nu il validam aici.
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         user.setFirstName(dto.getFirstName());

@@ -4,10 +4,9 @@ import java.time.LocalDate;
 
 public class Volunteer {
     private Integer idVolunteer;
-    private Integer idUser; // Foreign key către User
-    private User user; // Obiect User complet (pentru join-uri)
+    private Integer idUser;
+    private User user;
 
-    // Câmpuri noi
     private LocalDate birthDate;
     private String skills;
     private String availability;
@@ -19,7 +18,6 @@ public class Volunteer {
         this.idUser = idUser;
     }
 
-    // Getters and Setters
     public Integer getIdVolunteer() { return idVolunteer; }
     public void setIdVolunteer(Integer idVolunteer) { this.idVolunteer = idVolunteer; }
 

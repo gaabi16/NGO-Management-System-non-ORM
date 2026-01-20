@@ -21,32 +21,24 @@ public class Activity {
     private Integer maxVolunteers;
     private String status;
 
-    // [MODIFICAT] donationsCollected -> targetDonation
     private Double targetDonation;
 
-    // Câmpuri tranzitorii (afișare)
     private String categoryName;
     private Integer pendingCount = 0;
 
-    // [NOU] Număr voluntari acceptați (x / y)
     private Integer acceptedCount = 0;
 
-    // Câmpuri pentru logica de voluntari (My Activities)
     private boolean enrolled = false;
-    private String enrollmentStatus; // 'pending', 'accepted', 'rejected'
+    private String enrollmentStatus;
 
-    // Detalii Coordonator & ONG pentru afișare extinsă
     private String coordinatorName;
     private String coordinatorEmail;
     private String coordinatorPhone;
     private String ongName;
 
-    // Necesar pentru notificarea din dashboard
     private boolean donationRegistered;
 
     public Activity() {}
-
-    // Getters and Setters
 
     public Integer getIdActivity() { return idActivity; }
     public void setIdActivity(Integer idActivity) { this.idActivity = idActivity; }
@@ -78,7 +70,6 @@ public class Activity {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    // [MODIFICAT] Getters/Setters
     public Double getTargetDonation() { return targetDonation; }
     public void setTargetDonation(Double targetDonation) { this.targetDonation = targetDonation; }
 
