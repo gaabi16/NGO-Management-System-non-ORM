@@ -349,7 +349,7 @@
     </div>
 
     <div class="recommendations-section" th:if="${!recommendations.isEmpty()}">
-        <h2 class="section-title" style="border-left-color: #6f42c1; opacity: 1; animation: none;">✨ Recommended for You</h2>
+        <h2 class="section-title" style="border-left-color: #6f42c1; opacity: 1; animation: none;">Recommended for You</h2>
         <p class="rec-subtitle">Based on the countries you've volunteered in, here are 3 opportunities you might like:</p>
 
         <div class="activities-list">
@@ -367,7 +367,7 @@
                             <div>📅 <span th:text="${#temporals.format(rec.startDate, 'dd MMM HH:mm')}">Start</span> - <span th:text="${#temporals.format(rec.endDate, 'dd MMM HH:mm')}">End</span></div>
                             <div>👤 <span th:text="${rec.coordinatorName}">Coord</span></div>
                         </div>
-                        <a th:href="@{'/volunteer/ong/' + ${rec.ongName}}" class="btn-view">View details</a>
+                        <a th:href="@{'/volunteer/ong/' + ${rec.ongRegistrationNumber}}" class="btn-view">View details</a>
                     </div>
                 </div>
             </div>
