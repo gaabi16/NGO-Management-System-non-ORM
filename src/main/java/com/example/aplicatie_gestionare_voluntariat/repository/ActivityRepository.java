@@ -76,9 +76,7 @@ public class ActivityRepository {
                 if (regNum != null) {
                     activity.setOngRegistrationNumber(regNum);
                 }
-            } catch (SQLException e) {
-
-            }
+            } catch (SQLException e) { }
 
             return activity;
         }
@@ -159,6 +157,27 @@ public class ActivityRepository {
                 "ORDER BY a.start_date ASC LIMIT 3";
 
         return jdbcTemplate.query(sql, activityRowMapper, volunteerId, volunteerId);
+    }
+
+    public void autoCloseFinishedActivities() {
+        String sqlVolunteers =
+                "UPDATE volunteer_activities va " +
+                        "SET status = 'completed', " +
+                        "    hours_completed = GREATEST(1, ROUND((EXTRACT(EPOCH FROM (a.end_date - a.start_date)) / 3600)::numeric, 1)) " +
+                        "FROM activities a " +
+                        "WHERE va.id_activity = a.id_activity " +
+                        "AND a.end_date < CURRENT_TIMESTAMP " +
+                        "AND va.status = 'accepted'";
+
+        jdbcTemplate.update(sqlVolunteers);
+
+        String sqlActivities =
+                "UPDATE activities " +
+                        "SET status = 'completed' " +
+                        "WHERE end_date < CURRENT_TIMESTAMP " +
+                        "AND status != 'completed'";
+
+        jdbcTemplate.update(sqlActivities);
     }
 
     public void save(Activity activity) {
