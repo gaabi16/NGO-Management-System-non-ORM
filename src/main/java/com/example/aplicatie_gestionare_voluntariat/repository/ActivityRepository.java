@@ -142,19 +142,19 @@ public class ActivityRepository {
                 "JOIN users u ON c.id_user = u.id_user " +
                 "JOIN ongs o ON c.ong_registration_number = o.registration_number " +
                 "LEFT JOIN activity_categories cat ON a.id_category = cat.id_category " +
-                "WHERE o.country IN (" +
+                "WHERE o.country IN (" + // subcerere: gasesc tarile unde voluntarul a mai participat
                 "    SELECT DISTINCT o2.country " +
                 "    FROM volunteer_activities va2 " +
                 "    JOIN activities a2 ON va2.id_activity = a2.id_activity " +
                 "    JOIN coordinators c2 ON a2.id_coordinator = c2.id_coordinator " +
                 "    JOIN ongs o2 ON c2.ong_registration_number = o2.registration_number " +
-                "    WHERE va2.id_volunteer = ? AND va2.status IN ('accepted', 'completed')" +
+                "    WHERE va2.id_volunteer = ? AND va2.status IN ('accepted', 'completed')" + // doar activitati confirmate in trecut
                 ") " +
-                "AND a.id_activity NOT IN (" +
+                "AND a.id_activity NOT IN (" + // subcerere: exclud activitatile unde voluntarul este deja inscris
                 "    SELECT va3.id_activity FROM volunteer_activities va3 WHERE va3.id_volunteer = ?" +
                 ") " +
-                "AND a.status = 'open' " +
-                "ORDER BY a.start_date ASC LIMIT 3";
+                "AND a.status = 'open' " + // doar activitati deschise
+                "ORDER BY a.start_date ASC LIMIT 3"; // primele 3 cele mai apropiate ca data
 
         return jdbcTemplate.query(sql, activityRowMapper, volunteerId, volunteerId);
     }
@@ -162,12 +162,14 @@ public class ActivityRepository {
     public void autoCloseFinishedActivities() {
         String sqlVolunteers =
                 "UPDATE volunteer_activities va " +
-                        "SET status = 'completed', " +
+                        "SET status = 'completed', " + // marchez statusul voluntarului ca finalizat
+                        // calculez orele orele automat: (Data sfarsit - Data inceput) in secunde / 3600
+                        // folosesc GREATEST pentru a asigura minim 1 ora chiar daca activitatea a fost scurta
                         "    hours_completed = GREATEST(1, ROUND((EXTRACT(EPOCH FROM (a.end_date - a.start_date)) / 3600)::numeric, 1)) " +
                         "FROM activities a " +
                         "WHERE va.id_activity = a.id_activity " +
-                        "AND a.end_date < CURRENT_TIMESTAMP " +
-                        "AND va.status = 'accepted'";
+                        "AND a.end_date < CURRENT_TIMESTAMP " + // doar daca activitatea a expirat calendaristic
+                        "AND va.status = 'accepted'"; // doar pentru voluntarii acceptati
 
         jdbcTemplate.update(sqlVolunteers);
 
