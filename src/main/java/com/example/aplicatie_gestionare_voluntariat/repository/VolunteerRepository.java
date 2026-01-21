@@ -109,4 +109,53 @@ public class VolunteerRepository {
     public long count() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM volunteers", Long.class);
     }
+
+    public List<Map<String, Object>> getLeaderboardData() {
+        String sql =
+                "SELECT * FROM (" +
+                        "   SELECT " +
+                        "       rank_table.full_name, " +
+                        "       rank_table.id_volunteer, " +
+                        "       ROUND(rank_table.total_weighted_score::numeric, 2) as score, " +
+                        "       rank_table.activities_count, " +
+                        "       DENSE_RANK() OVER (ORDER BY rank_table.total_weighted_score DESC) as global_rank, " +
+                        "       ROUND((rank_table.total_weighted_score - " +
+                        "           (SELECT AVG(total_weighted_score) FROM ( " +
+                        "               SELECT SUM(GREATEST(COALESCE(hours_completed, 1), 1)) as total_weighted_score " +
+                        "               FROM volunteer_activities " +
+                        "               WHERE LOWER(status)='completed' " +
+                        "               GROUP BY id_volunteer " +
+                        "            ) avg_sub " +
+                        "           ) " +
+                        "       )::numeric, 1) as diff_from_avg, " +
+                        "       CASE " +
+                        "          WHEN rank_table.activities_count >= 10 THEN 'Elite' " +
+                        "          WHEN rank_table.activities_count >= 5 THEN 'Veteran' " +
+                        "          WHEN rank_table.activities_count >= 3 THEN 'Senior' " +
+                        "          ELSE 'Junior' " +
+                        "      END as rank_title " +
+                        "   FROM ( " +
+                        "       SELECT " +
+                        "           u.first_name || ' ' || u.last_name as full_name, " +
+                        "           v.id_volunteer, " +
+                        "           COUNT(va.id_activity) as activities_count, " +
+                        "           SUM( " +
+                        "               GREATEST(COALESCE(va.hours_completed, 1), 1) * CASE " +
+                        "                   WHEN va.enrollment_date > CURRENT_DATE - INTERVAL '30 days' THEN 1.5 " +
+                        "                   WHEN va.enrollment_date > CURRENT_DATE - INTERVAL '90 days' THEN 1.2 " +
+                        "                   ELSE 1.0 " +
+                        "               END " +
+                        "           ) as total_weighted_score " +
+                        "       FROM volunteers v " +
+                        "       JOIN users u ON v.id_user = u.id_user " +
+                        "       JOIN volunteer_activities va ON v.id_volunteer = va.id_volunteer " +
+                        "       WHERE LOWER(va.status) = 'completed' " +
+                        "       GROUP BY u.first_name, u.last_name, v.id_volunteer " +
+                        "   ) as rank_table " +
+                        ") as final_ranking " +
+                        "WHERE global_rank <= 10 " +
+                        "ORDER BY global_rank ASC";
+
+        return jdbcTemplate.queryForList(sql);
+    }
 }
