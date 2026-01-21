@@ -174,4 +174,8 @@ public class VolunteerPageService {
             }
         }
     }
+
+    public List<Map<String, Object>> getVolunteerLeaderboard() {
+        return volunteerRepository.getLeaderboardData();
+    }
 }
