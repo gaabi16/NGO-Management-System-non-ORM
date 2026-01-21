@@ -118,9 +118,11 @@ public class VolunteerRepository {
                         "       rank_table.id_volunteer, " +
                         "       ROUND(rank_table.total_weighted_score::numeric, 2) as score, " +
                         "       rank_table.activities_count, " +
+                                // calculez rangul (locul), permitand egalitati
                         "       DENSE_RANK() OVER (ORDER BY rank_table.total_weighted_score DESC) as global_rank, " +
+                                // calculez diferenta fata de media globala a scorurilor
                         "       ROUND((rank_table.total_weighted_score - " +
-                        "           (SELECT AVG(total_weighted_score) FROM ( " +
+                        "           (SELECT AVG(total_weighted_score) FROM ( " + // subcerere pentru media globala
                         "               SELECT SUM(GREATEST(COALESCE(hours_completed, 1), 1)) as total_weighted_score " +
                         "               FROM volunteer_activities " +
                         "               WHERE LOWER(status)='completed' " +
@@ -128,6 +130,7 @@ public class VolunteerRepository {
                         "            ) avg_sub " +
                         "           ) " +
                         "       )::numeric, 1) as diff_from_avg, " +
+                                // atribui titluri bazate pe numarul de activitati finalizate
                         "       CASE " +
                         "          WHEN rank_table.activities_count >= 10 THEN 'Elite' " +
                         "          WHEN rank_table.activities_count >= 5 THEN 'Veteran' " +
@@ -135,25 +138,28 @@ public class VolunteerRepository {
                         "          ELSE 'Junior' " +
                         "      END as rank_title " +
                         "   FROM ( " +
+                                // subcerere interna: agreg datele brute per voluntar
                         "       SELECT " +
                         "           u.first_name || ' ' || u.last_name as full_name, " +
                         "           v.id_volunteer, " +
                         "           COUNT(va.id_activity) as activities_count, " +
                         "           SUM( " +
+                                    // logica de punctaj: ore lucrate * factor de recenta
+                                    // GREATEST imi asigura minim 1 punct chiar daca orele sunt 0 sau null
                         "               GREATEST(COALESCE(va.hours_completed, 1), 1) * CASE " +
-                        "                   WHEN va.enrollment_date > CURRENT_DATE - INTERVAL '30 days' THEN 1.5 " +
-                        "                   WHEN va.enrollment_date > CURRENT_DATE - INTERVAL '90 days' THEN 1.2 " +
-                        "                   ELSE 1.0 " +
+                        "                   WHEN va.enrollment_date > CURRENT_DATE - INTERVAL '30 days' THEN 1.5 " + // bonus 50%
+                        "                   WHEN va.enrollment_date > CURRENT_DATE - INTERVAL '90 days' THEN 1.2 " + // bonus 20%
+                        "                   ELSE 1.0 " + // standard
                         "               END " +
                         "           ) as total_weighted_score " +
                         "       FROM volunteers v " +
                         "       JOIN users u ON v.id_user = u.id_user " +
                         "       JOIN volunteer_activities va ON v.id_volunteer = va.id_volunteer " +
-                        "       WHERE LOWER(va.status) = 'completed' " +
+                        "       WHERE LOWER(va.status) = 'completed' " + // iau in calcul doar activitatile finalizate
                         "       GROUP BY u.first_name, u.last_name, v.id_volunteer " +
                         "   ) as rank_table " +
                         ") as final_ranking " +
-                        "WHERE global_rank <= 10 " +
+                        "WHERE global_rank <= 10 " + // filtrez doar primele 10 locuri pt afisare
                         "ORDER BY global_rank ASC";
 
         return jdbcTemplate.queryForList(sql);
