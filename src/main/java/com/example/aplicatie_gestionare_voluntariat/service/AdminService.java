@@ -11,6 +11,7 @@ import com.example.aplicatie_gestionare_voluntariat.repository.UserRepository;
 import com.example.aplicatie_gestionare_voluntariat.repository.VolunteerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,16 @@ public class AdminService {
     private JdbcTemplate jdbcTemplate;
 
     private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+
+    @Scheduled(fixedRate = 60000)
+    public void runSystemMaintenance() {
+        try {
+            activityRepository.autoCloseFinishedActivities();
+            System.out.println("[Scheduler] Finished activities processed and volunteer hours updated.");
+        } catch (Exception e) {
+            System.err.println("[Scheduler Error] Failed to update activities: " + e.getMessage());
+        }
+    }
 
     private boolean isValidEmail(String email) {
         return email != null && Pattern.matches(EMAIL_PATTERN, email);
