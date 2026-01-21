@@ -89,6 +89,7 @@ public class VolunteerController {
         User user = userRepository.findByEmail(email).orElse(new User());
 
         List<Activity> activities = volunteerPageService.getMyActivities(email, status);
+
         List<Activity> recommendations = volunteerPageService.getRecommendedActivities(email);
 
         model.addAttribute("activities", activities);
@@ -124,5 +125,17 @@ public class VolunteerController {
         HttpSession session = request.getSession(false);
         if (session != null) session.invalidate();
         return "redirect:/login?accountDeleted=true";
+    }
+
+    @GetMapping("/leaderboard")
+    public String leaderboard(Model model, Authentication authentication) {
+        List<Map<String, Object>> leaderboard = volunteerPageService.getVolunteerLeaderboard();
+        Integer currentVolId = volunteerPageService.getVolunteerIdByEmail(authentication.getName());
+        User user = userRepository.findByEmail(authentication.getName()).orElse(new User());
+
+        model.addAttribute("leaderboard", leaderboard);
+        model.addAttribute("currentVolunteerId", currentVolId);
+        model.addAttribute("firstName", user.getFirstName());
+        return "volunteer-leaderboard";
     }
 }
