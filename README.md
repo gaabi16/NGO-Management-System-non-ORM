@@ -39,8 +39,9 @@ All the database configuration scripts (creating tables, inserting mock data, cl
 
 1. **Clone the repo:**
    ```bash
-   git clone [https://github.com/gaabi16/ngo-management-system-non-orm.git](https://github.com/gaabi16/ngo-management-system-non-orm.git)
+   git clone https://github.com/gaabi16/ngo-management-system-non-orm.git
    cd ngo-management-system-non-orm
+   ```
 2. **Set up the Database:**
    * Run the `/db/create_tables.sql` and `/db/create_entries_for_all_tables.sql` scripts in your local SQL server.
    * Add your DB credentials in `src/main/resources/application.properties`:
