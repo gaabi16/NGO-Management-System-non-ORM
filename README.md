@@ -63,19 +63,13 @@ Then open http://localhost:8080 in your browser.
   <img src="screenshots/Home_page_volunteer.png" width="600">
 </p>
 
----
-
 <p align="center">
   <img src="screenshots/ONG_description_volunteer.png" width="600">
 </p>
 
----
-
 <p align="center">
   <img src="screenshots/Coordinator_dashboard.png" width="600">
 </p>
-
----
 
 <p align="center">
   <img src="screenshots/Admin_dashboard.png" width="600">
