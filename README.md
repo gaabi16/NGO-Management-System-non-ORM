@@ -55,8 +55,6 @@ All the database configuration scripts (creating tables, inserting mock data, cl
     ```
 Then open http://localhost:8080 in your browser.
 
----
-
 ## Screenshots
 
 <p align="center">
